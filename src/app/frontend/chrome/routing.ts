@@ -19,6 +19,7 @@ import {AuthGuard} from '../common/services/guard/auth';
 import {SystemGuard} from '../common/services/guard/system';
 import {ChromeComponent} from './component';
 
+
 const routes: Routes = [
   {path: '', redirectTo: '/overview', pathMatch: 'full'},
   {
@@ -31,7 +32,7 @@ const routes: Routes = [
         loadChildren: 'error/module#ErrorModule',
       },
 
-      // Cluster group
+      // Cluster Management
       {
         path: 'cluster',
         loadChildren: 'resource/cluster/module#ClusterModule',
@@ -39,7 +40,6 @@ const routes: Routes = [
       {
         path: 'tenant',
         loadChildren: 'resource/cluster/tenant/module#TenantModule',
-        canActivate: [SystemGuard],
       },
       {
         path: 'clusterrole',
@@ -152,6 +152,38 @@ const routes: Routes = [
         loadChildren: 'about/module#AboutModule',
       },
 
+
+      //Tenant management
+      {
+        path: 'clustermanagement',
+        loadChildren: 'clustermanagement/module#ClustermanagementModule',
+      },
+      {
+        path: 'clusterhealth',
+        loadChildren: 'clustermanagement/clusterhealth/module#ClusterhealthModule',
+
+      },
+      {
+        path: 'clusternamespace',
+        loadChildren: 'clustermanagement/clusternamespace/module#ClusterNamespaceModule',
+
+      },
+      {
+        path: 'role',
+        loadChildren: 'clustermanagement/role/module#RoleModule',
+
+      },
+      {
+        path: 'quotas',
+        loadChildren: 'clustermanagement/quotas/module#QuotasModule',
+
+      },
+      {
+        path: 'users',
+        loadChildren: 'clustermanagement/users/module#UsersModule',
+
+      },
+
       {
         path: 'create',
         loadChildren: 'create/module#CreateModule',
@@ -164,6 +196,8 @@ const routes: Routes = [
         path: 'shell',
         loadChildren: 'shell/module#ShellModule',
       },
+
+
       {
         path: 'search',
         loadChildren: 'search/module#SearchModule',

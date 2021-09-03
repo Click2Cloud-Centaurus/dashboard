@@ -16,10 +16,9 @@ import {Component, OnInit} from '@angular/core';
 
 @Component({
   selector: 'kd-tenant-list-view',
-  template: '<kd-tenant-list></kd-tenant-list>',
+  templateUrl: './template.html',
 })
-export class TenantListComponent implements OnInit {
-  constructor() {}
+export class TenantListComponent {
+  imageofcmtenant:string ="../assets/images/cm/cmtenant.png"
 
-  ngOnInit() {}
 }

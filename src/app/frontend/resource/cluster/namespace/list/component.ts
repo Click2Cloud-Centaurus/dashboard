@@ -15,7 +15,10 @@
 import {Component} from '@angular/core';
 
 @Component({
-  selector: 'kd-namespace-list-view',
-  template: '<kd-namespace-list></kd-namespace-list>',
+  selector: 'kd-namespace-cmimg',
+  templateUrl: './template.html',
 })
-export class NamespaceListComponent {}
+export class NamespaceListComponent {
+  imageofcmns:string ="../assets/images/cm/cmns.png"
+
+}

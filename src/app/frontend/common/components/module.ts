@@ -64,6 +64,7 @@ import {PropertyComponent} from './property/component';
 import {ProxyComponent} from './proxy/component';
 import {ResourceQuotaListComponent} from './quotas/component';
 import {ClusterRoleListComponent} from './resourcelist/clusterrole/component';
+import {RoleListComponent} from './resourcelist/role/component';
 import {ConfigMapListComponent} from './resourcelist/configmap/component';
 import {CRDListComponent} from './resourcelist/crd/component';
 import {CRDObjectListComponent} from './resourcelist/crdobject/component';
@@ -93,6 +94,11 @@ import {WorkloadStatusComponent} from './workloadstatus/component';
 import {ZeroStateComponent} from './zerostate/component';
 import {TenantSelectorComponent} from './tenant/component';
 import {TenantListComponent} from './resourcelist/tenantlist/component';
+//moduleadded
+
+import {UserListComponent} from "./resourcelist/user/component";
+import {QuotasListComponent} from "./resourcelist/quota/component";
+
 
 const components = [
   ActionbarDetailActionsComponent,
@@ -113,6 +119,7 @@ const components = [
   ChipsComponent,
   CronJobListComponent,
   ClusterRoleListComponent,
+  RoleListComponent,
   ConfigMapListComponent,
   ColumnComponent,
   ChipDialog,
@@ -189,6 +196,10 @@ const components = [
 
   TenantSelectorComponent,
   TenantListComponent,
+  //added component
+
+  UserListComponent,
+  QuotasListComponent
 ];
 
 @NgModule({

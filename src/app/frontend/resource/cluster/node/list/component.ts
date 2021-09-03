@@ -16,6 +16,9 @@ import {Component} from '@angular/core';
 
 @Component({
   selector: 'kd-node-list-state',
-  template: '<kd-node-list></kd-node-list>',
+  templateUrl: './template.html',
 })
-export class NodeListComponent {}
+export class NodeListComponent {
+  imageofcmnode:string ="../assets/images/cm/cmnode.png"
+
+}
