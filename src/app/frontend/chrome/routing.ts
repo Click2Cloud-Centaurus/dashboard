@@ -38,12 +38,16 @@ const routes: Routes = [
         loadChildren: 'resource/cluster/module#ClusterModule',
       },
       {
+        path: 'clusterrole',
+        loadChildren: 'resource/cluster/clusterrole/module#ClusterRoleModule',
+      },
+      {
         path: 'tenant',
         loadChildren: 'resource/cluster/tenant/module#TenantModule',
       },
       {
-        path: 'clusterrole',
-        loadChildren: 'resource/cluster/clusterrole/module#ClusterRoleModule',
+        path: 'quota',
+        loadChildren: 'resource/cluster/quota/module#QuotaModule',
       },
       {
         path: 'namespace',
@@ -54,14 +58,14 @@ const routes: Routes = [
         loadChildren: 'resource/cluster/node/module#NodeModule',
         canActivate: [SystemGuard],
       },
-      {
-        path: 'persistentvolume',
-        loadChildren: 'resource/cluster/persistentvolume/module#PersistentVolumeModule',
-      },
-      {
-        path: 'storageclass',
-        loadChildren: 'resource/cluster/storageclass/module#StorageClassModule',
-      },
+      // {
+      //   path: 'persistentvolume',
+      //   loadChildren: 'resource/cluster/persistentvolume/module#PersistentVolumeModule',
+      // },
+      // {
+      //   path: 'storageclass',
+      //   loadChildren: 'resource/cluster/storageclass/module#StorageClassModule',
+      // },
 
       // Overview
       {
@@ -153,36 +157,38 @@ const routes: Routes = [
       },
 
 
-      //Tenant management
+
+
       {
-        path: 'clustermanagement',
-        loadChildren: 'clustermanagement/module#ClustermanagementModule',
+        path: 'tenantmanagement',
+        loadChildren: 'tenantmanagement/module#TenantManagementModule',
       },
       {
-        path: 'clusterhealth',
-        loadChildren: 'clustermanagement/clusterhealth/module#ClusterhealthModule',
+        path: 'tenantmonitoring',
+        loadChildren: 'tenantmanagement/tenantmonitoring/module#TenantMonitoringModule',
 
       },
       {
-        path: 'clusternamespace',
-        loadChildren: 'clustermanagement/clusternamespace/module#ClusterNamespaceModule',
+        path: 'tenantnamespace',
+        loadChildren: 'tenantmanagement/tenantnamespace/module#TenantNamespaceModule',
 
       },
       {
-        path: 'role',
-        loadChildren: 'clustermanagement/role/module#RoleModule',
+        path: 'tenantaccesscontrol',
+        loadChildren: 'tenantmanagement/tenantaccesscontrol/module#TenantAccessControlModule',
 
       },
       {
-        path: 'quotas',
-        loadChildren: 'clustermanagement/quotas/module#QuotasModule',
+        path: 'tenantquota',
+        loadChildren: 'tenantmanagement/tenantquota/module#TenantQuotasModule',
 
       },
       {
-        path: 'users',
-        loadChildren: 'clustermanagement/users/module#UsersModule',
+        path: 'tenantuser',
+        loadChildren: 'tenantmanagement/tenantuser/module#TenantUsersModule',
 
       },
+      //here
 
       {
         path: 'create',

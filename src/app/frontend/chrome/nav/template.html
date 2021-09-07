@@ -52,43 +52,41 @@ limitations under the License.
                    state="/node"
                    i18n>Nodes
       </kd-nav-item>
-      <kd-nav-item class="kd-nav-item"
-                   state="/persistentvolume"
-                   i18n>Persistent Volumes
+      <kd-nav-item *ngIf="isCurrentSystem"
+                   class="kd-nav-item"
+                   state="/quota"
+                   i18n>Quota
       </kd-nav-item>
-      <kd-nav-item class="kd-nav-item"
-                   state="/storageclass"
-                   i18n>Storage Classes
-      </kd-nav-item>
+
     </div>
 
     <mat-divider></mat-divider>
 
 
     <kd-nav-item class="kd-nav-group-item"
-                 state="/clustermanagement"
+                 state="/tenantmanagement"
                  i18n>Tenant Management
     </kd-nav-item>
     <kd-nav-item class="kd-nav-item"
-                 state="/clusterhealth"
+                 state="/tenantmonitoring"
                  i18n>Tenant Monitoring
     </kd-nav-item>
     <kd-nav-item class="kd-nav-item"
-                 state="/clusternamespace"
+                 state="/tenantnamespace"
                  i18n>Namespaces
     </kd-nav-item>
     <kd-nav-item class="kd-nav-item"
-                 state="/role"
+                 state="/tenantaccesscontrol"
                  i18n>Access Control
     </kd-nav-item>
 
     <kd-nav-item class="kd-nav-item"
-                 state="/quotas"
+                 state="/tenantquota"
                  i18n>Quota
     </kd-nav-item>
 
     <kd-nav-item class="kd-nav-item"
-                 state="/users"
+                 state="/tenantuser"
                  i18n>Users
     </kd-nav-item>
 
@@ -193,22 +191,9 @@ limitations under the License.
                    i18n>About
       </kd-nav-item>
       <mat-divider></mat-divider>
-     <!---tab added--->
-      <kd-nav-item class="kd-nav-group-item"
-                   state="/information"
-                   i18n>Information
-      </kd-nav-item>
-      <kd-nav-item class="kd-nav-item"
-                   state="/sonali"
-                   i18n>Sonali
-      </kd-nav-item>
-      <kd-nav-item class="kd-nav-item"
-                   state="/varsha"
-                   i18n>Varsha
-      </kd-nav-item>
 
       <div>
-        <kd-example-selector></kd-example-selector>
+
         <mat-divider></mat-divider>
       </div>
     </div>
