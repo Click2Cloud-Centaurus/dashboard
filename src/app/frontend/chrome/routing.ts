@@ -155,10 +155,6 @@ const routes: Routes = [
         path: 'about',
         loadChildren: 'about/module#AboutModule',
       },
-
-
-
-
       {
         path: 'tenantmanagement',
         loadChildren: 'tenantmanagement/module#TenantManagementModule',

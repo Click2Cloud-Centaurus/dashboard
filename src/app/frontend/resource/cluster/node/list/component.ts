@@ -8,5 +8,5 @@ import {Component, Input} from '@angular/core';
 
 
 export class NodeListComponent{
-  imageofnode:string="../assets/images/node.png"
+
 }

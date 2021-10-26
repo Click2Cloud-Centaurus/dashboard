@@ -8,5 +8,5 @@ import {Component, Input} from '@angular/core';
 
 
 export class NamespaceListComponent{
-  imagens:string="../assets/images/namespace.png"
+
 }

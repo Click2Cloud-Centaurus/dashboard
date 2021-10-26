@@ -18,8 +18,8 @@ import {ResourceQuotaDetail} from 'typings/backendapi';
 
 @Component({
   selector: 'kd-resource-quota-list',
-  templateUrl: './template.html',
+  template: './template.html',
 })
 export class QuotaComponent {
-  imageofquota:string ="../assets/images/quota.png"
+
 }

@@ -95,7 +95,6 @@ import {ZeroStateComponent} from './zerostate/component';
 import {TenantSelectorComponent} from './tenant/component';
 import {TenantListComponent} from './resourcelist/tenantlist/component';
 //moduleadded
-
 import {UserListComponent} from "./resourcelist/user/component";
 import {QuotasListComponent} from "./resourcelist/quota/component";
 
@@ -199,7 +198,9 @@ const components = [
   //added component
 
   UserListComponent,
-  QuotasListComponent
+  QuotasListComponent,
+  
+ 
 ];
 
 @NgModule({

@@ -23,6 +23,12 @@ import {ResourceService} from '../../../services/resource/resource';
 import {NotificationsService} from '../../../services/global/notifications';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
+import {MatDialog, MatDialogConfig} from '@angular/material/';
+import { CreateFromFormComponent } from 'create/from/form/component';
+import { CreatorCardComponent } from 'common/components/creator/component';
+import { CreateFromFileComponent } from 'create/from/file/component';
+import { Form } from '@angular/forms';
+
 
 @Component({
   selector: 'kd-tenant-list',
@@ -30,10 +36,10 @@ import {MenuComponent} from '../../list/column/menu/component';
 })
 export class TenantListComponent extends ResourceListWithStatuses<TenantList, Tenant> {
   @Input() endpoint = EndpointManager.resource(Resource.tenant).list();
-
   constructor(
     private readonly tenant_: ResourceService<TenantList>,
     notifications: NotificationsService,
+     private dialog: MatDialog //add the code
   ) {
     super('tenant', notifications);
     this.id = ListIdentifier.tenant;
@@ -65,5 +71,10 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
 
   getDisplayColumns(): string[] {
     return ['statusicon', 'name', 'phase', 'age'];
+  }
+
+
+  onCreate() { //added the code
+     this.dialog.open(CreateFromFileComponent)
   }
 }

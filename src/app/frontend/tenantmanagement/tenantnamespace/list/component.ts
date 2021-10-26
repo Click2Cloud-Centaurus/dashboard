@@ -19,5 +19,5 @@ import {Component} from '@angular/core';
   templateUrl: './template.html'
 })
 export class TenantNamespaceListComponent {
-  imageofns:string ="../assets/images/tm/tenantnamespace.png"
+
 }

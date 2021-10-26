@@ -21,5 +21,5 @@ import {Observable} from 'rxjs/Observable';
 })
 
 export class TenantMonitoringListComponent {
-  imageoftenantmonitoring: string = "../assets/images/tm/tenantmonitoring.png"
+
 }

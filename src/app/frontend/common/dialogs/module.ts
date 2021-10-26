@@ -33,6 +33,7 @@ import {TriggerResourceDialog} from './triggerresource/dialog';
     LogsDownloadDialog,
     ScaleResourceDialog,
     TriggerResourceDialog,
+
   ],
   exports: [
     AlertDialog,
@@ -41,6 +42,7 @@ import {TriggerResourceDialog} from './triggerresource/dialog';
     LogsDownloadDialog,
     ScaleResourceDialog,
     TriggerResourceDialog,
+  
   ],
   entryComponents: [
     AlertDialog,
@@ -49,6 +51,7 @@ import {TriggerResourceDialog} from './triggerresource/dialog';
     LogsDownloadDialog,
     ScaleResourceDialog,
     TriggerResourceDialog,
+  
   ],
 })
 export class DialogsModule {}

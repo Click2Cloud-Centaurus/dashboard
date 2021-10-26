@@ -19,6 +19,6 @@ import {Component} from '@angular/core';
   templateUrl: './template.html'
 })
 export class TenantAccessControlListComponent {
-  imageofaccesscontrol:string ="../assets/images/tm/tenantrole.png"
+
 
 }

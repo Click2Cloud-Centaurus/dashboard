@@ -32,6 +32,5 @@ import {Observable} from 'rxjs/Observable';
 })
 export class TenantQuotaListComponent  {
 
-  imageofquota:string ="../assets/images/tm/tenantquota.png"
 
 }
