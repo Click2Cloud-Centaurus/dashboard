@@ -29,6 +29,7 @@ import { CreatorCardComponent } from 'common/components/creator/component';
 import { CreateFromFileComponent } from 'create/from/file/component';
 import { Form } from '@angular/forms';
 
+import {VerberService} from '../../../services/global/verber';
 
 @Component({
   selector: 'kd-tenant-list',
@@ -36,7 +37,11 @@ import { Form } from '@angular/forms';
 })
 export class TenantListComponent extends ResourceListWithStatuses<TenantList, Tenant> {
   @Input() endpoint = EndpointManager.resource(Resource.tenant).list();
+  displayName:any="";
+  typeMeta:any="";
+  objectMeta:any;
   constructor(
+    private readonly verber_: VerberService,
     private readonly tenant_: ResourceService<TenantList>,
     notifications: NotificationsService,
      private dialog: MatDialog //add the code
@@ -73,8 +78,8 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
     return ['statusicon', 'name', 'phase', 'age'];
   }
 
-
-  onCreate() { //added the code
-     this.dialog.open(CreateFromFileComponent)
+  //added the code
+  onClick(): void {
+    this.verber_.showCreateDialog(this.displayName, this.typeMeta, this.objectMeta);
   }
 }

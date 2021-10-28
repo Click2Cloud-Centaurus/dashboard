@@ -18,6 +18,7 @@ import {SharedModule} from '../../shared.module';
 import {ComponentsModule} from '../components/module';
 
 import {AlertDialog} from './alert/dialog';
+import {CreateResourceDialog} from './createresource/dialog';
 import {DeleteResourceDialog} from './deleteresource/dialog';
 import {LogsDownloadDialog} from './download/dialog';
 import {EditResourceDialog} from './editresource/dialog';
@@ -28,6 +29,7 @@ import {TriggerResourceDialog} from './triggerresource/dialog';
   imports: [SharedModule, ComponentsModule],
   declarations: [
     AlertDialog,
+    CreateResourceDialog,
     EditResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
@@ -37,21 +39,21 @@ import {TriggerResourceDialog} from './triggerresource/dialog';
   ],
   exports: [
     AlertDialog,
+    CreateResourceDialog,
     EditResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
     ScaleResourceDialog,
     TriggerResourceDialog,
-  
   ],
   entryComponents: [
     AlertDialog,
+    CreateResourceDialog,
     EditResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
     ScaleResourceDialog,
     TriggerResourceDialog,
-  
   ],
 })
 export class DialogsModule {}

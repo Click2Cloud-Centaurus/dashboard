@@ -92,9 +92,10 @@ import {TextInputComponent} from './textinput/component';
 import {UploadFileComponent} from './uploadfile/component';
 import {WorkloadStatusComponent} from './workloadstatus/component';
 import {ZeroStateComponent} from './zerostate/component';
+//module added
 import {TenantSelectorComponent} from './tenant/component';
 import {TenantListComponent} from './resourcelist/tenantlist/component';
-//moduleadded
+import {CreateResourceDialog} from "../dialogs/createresource/dialog";
 import {UserListComponent} from "./resourcelist/user/component";
 import {QuotasListComponent} from "./resourcelist/quota/component";
 
@@ -193,14 +194,13 @@ const components = [
   ZeroStateComponent,
   WorkloadStatusComponent,
 
+  //added component
   TenantSelectorComponent,
   TenantListComponent,
-  //added component
+  CreateResourceDialog,
 
   UserListComponent,
   QuotasListComponent,
-  
- 
 ];
 
 @NgModule({
