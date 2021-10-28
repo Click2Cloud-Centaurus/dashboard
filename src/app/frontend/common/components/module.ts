@@ -95,7 +95,6 @@ import {ZeroStateComponent} from './zerostate/component';
 //module added
 import {TenantSelectorComponent} from './tenant/component';
 import {TenantListComponent} from './resourcelist/tenantlist/component';
-import {CreateResourceDialog} from "../dialogs/createresource/dialog";
 import {UserListComponent} from "./resourcelist/user/component";
 import {QuotasListComponent} from "./resourcelist/quota/component";
 
@@ -197,7 +196,6 @@ const components = [
   //added component
   TenantSelectorComponent,
   TenantListComponent,
-  CreateResourceDialog,
 
   UserListComponent,
   QuotasListComponent,
