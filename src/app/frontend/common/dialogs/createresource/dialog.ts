@@ -14,93 +14,28 @@
 
 
 
-
-
+import {Component} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
 import {HttpClient} from '@angular/common/http';
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatButtonToggleGroup, MatDialogRef} from '@angular/material';
-import {dump as toYaml, load as fromYaml} from 'js-yaml';
-
-import {RawResource} from '../../resources/rawresource';
-import {ResourceMeta} from '../../services/global/actionbar';
-import {TenantService} from 'common/services/global/tenant';
-
-enum CreatorMode {
-  JSON = 'json',
-  YAML = 'yaml',
-}
 
 @Component({
-  selector: 'kd-create-resource-dialog',
+  selector: 'kd-delete-resource-dialog',
   templateUrl: 'template.html',
 })
-export class CreateResourceDialog implements OnInit {
-  selectedMode = CreatorMode.YAML;
 
-  @ViewChild('group', {static: true}) buttonToggleGroup: MatButtonToggleGroup;
-  text = '';
-  modes = CreatorMode;
+export class CreateResourceDialog {
 
-  constructor(
-    public dialogRef: MatDialogRef<CreateResourceDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: ResourceMeta,
-    private readonly http_: HttpClient,
-    private readonly tenant_: TenantService,
-  ) {}
+  constructor(public dialog: MatDialog, private http:HttpClient) {}
 
-  ngOnInit(): void {
-    const url = RawResource.getUrl(
-      this.tenant_.current(),
-      this.data.typeMeta,
-      this.data.objectMeta,
-    );
-    this.http_
-      .get(url)
-      .toPromise()
-      .then(response => {
-        this.text = toYaml(response);
-      });
-
-    this.buttonToggleGroup.valueChange.subscribe((selectedMode: CreatorMode) => {
-      this.selectedMode = selectedMode;
-
-      if (this.text) {
-        this.createText();
-      }
+  openDialog() {
+    const dialogRef = this.dialog.open(CreateResourceDialog);
+    var data = {
+      tenant_name: "this.tenant_name"
+    }
+    this.http.post<any>('http://<ip_address>/api/v1/tenant', data);
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`Dialog result: ${result}`);
     });
   }
-
-  getData(): string {
-    if (this.selectedMode === CreatorMode.YAML) {
-      console.log('this.selectedMode',this.selectedMode);
-      return this.toRawJSON(fromYaml(this.text));
-    }
-
-    return this.text;
-  }
-
-  getSelectedMode(): string {
-    return this.buttonToggleGroup.value;
-  }
-
-  private createText(): void {
-    if (this.selectedMode === CreatorMode.YAML) {
-      this.text = toYaml(JSON.parse(this.text));
-    } else {
-      this.text = this.toRawJSON(fromYaml(this.text));
-    }
-  }
-
-  private toRawJSON(object: {}): string {
-    return JSON.stringify(object, null, '\t');
-  }
-
-  /**
-   * Cancels the new tenant form.
-   */
-  cancel(): void {
-    console.log('cancel call kiya');
-
-    this.dialogRef.close();
-  }
 }
+
