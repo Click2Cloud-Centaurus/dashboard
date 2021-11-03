@@ -3,7 +3,7 @@ import {Component, Input} from '@angular/core';
 
 @Component({
   selector: 'kd-cluster-health-list-state',
-  templateUrl: './template.html',
+  template: '<kd-node-list></kd-node-list>',
 })
 
 

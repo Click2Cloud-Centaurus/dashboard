@@ -15,6 +15,7 @@ import {Component, Input} from '@angular/core';
 import {Node, NodeList} from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 
+
 @Component({
   selector: 'kd-cluster-health-list-state',
   templateUrl: './template.html',
@@ -23,3 +24,4 @@ import {Observable} from 'rxjs/Observable';
 export class TenantMonitoringListComponent {
 
 }
+

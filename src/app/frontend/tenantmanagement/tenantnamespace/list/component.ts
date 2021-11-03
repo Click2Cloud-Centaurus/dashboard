@@ -16,7 +16,7 @@ import {Component} from '@angular/core';
 
 @Component({
   selector: 'kd-namespace-list-view',
-  templateUrl: './template.html'
+  template: '<kd-namespace-list></kd-namespace-list>'
 })
 export class TenantNamespaceListComponent {
 

@@ -6,10 +6,10 @@ import {Observable} from 'rxjs/Observable';
 
 @Component({
   selector: 'kd-cluster-health-list-state',
-  templateUrl: './template.html',
+  template: '<kd-cluster-role-list></kd-cluster-role-list>',
 })
 
 
 export class ClusterRoleListComponent{
-  imageac:string="../assets/images/accesscontrol.png"
+
 }

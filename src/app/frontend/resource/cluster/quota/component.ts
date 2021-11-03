@@ -18,7 +18,7 @@ import {ResourceQuotaDetail} from 'typings/backendapi';
 
 @Component({
   selector: 'kd-resource-quota-list',
-  template: './template.html',
+  template: '',
 })
 export class QuotaComponent {
 
