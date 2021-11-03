@@ -44,7 +44,7 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
     private readonly verber_: VerberService,
     private readonly tenant_: ResourceService<TenantList>,
     notifications: NotificationsService,
-     private dialog: MatDialog //add the code
+    private dialog: MatDialog //add the code
   ) {
     super('tenant', notifications);
     this.id = ListIdentifier.tenant;

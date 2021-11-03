@@ -24,13 +24,14 @@ import {LogsDownloadDialog} from './download/dialog';
 import {EditResourceDialog} from './editresource/dialog';
 import {ScaleResourceDialog} from './scaleresource/dialog';
 import {TriggerResourceDialog} from './triggerresource/dialog';
-
+import { CreateResourceDialog } from './createresource/dialog';
 @NgModule({
   imports: [SharedModule, ComponentsModule],
   declarations: [
     AlertDialog,
     CreateResourceDialog,
     EditResourceDialog,
+    CreateResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
     ScaleResourceDialog,
@@ -41,6 +42,7 @@ import {TriggerResourceDialog} from './triggerresource/dialog';
     AlertDialog,
     CreateResourceDialog,
     EditResourceDialog,
+    CreateResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
     ScaleResourceDialog,
@@ -50,6 +52,7 @@ import {TriggerResourceDialog} from './triggerresource/dialog';
     AlertDialog,
     CreateResourceDialog,
     EditResourceDialog,
+    CreateResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
     ScaleResourceDialog,
