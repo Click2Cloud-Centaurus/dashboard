@@ -19,9 +19,10 @@ import {ComponentsModule} from '../components/module';
 
 import {AlertDialog} from './alert/dialog';
 import {CreateResourceDialog} from './createresource/dialog';
-import {CreateTenantDialog } from './createTenant/dialog';
-import { CreateNamespaceDialog } from './createNamespace/dialog';
-import { CreateRoleDialog } from './createRole/dialog';
+import {CreateTenantDialog} from './createTenant/dialog';
+import {CreateNamespaceDialog} from './createNamespace/dialog';
+import {CreateRoleDialog} from './createRole/dialog';
+import {CreateClusterroleDialog} from "./createClusterrole/dialog";
 import {DeleteResourceDialog} from './deleteresource/dialog';
 import {LogsDownloadDialog} from './download/dialog';
 import {EditResourceDialog} from './editresource/dialog';
@@ -38,6 +39,7 @@ import {assignQuotaDialog} from "./assignQuota/dialog";
     CreateTenantDialog,
     CreateNamespaceDialog,
     CreateRoleDialog,
+    CreateClusterroleDialog,
     EditResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
@@ -46,7 +48,6 @@ import {assignQuotaDialog} from "./assignQuota/dialog";
     CreateNodeDialog,
     assignQuotaDialog,
 
-
   ],
   exports: [
     AlertDialog,
@@ -54,6 +55,7 @@ import {assignQuotaDialog} from "./assignQuota/dialog";
     CreateTenantDialog,
     CreateNamespaceDialog,
     CreateRoleDialog,
+    CreateClusterroleDialog,
     EditResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
@@ -69,6 +71,7 @@ import {assignQuotaDialog} from "./assignQuota/dialog";
     CreateTenantDialog,
     CreateNamespaceDialog,
     CreateRoleDialog,
+    CreateClusterroleDialog,
     EditResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
