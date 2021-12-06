@@ -45,10 +45,7 @@ const routes: Routes = [
         path: 'tenant',
         loadChildren: 'resource/cluster/tenant/module#TenantModule',
       },
-      {
-        path: 'quota',
-        loadChildren: 'resource/cluster/quota/module#QuotaModule',
-      },
+
       {
         path: 'namespace',
         loadChildren: 'resource/cluster/namespace/module#NamespaceModule',
@@ -180,7 +177,7 @@ const routes: Routes = [
       },
       {
         path: 'tenantquota',
-        loadChildren: 'tenantmanagement/tenantquota/module#TenantQuotasModule',
+        loadChildren: 'tenantmanagement/tenantquota/module#TenantQuotaModule',
 
       },
       {

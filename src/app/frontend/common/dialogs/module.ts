@@ -28,6 +28,7 @@ import {EditResourceDialog} from './editresource/dialog';
 import {ScaleResourceDialog} from './scaleresource/dialog';
 import {TriggerResourceDialog} from './triggerresource/dialog';
 import {CreateNodeDialog} from "./createNode/dialog";
+import {assignQuotaDialog} from "./assignQuota/dialog";
 
 @NgModule({
   imports: [SharedModule, ComponentsModule],
@@ -43,6 +44,7 @@ import {CreateNodeDialog} from "./createNode/dialog";
     ScaleResourceDialog,
     TriggerResourceDialog,
     CreateNodeDialog,
+    assignQuotaDialog,
 
 
   ],
@@ -58,6 +60,7 @@ import {CreateNodeDialog} from "./createNode/dialog";
     ScaleResourceDialog,
     TriggerResourceDialog,
     CreateNodeDialog,
+    assignQuotaDialog,
 
   ],
   entryComponents: [
@@ -72,6 +75,7 @@ import {CreateNodeDialog} from "./createNode/dialog";
     ScaleResourceDialog,
     TriggerResourceDialog,
     CreateNodeDialog,
+    assignQuotaDialog,
 
   ],
 })

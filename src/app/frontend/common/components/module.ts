@@ -100,6 +100,7 @@ import {QuotasListComponent} from "./resourcelist/quota/component";
 import {NewNodeListComponent} from "./resourcelist/resourcemonitoring/component";
 
 
+
 const components = [
   ActionbarDetailActionsComponent,
   ActionbarDetailDeleteComponent,
@@ -113,6 +114,8 @@ const components = [
   ActionbarDetailTriggerComponent,
   NewNodeListComponent,
   BreadcrumbsComponent,
+
+
 
   CardComponent,
   CardListFilterComponent,
