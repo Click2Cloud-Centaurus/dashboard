@@ -97,6 +97,7 @@ import {TenantSelectorComponent} from './tenant/component';
 import {TenantListComponent} from './resourcelist/tenantlist/component';
 import {UserListComponent} from "./resourcelist/user/component";
 import {QuotasListComponent} from "./resourcelist/quota/component";
+import {NewNodeListComponent} from "./resourcelist/resourcemonitoring/component";
 
 
 const components = [
@@ -110,7 +111,7 @@ const components = [
   ActionbarComponent,
   AllocationChartComponent,
   ActionbarDetailTriggerComponent,
-
+  NewNodeListComponent,
   BreadcrumbsComponent,
 
   CardComponent,

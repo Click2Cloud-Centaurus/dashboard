@@ -58,6 +58,11 @@ const routes: Routes = [
         loadChildren: 'resource/cluster/node/module#NodeModule',
         canActivate: [SystemGuard],
       },
+      {
+        path: 'resourcemonitoring',
+        loadChildren: 'resource/cluster/resourcemonitoring/module#NewNodeModule',
+
+      },
       // Overview
       {
         path: 'overview',

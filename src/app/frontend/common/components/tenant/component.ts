@@ -42,7 +42,6 @@ export class TenantSelectorComponent implements OnInit {
   selectTenantInput = '';
   systemTenantName = CONFIG.systemTenantName;
 
-
   @ViewChild(MatSelect, {static: true}) private readonly select_: MatSelect;
   @ViewChild('tenantInput', {static: true}) private readonly tenantInputEl_: ElementRef;
 
@@ -138,7 +137,7 @@ export class TenantSelectorComponent implements OnInit {
   }
 
   /**
-   * Focuses tenant input field after clicking on tenant selector menu.
+   * Focuses clustertenant input field after clicking on clustertenant selector menu.
    */
   private focusTenantInput_(): void {
     // Wrap in a timeout to make sure that element is rendered before looking for it.
