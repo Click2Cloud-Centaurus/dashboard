@@ -54,6 +54,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/resource/replicationcontroller"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/secret"
 	resourceService "github.com/kubernetes/dashboard/src/app/backend/resource/service"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/serviceaccount"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/statefulset"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/storageclass"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/tenant"
@@ -839,6 +840,23 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.GET("/clusterrole/{name}").
 			To(apiHandler.handleGetClusterRoleDetail).
 			Writes(clusterrole.ClusterRoleDetail{}))
+
+	apiV1Ws.Route(
+		apiV1Ws.GET("/serviceaccount").
+			To(apiHandler.handleGetServiceAccounts).
+			Writes(serviceaccount.ServiceAccountList{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/namespace/{namespace}/serviceaccount/{name}").
+			To(apiHandler.handleGetServiceAccountDetail).
+			Writes(serviceaccount.ServiceAccountDetail{}))
+	apiV1Ws.Route(
+		apiV1Ws.POST("/serviceaccount").
+			To(apiHandler.handleCreateServiceAccount).
+			Reads(serviceaccount.ServiceAccount{}).
+			Writes(serviceaccount.ServiceAccount{}))
+	apiV1Ws.Route(
+		apiV1Ws.DELETE("/namespaces/{namespace}/serviceaccounts/{serviceaccount}").
+			To(apiHandler.handleDeleteServiceAccount))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/clusterrole").
@@ -2721,6 +2739,79 @@ func (apiHandler *APIHandler) handleDeleteTenant(request *restful.Request, respo
 
 	tenantName := request.PathParameter("tenant")
 	if err := tenant.DeleteTenant(tenantName, k8sClient); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeader(http.StatusOK)
+}
+
+func (apiHandler *APIHandler) handleGetServiceAccounts(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	Namespace := request.PathParameter("namespace")
+	var namespaces []string
+	namespaces = append(namespaces, Namespace)
+	namespace := common.NewNamespaceQuery(namespaces)
+	dataSelect := parseDataSelectPathParameter(request)
+
+	result, err := serviceaccount.GetServiceAccountList(k8sClient, namespace, dataSelect)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleGetServiceAccountDetail(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	name := request.PathParameter("name")
+	namespace := request.PathParameter("namespace")
+	result, err := serviceaccount.GetServiceAccountDetail(k8sClient, namespace, name)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleCreateServiceAccount(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	serviceaccountSpec := new(serviceaccount.ServiceAccountSpec)
+	if err := request.ReadEntity(serviceaccountSpec); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	if err := serviceaccount.CreateServiceAccount(serviceaccountSpec, k8sClient); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusCreated, serviceaccountSpec)
+}
+
+func (apiHandler *APIHandler) handleDeleteServiceAccount(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	serviceaccountName := request.PathParameter("serviceaccount")
+	namespaceName := request.PathParameter("namespace")
+	if err := serviceaccount.DeleteServiceAccount(namespaceName, serviceaccountName, k8sClient); err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
