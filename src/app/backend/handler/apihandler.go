@@ -123,6 +123,12 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 	systemBannerHandler := systembanner.NewSystemBannerHandler(sbManager)
 	systemBannerHandler.Install(apiV1Ws)
 
+	//added POST Method for tenant
+	apiV1Ws.Route(
+		apiV1Ws.POST("/tenant").
+			To(apiHandler.handleCreateTenant).
+			Reads(tenant.TenantSpec{}).
+			Writes(tenant.TenantSpec{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenant").
 			To(apiHandler.handleGetTenantList).
@@ -131,6 +137,11 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.GET("/tenant/{name}").
 			To(apiHandler.handleGetTenantDetail).
 			Writes(tenant.TenantDetail{}))
+	//added post method for namespace under tenant
+  //apiV1Ws.Route(
+  //  apiV1Ws.POST("/tenant/{name}/namespace/{namespace}").
+  //    To(apiHandler.handleGetTenantDetail).
+  //    Writes(tenant.TenantDetail{}))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("csrftoken/{action}").
@@ -560,14 +571,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Reads(ns.NamespaceSpec{}).
 			Writes(ns.NamespaceSpec{}))
 	apiV1Ws.Route(
-		apiV1Ws.POST("/tenant").
-			To(apiHandler.handleCreateTenant).
-			Reads(tenant.TenantSpec{}).
-			Writes(tenant.TenantSpec{}))
-	apiV1Ws.Route(
-		apiV1Ws.DELETE("/tenants/{tenant}").
-			To(apiHandler.handleDeleteTenant))
-	apiV1Ws.Route(
 		apiV1Ws.GET("/namespace").
 			To(apiHandler.handleGetNamespaces).
 			Writes(ns.NamespaceList{}))
@@ -582,9 +585,10 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.POST("/tenants/{tenant}/namespace"). // TODO
-								To(apiHandler.handleCreateNamespace).
+								To(apiHandler.handleGetNamespacesWithMultiTenancy).
 								Reads(ns.NamespaceSpec{}).
 								Writes(ns.NamespaceSpec{}))
+
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/namespace").
 			To(apiHandler.handleGetNamespacesWithMultiTenancy).
@@ -1032,6 +1036,26 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(logs.LogDetails{}))
 
 	return wsContainer, nil
+}
+
+//for tenant handlerCreateTenant method
+func (apiHandler *APIHandler) handleCreateTenant(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	tenantSpec := new(tenant.TenantSpec)
+	if err := request.ReadEntity(tenantSpec); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	if err := tenant.CreateTenant(tenantSpec, k8sClient); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusCreated, tenantSpec)
 }
 
 func (apiHandler *APIHandler) handleGetTenantList(request *restful.Request, response *restful.Response) {

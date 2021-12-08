@@ -18,37 +18,68 @@ import {SharedModule} from '../../shared.module';
 import {ComponentsModule} from '../components/module';
 
 import {AlertDialog} from './alert/dialog';
+import {CreateResourceDialog} from './createresource/dialog';
+import {CreateTenantDialog} from './createTenant/dialog';
+import {CreateNamespaceDialog} from './createNamespace/dialog';
+import {CreateRoleDialog} from './createRole/dialog';
+import {CreateClusterroleDialog} from "./createClusterrole/dialog";
 import {DeleteResourceDialog} from './deleteresource/dialog';
 import {LogsDownloadDialog} from './download/dialog';
 import {EditResourceDialog} from './editresource/dialog';
 import {ScaleResourceDialog} from './scaleresource/dialog';
 import {TriggerResourceDialog} from './triggerresource/dialog';
+import {CreateNodeDialog} from "./createNode/dialog";
+import {assignQuotaDialog} from "./assignQuota/dialog";
 
 @NgModule({
   imports: [SharedModule, ComponentsModule],
   declarations: [
     AlertDialog,
+    CreateResourceDialog,
+    CreateTenantDialog,
+    CreateNamespaceDialog,
+    CreateRoleDialog,
+    CreateClusterroleDialog,
     EditResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
     ScaleResourceDialog,
     TriggerResourceDialog,
+    CreateNodeDialog,
+    assignQuotaDialog,
+
   ],
   exports: [
     AlertDialog,
+    CreateResourceDialog,
+    CreateTenantDialog,
+    CreateNamespaceDialog,
+    CreateRoleDialog,
+    CreateClusterroleDialog,
     EditResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
     ScaleResourceDialog,
     TriggerResourceDialog,
+    CreateNodeDialog,
+    assignQuotaDialog,
+
   ],
   entryComponents: [
     AlertDialog,
+    CreateResourceDialog,
+    CreateTenantDialog,
+    CreateNamespaceDialog,
+    CreateRoleDialog,
+    CreateClusterroleDialog,
     EditResourceDialog,
     DeleteResourceDialog,
     LogsDownloadDialog,
     ScaleResourceDialog,
     TriggerResourceDialog,
+    CreateNodeDialog,
+    assignQuotaDialog,
+
   ],
 })
 export class DialogsModule {}

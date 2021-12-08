@@ -1,0 +1,5 @@
+password,User,id,group,Tenant,Phase,Age
+smartvm,developer,user,system:masters,tenant-1,Active,2 hours
+smartvm,tester,user,system:masters,tenant-2,Active,1 hours
+smartvm,manager,user,system:masters,tenant-3,Active,2 hours
+

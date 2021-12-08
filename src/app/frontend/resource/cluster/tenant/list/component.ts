@@ -1,4 +1,4 @@
-// Copyright 2020 Authors of Arktos.
+//Copyright 2020 Authors of Arktos.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,5 @@ import {Component, OnInit} from '@angular/core';
 })
 export class TenantListComponent implements OnInit {
   constructor() {}
-
   ngOnInit() {}
 }

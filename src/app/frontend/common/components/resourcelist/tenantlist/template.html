@@ -14,25 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<kd-card role="table"
-         [hidden]="isHidden()">
-  <div title
-       fxLayout="row"
-       i18n>Tenants</div>
-  <div description><span class="kd-muted-light"
-          i18n>Items:&nbsp;</span>{{totalItems}}</div>
-  <div actions>
-    <kd-card-list-filter></kd-card-list-filter>
+<div class="main_container">
+  <div class="row">
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+      <div class="create_btn_sec" align="end">
+        <button mat-raised-button matTooltip="Add Tenant" color="primary" (click)="onClick()">
+          <img class="add_icon" src="assets/images/plus_icon_white.svg" alt="">
+          Add Tenant</button>
+      </div>
+    </div>
   </div>
+  <div class="row">
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+      <kd-card role="table" [hidden]="isHidden()">
+        <div title fxLayout="row" i18n></div>
+        <div title fxLayout="row" i18n>Tenants</div>
+        <div description><span class="kd-muted-light" i18n>Items:&nbsp;</span>{{totalItems}}
+        </div>
 
-  <div content
-       [hidden]="showZeroState()">
-    <div kdLoadingSpinner
-         [isLoading]="isLoading"></div>
+        <div content [hidden]="showZeroState()">
+          <div kdLoadingSpinner [isLoading]="isLoading"></div>
 
     <mat-table [dataSource]="getData()"
                matSort
-               [matSortActive]="getColumns()[3]"
+               [matSortActive]="getColumns()[4]"
                matSortDisableClear
                matSortDirection="asc">
       <ng-container [matColumnDef]="getColumns()[0]">
@@ -59,11 +64,19 @@ limitations under the License.
 
       <ng-container [matColumnDef]="getColumns()[2]">
         <mat-header-cell *matHeaderCellDef
+                         i18n>Namespace</mat-header-cell>
+        <mat-cell *matCellDef="let tenant">{{tenant.namespace}}</mat-cell>
+      </ng-container>
+
+      <ng-container [matColumnDef]="getColumns()[3]">
+        <mat-header-cell *matHeaderCellDef
                          i18n>Phase</mat-header-cell>
         <mat-cell *matCellDef="let tenant">{{tenant.phase}}</mat-cell>
       </ng-container>
 
-      <ng-container [matColumnDef]="getColumns()[3]">
+
+
+      <ng-container [matColumnDef]="getColumns()[4]">
         <mat-header-cell *matHeaderCellDef
                          mat-sort-header
                          disableClear="true"
@@ -73,6 +86,7 @@ limitations under the License.
                    relative></kd-date>
         </mat-cell>
       </ng-container>
+
 
       <ng-container *ngFor="let col of getActionColumns()"
                     [matColumnDef]="col.name">
@@ -90,11 +104,17 @@ limitations under the License.
     <mat-paginator [length]="totalItems"
                    [pageSize]="itemsPerPage"
                    [hidePageSize]="true"
-                   [showFirstLastButtons]="true"></mat-paginator>
-  </div>
+                     [showFirstLastButtons]="true"></mat-paginator>
+    </div>
 
-  <div content
-       [hidden]="!showZeroState()">
-    <kd-list-zero-state></kd-list-zero-state>
+    <div content
+         [hidden]="!showZeroState()">
+      <kd-list-zero-state></kd-list-zero-state>
+    </div>
+      <div content [hidden]="!showZeroState()">
+        <kd-list-zero-state></kd-list-zero-state>
+      </div>
+      </kd-card>
+    </div>
   </div>
-</kd-card>
+</div>

@@ -78,7 +78,7 @@ type TypeMeta struct {
 	Kind ResourceKind `json:"kind,omitempty"`
 }
 
-// ListMeta describes list of objects, i.e. holds information about pagination options set for the list.
+// ListMeta describes list of objects, i.e. holds clustermanagement about pagination options set for the list.
 type ListMeta struct {
 	// Total number of items on the list. Used for pagination.
 	TotalItems int `json:"totalItems"`
@@ -195,6 +195,7 @@ var KindToAPIMapping = map[string]APIMapping{
 	ResourceKindStorageClass:             {"storageclasses", ClientTypeStorageClient, false},
 	ResourceKindEndpoint:                 {"endpoints", ClientTypeDefault, true},
 	ResourceKindClusterRole:              {"clusterroles", ClientTypeRbacClient, false},
+	ResourceKindTenant:                   {"tenants", ClientTypeDefault, false},
 }
 
 // IsSelectorMatching returns true when an object with the given selector targets the same

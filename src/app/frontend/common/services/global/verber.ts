@@ -18,17 +18,31 @@ import {MatDialog, MatDialogConfig} from '@angular/material';
 import {ObjectMeta, TypeMeta} from '@api/backendapi';
 
 import {AlertDialog, AlertDialogConfig} from '../../dialogs/alert/dialog';
+import {CreateResourceDialog} from '../../dialogs/createresource/dialog';
 import {DeleteResourceDialog} from '../../dialogs/deleteresource/dialog';
 import {EditResourceDialog} from '../../dialogs/editresource/dialog';
 import {ScaleResourceDialog} from '../../dialogs/scaleresource/dialog';
 import {TriggerResourceDialog} from '../../dialogs/triggerresource/dialog';
 import {RawResource} from '../../resources/rawresource';
+import { assignQuotaDialog } from './../../dialogs/assignQuota/dialog';
+// tenat dialog
+import { CreateTenantDialog } from './../../dialogs/createTenant/dialog';
+// namespace dialog
+import {CreateNamespaceDialog} from '../../dialogs/createNamespace/dialog'; // namespace dialog
+// role dialog
+import {CreateRoleDialog} from '../../dialogs/createRole/dialog'; // role dialog
+// clusterrole dialog
+import {CreateClusterroleDialog} from '../../dialogs/createClusterrole/dialog';
 
 import {ResourceMeta} from './actionbar';
 import {TenantService} from './tenant';
+import {CreateNodeDialog} from "../../dialogs/createNode/dialog";
 
 @Injectable()
 export class VerberService {
+  onCreate = new EventEmitter<boolean>();
+  onCreateTenant = new EventEmitter<boolean>(); //added
+  onCreateNode = new EventEmitter<boolean>(); //added
   onDelete = new EventEmitter<boolean>();
   onEdit = new EventEmitter<boolean>();
   onScale = new EventEmitter<boolean>();
@@ -39,6 +53,115 @@ export class VerberService {
     private readonly http_: HttpClient,
     private tenant_: TenantService,
   ) {}
+
+  showCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_
+      .open(CreateResourceDialog, dialogConfig)
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          const url = RawResource.getUrl(this.tenant_.current(), typeMeta, objectMeta);
+          this.http_
+            .post(url, JSON.parse(result), {headers: this.getHttpHeaders_()})
+            .subscribe(() => this.onCreate.emit(true), this.handleErrorResponse_.bind(this));
+        }
+      });
+  }
+  //added quota dialog
+  showQuotaCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_
+      .open(assignQuotaDialog, dialogConfig)
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          const url = RawResource.getUrl(this.tenant_.current(), typeMeta, objectMeta);
+          this.http_
+            .post(url, JSON.parse(result), {headers: this.getHttpHeaders_()})
+            .subscribe(() => this.onCreateTenant.emit(true), this.handleErrorResponse_.bind(this));
+        }
+      });
+  }
+
+  // create tenant
+  showTenantCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_
+      .open(CreateTenantDialog, dialogConfig)
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          const url = RawResource.getUrl(this.tenant_.current(), typeMeta, objectMeta);
+          this.http_
+            .post(url, JSON.parse(result), {headers: this.getHttpHeaders_()})
+            .subscribe(() => this.onCreateTenant.emit(true), this.handleErrorResponse_.bind(this));
+        }
+      });
+  }
+
+  // create Namespace
+  showNamespaceCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_
+      .open(CreateNamespaceDialog, dialogConfig)
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          const url = RawResource.getUrl(this.tenant_.current(), typeMeta, objectMeta);
+          this.http_
+            .post(url, JSON.parse(result), {headers: this.getHttpHeaders_()})
+            .subscribe(() => this.onCreate.emit(true), this.handleErrorResponse_.bind(this));
+        }
+      });
+  }
+  // create Role
+  showRoleCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_
+      .open(CreateRoleDialog, dialogConfig)
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          const url = RawResource.getUrl(this.tenant_.current(), typeMeta, objectMeta);
+          this.http_
+            .post(url, JSON.parse(result), {headers: this.getHttpHeaders_()})
+            .subscribe(() => this.onCreate.emit(true), this.handleErrorResponse_.bind(this));
+        }
+      });
+  }
+
+  // create Clusterrole
+  showClusterroleCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_
+      .open(CreateClusterroleDialog, dialogConfig)
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          const url = RawResource.getUrl(this.tenant_.current(), typeMeta, objectMeta);
+          this.http_
+            .post(url, JSON.parse(result), {headers: this.getHttpHeaders_()})
+            .subscribe(() => this.onCreate.emit(true), this.handleErrorResponse_.bind(this));
+        }
+      });
+  }
+
+  // create node
+  showNodeCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_
+      .open(CreateNodeDialog, dialogConfig)
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          const url = RawResource.getUrl(this.tenant_.current(), typeMeta, objectMeta);
+          this.http_
+            .post(url, JSON.parse(result), {headers: this.getHttpHeaders_()})
+            .subscribe(() => this.onCreateNode.emit(true), this.handleErrorResponse_.bind(this));
+        }
+      });
+  }
 
   showDeleteDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
     const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
