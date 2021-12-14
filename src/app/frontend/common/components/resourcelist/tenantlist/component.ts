@@ -82,7 +82,7 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name','namespace', 'phase', 'age'];
+    return ['statusicon', 'name', 'phase', 'age'];
   }
 
   //added the code
