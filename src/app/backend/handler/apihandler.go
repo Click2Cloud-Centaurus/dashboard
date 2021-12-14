@@ -16,7 +16,6 @@
 package handler
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -4563,34 +4562,6 @@ func parseDataSelectPathParameter(request *restful.Request) *dataselect.DataSele
 	return dataselect.NewDataSelectQuery(paginationQuery, sortQuery, filterQuery, metricQuery)
 }
 
-// create connection with postgres db
-func createConnection() *sql.DB {
-	//host:=os.Getenv('HOST')
-	//port:=os.Getenv('PORT')
-	//user:=os.Getenv('USER')
-	//password:=os.Getenv('PASSWORD')
-	//dbname:=os.Getenv('DB_NAME')
-	//sslmode:=os.Getenv('SSL')
-	// Open the connection
-	connStr := "host=192.168.1.240 port=5432 dbname=postgres user=postgres password=postgres123 sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
-
-	if err != nil {
-		panic(err)
-	}
-
-	// check the connection
-	err = db.Ping()
-
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Successfully connected!")
-	// return the connection
-	return db
-}
-
 // CreateUser create a user in the postgres db
 func (apiHandler *APIHandler) handleCreateUser(w *restful.Request, r *restful.Response) {
 
@@ -4603,7 +4574,7 @@ func (apiHandler *APIHandler) handleCreateUser(w *restful.Request, r *restful.Re
 	}
 
 	// call insert user function and pass the user
-	insertID := insertUser(user)
+	insertID := models.InsertUser(user)
 
 	// format a response object
 	res := response{
@@ -4622,7 +4593,7 @@ func (apiHandler *APIHandler) handleGetUser(w *restful.Request, r *restful.Respo
 
 	// call the getUser function with user id to retrieve a single user
 	//id_, err := strconv.Atoi(id)
-	user, err := getUser(username)
+	user, err := models.GetUser(username)
 
 	if err != nil {
 		log.Fatalf("Unable to get user. %v", err)
@@ -4634,7 +4605,7 @@ func (apiHandler *APIHandler) handleGetUser(w *restful.Request, r *restful.Respo
 // GetAllUser will return all the users
 func (apiHandler *APIHandler) handleGetAllUser(w *restful.Request, r *restful.Response) {
 	// get all the users in the db
-	users, err := getAllUsers()
+	users, err := models.GetAllUsers()
 
 	if err != nil {
 		log.Fatalf("Unable to get all user. %v", err)
@@ -4663,7 +4634,7 @@ func (apiHandler *APIHandler) handleUpdateUser(w *restful.Request, r *restful.Re
 	}
 
 	// call update user function to update the user
-	updatedRows := updateUser(int64(id), user)
+	updatedRows := models.UpdateUser(int64(id), user)
 
 	if err != nil {
 		log.Fatalf("Unable to get user. %v", err)
@@ -4691,7 +4662,7 @@ func (apiHandler *APIHandler) handleDeleteUser(w *restful.Request, r *restful.Re
 
 	// call the deleteUser, convert the int to int64
 	id, err := strconv.Atoi(userid)
-	deletedRows := deleteUser(int64(id))
+	deletedRows := models.DeleteUser(int64(id))
 
 	if err != nil {
 		log.Fatalf("Unable to get user. %v", err)
@@ -4700,7 +4671,7 @@ func (apiHandler *APIHandler) handleDeleteUser(w *restful.Request, r *restful.Re
 	// format the message string
 	msg := fmt.Sprintf("User deleted successfully. Total rows/record affected %v", deletedRows)
 
-	// format the reponse message
+	// format the response message
 	res := response{
 		ID:      int64(id),
 		Message: msg,
@@ -4708,174 +4679,4 @@ func (apiHandler *APIHandler) handleDeleteUser(w *restful.Request, r *restful.Re
 
 	// send the response
 	r.WriteHeaderAndEntity(http.StatusOK, res)
-}
-
-//------------------------- handler functions ----------------
-// insert one user in the DB
-func insertUser(user models.User) int64 {
-
-	// create the postgres db connection
-	db := createConnection()
-
-	// close the db connection
-	defer db.Close()
-
-	// create the insert sql query
-	// returning userid will return the id of the inserted user
-	sqlStatement := `INSERT INTO users (username, password, token, type) VALUES ($1, $2, $3, $4) RETURNING userid`
-
-	// the inserted id will store in this id
-	var id int64
-
-	// execute the sql statement
-	// Scan function will save the insert id in the id
-	err := db.QueryRow(sqlStatement, user.Username, user.Password, user.Token, user.Type).Scan(&id)
-
-	if err != nil {
-		log.Fatalf("Unable to execute the query. %v", err)
-	}
-
-	fmt.Printf("Inserted a single record %v", id)
-
-	// return the inserted id
-	return id
-}
-
-// get one user from the DB by its userid
-func getUser(param string) (models.User, error) {
-	// create the postgres db connection
-	db := createConnection()
-
-	// close the db connection
-	defer db.Close()
-
-	// create a user of models.User type
-	var user models.User
-
-	// create the select sql query
-	sqlStatement := `SELECT * FROM users WHERE username=$1`
-
-	// execute the sql statement
-	row := db.QueryRow(sqlStatement, param)
-
-	// unmarshal the row object to user
-	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Token, &user.Type)
-
-	switch err {
-	case sql.ErrNoRows:
-		fmt.Println("No rows were returned!")
-		return user, nil
-	case nil:
-		return user, nil
-	default:
-		log.Fatalf("Unable to scan the row. %v", err)
-	}
-
-	// return empty user on error
-	return user, err
-}
-
-// get one user from the DB by its userid
-func getAllUsers() ([]models.User, error) {
-	// create the postgres db connection
-	db := createConnection()
-
-	// close the db connection
-	defer db.Close()
-
-	var users []models.User
-
-	// create the select sql query
-	sqlStatement := `SELECT * FROM users`
-
-	// execute the sql statement
-	rows, err := db.Query(sqlStatement)
-
-	if err != nil {
-		log.Fatalf("Unable to execute the query. %v", err)
-	}
-
-	// close the statement
-	defer rows.Close()
-
-	// iterate over the rows
-	for rows.Next() {
-		var user models.User
-
-		// unmarshal the row object to user
-		err = rows.Scan(&user.ID, &user.Username, &user.Password, &user.Token, &user.Type)
-
-		if err != nil {
-			log.Fatalf("Unable to scan the row. %v", err)
-		}
-
-		// append the user in the users slice
-		users = append(users, user)
-
-	}
-
-	// return empty user on error
-	return users, err
-}
-
-// update user in the DB
-func updateUser(id int64, user models.User) int64 {
-
-	// create the postgres db connection
-	db := createConnection()
-
-	// close the db connection
-	defer db.Close()
-
-	// create the update sql query
-	sqlStatement := `UPDATE users SET password=$2, token=$3 WHERE userid=$1`
-
-	// execute the sql statement
-	res, err := db.Exec(sqlStatement, id, user.Password, user.Token)
-
-	if err != nil {
-		log.Fatalf("Unable to execute the query. %v", err)
-	}
-
-	// check how many rows affected
-	rowsAffected, err := res.RowsAffected()
-
-	if err != nil {
-		log.Fatalf("Error while checking the affected rows. %v", err)
-	}
-
-	fmt.Printf("Total rows/record affected %v", rowsAffected)
-
-	return rowsAffected
-}
-
-// delete user in the DB
-func deleteUser(id int64) int64 {
-
-	// create the postgres db connection
-	db := createConnection()
-
-	// close the db connection
-	defer db.Close()
-
-	// create the delete sql query
-	sqlStatement := `DELETE FROM users WHERE userid=$1`
-
-	// execute the sql statement
-	res, err := db.Exec(sqlStatement, id)
-
-	if err != nil {
-		log.Fatalf("Unable to execute the query. %v", err)
-	}
-
-	// check how many rows affected
-	rowsAffected, err := res.RowsAffected()
-
-	if err != nil {
-		log.Fatalf("Error while checking the affected rows. %v", err)
-	}
-
-	fmt.Printf("Total rows/record affected %v", rowsAffected)
-
-	return rowsAffected
 }
