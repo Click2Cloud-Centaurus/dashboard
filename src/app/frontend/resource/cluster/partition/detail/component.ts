@@ -14,7 +14,7 @@
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {RPAddress, RPDetail, RPTaint} from '@api/backendapi';
+import {PartitionAddress, PartitionDetail, PartitionTaint} from '@api/backendapi';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ActionbarService, ResourceMeta} from '../../../../common/services/global/actionbar';
@@ -23,20 +23,20 @@ import {EndpointManager, Resource} from '../../../../common/services/resource/en
 import {ResourceService} from '../../../../common/services/resource/resource';
 
 @Component({
-  selector: 'kd-rp-detail',
+  selector: 'kd-partition-detail',
   templateUrl: './template.html',
   styleUrls: ['./style.scss'],
 })
-export class RPDetailComponent implements OnInit, OnDestroy {
+export class PartitionDetailComponent implements OnInit, OnDestroy {
   private nodeSubscription_: Subscription;
-  private readonly endpoint_ = EndpointManager.resource(Resource.rp);
-  rp: RPDetail;
+  private readonly endpoint_ = EndpointManager.resource(Resource.partition);
+  partition: PartitionDetail;
   isInitialized = false;
   podListEndpoint: string;
   eventListEndpoint: string;
 
   constructor(
-    private readonly rp_: ResourceService<RPDetail>,
+    private readonly partition_: ResourceService<PartitionDetail>,
     private readonly actionbar_: ActionbarService,
     private readonly activatedRoute_: ActivatedRoute,
     private readonly notifications_: NotificationsService,
@@ -48,12 +48,12 @@ export class RPDetailComponent implements OnInit, OnDestroy {
     this.podListEndpoint = this.endpoint_.child(resourceName, Resource.pod);
     this.eventListEndpoint = this.endpoint_.child(resourceName, Resource.event);
 
-    this.nodeSubscription_ = this.rp_
+    this.nodeSubscription_ = this.partition_
       .get(this.endpoint_.detail(), resourceName)
-      .subscribe((d: RPDetail) => {
-        this.rp = d;
+      .subscribe((d: PartitionDetail) => {
+        this.partition = d;
         this.notifications_.pushErrors(d.errors);
-        this.actionbar_.onInit.emit(new ResourceMeta('RP', d.objectMeta, d.typeMeta));
+        this.actionbar_.onInit.emit(new ResourceMeta('Partition', d.objectMeta, d.typeMeta));
         this.isInitialized = true;
       });
   }
@@ -64,11 +64,11 @@ export class RPDetailComponent implements OnInit, OnDestroy {
   }
 
   getAddresses(): string[] {
-    return this.rp.addresses.map((address: RPAddress) => `${address.type}: ${address.address}`);
+    return this.partition.addresses.map((address: PartitionAddress) => `${address.type}: ${address.address}`);
   }
 
   getTaints(): string[] {
-    return this.rp.taints.map((taint: RPTaint) => {
+    return this.partition.taints.map((taint: PartitionTaint) => {
       return taint.value
         ? `${taint.key}=${taint.value}:${taint.effect}`
         : `${taint.key}=${taint.effect}`;

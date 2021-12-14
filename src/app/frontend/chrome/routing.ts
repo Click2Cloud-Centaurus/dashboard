@@ -55,8 +55,8 @@ const routes: Routes = [
 
       },
       {
-        path: 'RP',
-        loadChildren: 'resource/cluster/RP/module#RPModule',
+        path: 'partition',
+        loadChildren: 'resource/cluster/partition/module#PartitionModule',
 
       },
       {

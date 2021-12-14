@@ -12,10 +12,10 @@ import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {VerberService} from "../../../services/global/verber";
 
 @Component({
-  selector: 'kd-rp-list',
+  selector: 'kd-partition-list',
   templateUrl: './template.html',
 })
-export class RPListComponent extends ResourceListWithStatuses<NodeList, Node> {
+export class PartitionListComponent extends ResourceListWithStatuses<NodeList, Node> {
   @Input() endpoint = EndpointManager.resource(Resource.node).list();
   displayName:any="";
   typeMeta:any="";

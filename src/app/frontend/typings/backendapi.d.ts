@@ -132,8 +132,8 @@ export interface NodeList extends ResourceList {
   nodes: Node[];
 }
 
-export interface RPList extends ResourceList {
-  rps: RP[];
+export interface PartitionList extends ResourceList {
+  partitions: Partition[];
 }
 
 
@@ -300,7 +300,7 @@ export interface Node extends Resource {
   ready: string;
 }
 
-export interface RP extends Resource {
+export interface Partition extends Resource {
   ready: string;
 }
 
@@ -550,7 +550,7 @@ export interface NodeDetail extends ResourceDetail {
   eventList: EventList;
 }
 
-export interface RPDetail extends ResourceDetail {
+export interface PartitionDetail extends ResourceDetail {
   phase: string;
   podCIDR: string;
   providerID: string;
@@ -851,7 +851,7 @@ export interface NodeAddress {
   address: string;
 }
 
-export interface RPAddress {
+export interface PartitionAddress {
   type: string;
   address: string;
 }
@@ -863,7 +863,7 @@ export interface NodeTaint {
   timeAdded: number;
 }
 
-export interface RPTaint {
+export interface PartitionTaint {
   key: string;
   value: string;
   effect: string;

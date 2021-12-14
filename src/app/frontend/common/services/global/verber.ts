@@ -163,7 +163,7 @@ export class VerberService {
       });
   }
 
-  showRPCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+  showPartitionCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
     const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
     this.dialog_
       .open(CreateNodeDialog, dialogConfig)

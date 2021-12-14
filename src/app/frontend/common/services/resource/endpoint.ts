@@ -42,7 +42,7 @@ export enum Resource {
   event = 'event',
   container = 'container',
   tenant = 'tenant',
-  rp = 'rp',
+  partition = 'partition',
   role = 'role'
 }
 
