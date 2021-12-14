@@ -20,26 +20,26 @@ import {CLUSTER_ROUTE} from '../routing';
 import {TenantRPListComponent} from './list/component';
 import {TenantRPDetailComponent} from './detail/component';
 
-const TENANTRP_LIST_ROUTE: Route = {
+const TENANT_LIST_ROUTE: Route = {
   path: '',
   component: TenantRPListComponent,
   data: {
-    breadcrumb: 'Tenant Partition',
+    breadcrumb: 'Tenant',
     parent: CLUSTER_ROUTE,
   },
 };
 
-const TENANTRP_DETAIL_ROUTE: Route = {
+const TENANT_DETAIL_ROUTE: Route = {
   path: ':resourceName',
   component: TenantRPDetailComponent,
   data: {
     breadcrumb: '{{ resourceName }}',
-    parent: TENANTRP_LIST_ROUTE,
+    parent: TENANT_LIST_ROUTE,
   },
 };
 
 @NgModule({
-  imports: [RouterModule.forChild([TENANTRP_LIST_ROUTE, TENANTRP_DETAIL_ROUTE])],
+  imports: [RouterModule.forChild([TENANT_LIST_ROUTE, TENANT_DETAIL_ROUTE])],
   exports: [RouterModule],
 })
 export class TenantRPRoutingModule {}

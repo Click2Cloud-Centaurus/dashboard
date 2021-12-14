@@ -128,6 +128,11 @@ export interface NodeList extends ResourceList {
   nodes: Node[];
 }
 
+export interface RPList extends ResourceList {
+  rps: RP[];
+}
+
+
 export interface PersistentVolumeClaimList extends ResourceList {
   items: PersistentVolumeClaim[];
 }
@@ -289,6 +294,10 @@ export interface Node extends Resource {
   ready: string;
 }
 
+export interface RP extends Resource {
+  ready: string;
+}
+
 export interface PersistentVolume extends Resource {
   capacity: StringMap;
   storageClass: string;
@@ -425,9 +434,7 @@ export interface PolicyRule {
   nonResourceURLs: string[];
 }
 
-export interface ClusterRoleDetail extends ResourceDetail {
-  rules: PolicyRule[];
-}
+
 
 export interface SecretDetail extends ResourceDetail {
   type: string;
@@ -534,6 +541,23 @@ export interface NodeDetail extends ResourceDetail {
   podList: PodList;
   eventList: EventList;
 }
+
+export interface RPDetail extends ResourceDetail {
+  phase: string;
+  podCIDR: string;
+  providerID: string;
+  unschedulable: boolean;
+  allocatedResources: NodeAllocatedResources;
+  nodeInfo: NodeInfo;
+  containerImages: string[];
+  initContainerImages: string[];
+  addresses: NodeAddress[];
+  taints: NodeTaint[];
+  conditions: Condition[];
+  podList: PodList;
+  eventList: EventList;
+}
+
 
 export interface HorizontalPodAutoscalerDetail extends ResourceDetail {
   scaleTargetRef: ScaleTargetRef;
@@ -819,7 +843,19 @@ export interface NodeAddress {
   address: string;
 }
 
+export interface RPAddress {
+  type: string;
+  address: string;
+}
+
 export interface NodeTaint {
+  key: string;
+  value: string;
+  effect: string;
+  timeAdded: number;
+}
+
+export interface RPTaint {
   key: string;
   value: string;
   effect: string;

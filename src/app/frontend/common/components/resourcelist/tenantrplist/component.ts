@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {HttpParams} from '@angular/common/http';
-import {Component, Input,OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import { Tenant, TenantList} from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 
@@ -26,14 +26,12 @@ import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
 import {MatDialog, MatDialogConfig,MatExpansionModule} from '@angular/material/';
 import {VerberService} from '../../../services/global/verber';
-import {NAMESPACE_STATE_PARAM} from "../../../params/params";
-import {ActionbarService} from "../../../services/global/actionbar";
 
 @Component({
   selector: 'kd-tenant-rp-list',
   templateUrl: './template.html',
 })
-export class TenantRPListComponent extends ResourceListWithStatuses<TenantList, Tenant > implements OnInit{
+export class TenantRPListComponent extends ResourceListWithStatuses<TenantList, Tenant > {
   @Input() endpoint = EndpointManager.resource(Resource.tenant).list();
   // @Input() endpoint = EndpointManager.resource(Resource.tenant, true, true).list();
 
@@ -45,7 +43,7 @@ export class TenantRPListComponent extends ResourceListWithStatuses<TenantList, 
     private readonly tenant_: ResourceService<TenantList>,
 
     notifications: NotificationsService,
-    private dialog: MatDialog ,//add the code
+    private dialog: MatDialog //add the code
   ) {
     super('tenant', notifications);
     this.id = ListIdentifier.tenant;
@@ -62,7 +60,6 @@ export class TenantRPListComponent extends ResourceListWithStatuses<TenantList, 
   getResourceObservable(params?: HttpParams): Observable<TenantList> {
     return this.tenant_.get(this.endpoint, undefined, params);
   }
-
 
   map(tenantList: TenantList): Tenant[] {
     return tenantList.tenants ;

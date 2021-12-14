@@ -98,6 +98,8 @@ import {TenantListComponent} from './resourcelist/tenantlist/component';
 import {UserListComponent} from "./resourcelist/user/component";
 import {QuotasListComponent} from "./resourcelist/quota/component";
 import {NewNodeListComponent} from "./resourcelist/resourcemonitoring/component";
+import {RPListComponent} from "./resourcelist/RP/component";
+import {TenantRPListComponent} from "./resourcelist/tenantrplist/component";
 
 
 const components = [
@@ -113,6 +115,8 @@ const components = [
   ActionbarDetailTriggerComponent,
   NewNodeListComponent,
   BreadcrumbsComponent,
+  TenantRPListComponent,
+
 
 
 
@@ -179,6 +183,7 @@ const components = [
   ReplicaSetListComponent,
   ReplicationControllerListComponent,
   RowDetailComponent,
+  RPListComponent,
 
   StorageClassListComponent,
   StatefulSetListComponent,

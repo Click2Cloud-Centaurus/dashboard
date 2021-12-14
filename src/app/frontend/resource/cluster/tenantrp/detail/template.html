@@ -1,6 +1,6 @@
 
 <kd-object-meta [initialized]="isInitialized"
-                [objectMeta]="tenantrp?.objectMeta"></kd-object-meta>
+                [objectMeta]="tenant?.objectMeta"></kd-object-meta>
 
 <kd-card [initialized]="isInitialized">
   <div title
@@ -8,10 +8,10 @@
   <div content
        *ngIf="isInitialized"
        fxLayout="row wrap">
-    <kd-property *ngIf="tenantrp?.phase">
+    <kd-property *ngIf="tenant?.phase">
       <div key
            i18n>Status</div>
-      <div value>{{tenantrp?.phase}}</div>
+      <div value>{{tenant?.phase}}</div>
     </kd-property>
   </div>
 </kd-card>

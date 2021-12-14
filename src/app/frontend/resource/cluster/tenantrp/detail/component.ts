@@ -44,14 +44,14 @@ export const emptyResourcesRatio: ResourcesRatio = {
 };
 
 @Component({
-  selector: 'kd-tenantrp-rp-detail',
+  selector: 'kd-tenant-rp-detail',
   templateUrl: './template.html',
 })
 export class TenantRPDetailComponent implements OnInit, OnDestroy  {
-  private tenantrpSubscription_: Subscription;
-  private readonly endpoint_ = EndpointManager.resource(Resource.tenantrp);
+  private tenantSubscription_: Subscription;
+  private readonly endpoint_ = EndpointManager.resource(Resource.tenant);
   node: NodeDetail;
-  tenantrp: TenantDetail;
+  tenant: TenantDetail;
   isInitialized = false;
   displayName: any = "";
   typeMeta: any = "";
@@ -60,7 +60,7 @@ export class TenantRPDetailComponent implements OnInit, OnDestroy  {
 
   constructor(
     private readonly node_: ResourceService<NodeDetail>,
-    private readonly tenantrp_: ResourceService<TenantDetail>,
+    private readonly tenant_: ResourceService<TenantDetail>,
     private readonly actionbar_: ActionbarService,
     private readonly activatedRoute_: ActivatedRoute,
     private readonly notifications_: NotificationsService,
@@ -70,10 +70,10 @@ export class TenantRPDetailComponent implements OnInit, OnDestroy  {
     const resourceName = this.activatedRoute_.snapshot.params.resourceName;
     this.podListEndpoint = this.endpoint_.child(resourceName, Resource.pod);
 
-    this.tenantrpSubscription_ = this.tenantrp_
+    this.tenantSubscription_ = this.tenant_
       .get(this.endpoint_.detail(), resourceName)
       .subscribe((d: TenantDetail) => {
-        this.tenantrp = d;
+        this.tenant = d;
         this.notifications_.pushErrors(d.errors);
         this.actionbar_.onInit.emit(new ResourceMeta('Tenant', d.objectMeta, d.typeMeta));
         this.isInitialized = true;
@@ -81,7 +81,7 @@ export class TenantRPDetailComponent implements OnInit, OnDestroy  {
   }
 
   ngOnDestroy(): void {
-    this.tenantrpSubscription_.unsubscribe();
+    this.tenantSubscription_.unsubscribe();
     this.actionbar_.onDetailsLeave.emit();
   }
 }

@@ -14,11 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<style>
-  :host ::ng-deep.detail_sec {
-    display: none !important;
-  }
-</style>
+
 
 <div class="row">
   <div class="create_btn_sec" align="right">
@@ -34,7 +30,7 @@ limitations under the License.
        fxLayout="row"
        i18n>Resource Partition</div>
   <div description><span class="kd-muted-light"
-                         i18n>Items:&nbsp;{{totalItems}}</span></div>
+                         i18n>Items:&nbsp;</span></div>
   <div actions>
     <kd-card-list-filter></kd-card-list-filter>
   </div>
@@ -113,7 +109,7 @@ limitations under the License.
       <div title
            fxLayout="row"
            i18n>Tenant Partition</div>
-      <div description ><span class="kd-muted-light"
+      <div description><span class="kd-muted-light"
                              i18n>Items:&nbsp;</span>{{totalItems}}</div>
       <div actions>
         <kd-card-list-filter></kd-card-list-filter>
@@ -144,7 +140,7 @@ limitations under the License.
                              disableClear="true"
                              i18n>Name</mat-header-cell>
             <mat-cell *matCellDef="let node">
-              <a routerLink="/tenantrp" routerLinkActive="active">
+              <a routerLink="/tenant" routerLinkActive="active">
                 TP1
               </a>
             </mat-cell>
