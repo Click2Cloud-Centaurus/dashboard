@@ -31,8 +31,6 @@ import {AlertDialog, AlertDialogConfig} from "../alert/dialog";
 
 export interface CreateTenantDialogMeta {
   tenants: string[];
-  StorageClusterId: string []
-  //storageclusterid: string[];
   data : string[]
 }
 @Component({
@@ -45,24 +43,10 @@ export class CreateTenantDialog implements OnInit {
 
   private readonly config_ = CONFIG;
 
-  /**
-   * Max-length validation rule for tenant
-   */
   tenantMaxLength = 24;
   storageidMaxLength =10;
-  /**
-   * Pattern validation rule for tenant
-   */
   tenantPattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
   storageidPattern: RegExp = new RegExp('^[0-9]$');
-  /**
-   * Max-length validation rule for namespace
-   */
-  namespaceMaxLength = 63;
-  /**
-   * Pattern validation rule for namespace
-   */
-  namespacePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
 
   constructor(
     public dialogRef: MatDialogRef<CreateTenantDialog>,
@@ -98,19 +82,13 @@ export class CreateTenantDialog implements OnInit {
   get tenant(): AbstractControl {
     return this.form1.get('tenant');
   }
-  // get namespace(): AbstractControl {
-  //   return this.form1.get('namespace');
-  // }
   /**
    * Creates new tenant based on the state of the controller.
    */
   createTenant(): void {
     if (!this.form1.valid) return;
-    const tenantSpec= {name: this.tenant.value,StorageClusterId: this.tenant.value};
-    // const namespaceSpec = {namespace: this.namespace.value};
-    // console.log("ns",namespaceSpec)
+    const tenantSpec= {name: this.tenant.value};
     const tokenPromise = this.csrfToken_.getTokenForAction('tenant');
-    // const tokenPromisenamespace = this.csrfToken_.getTokenForAction('namespace');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(
@@ -122,11 +100,9 @@ export class CreateTenantDialog implements OnInit {
         )
         .subscribe(
           () => {
-            // this.log_.info('Successfully created tenant:', savedConfig);
             this.dialogRef.close(this.tenant.value);
           },
           error => {
-            // this.log_.info('Error creating tenant:', err);
             this.dialogRef.close();
             const configData: AlertDialogConfig = {
               title: 'Tenant Already Exists',
@@ -146,9 +122,6 @@ export class CreateTenantDialog implements OnInit {
     return this.data.tenants.indexOf(this.tenant.value) >= 0;
   }
 
-  /**
-   * Cancels the new tenant form.
-   */
   cancel(): void {
     this.dialogRef.close();
   }
