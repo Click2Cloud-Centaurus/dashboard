@@ -16,7 +16,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {AuthGuard} from '../common/services/guard/auth';
-import {SystemGuard} from '../common/services/guard/system';
 import {ChromeComponent} from './component';
 
 
@@ -55,6 +54,18 @@ const routes: Routes = [
         loadChildren: 'resource/cluster/node/module#NodeModule',
 
       },
+      {
+        path: 'RP',
+        loadChildren: 'resource/cluster/RP/module#RPModule',
+
+      },
+      {
+        path: 'tenantrp',
+        loadChildren: 'resource/cluster/tenantrp/module#TenantRPModule',
+
+      },
+
+
       // Overview
       {
         path: 'overview',
@@ -65,6 +76,11 @@ const routes: Routes = [
       {
         path: 'workloads',
         loadChildren: 'resource/workloads/module#WorkloadsModule',
+      },
+      {
+        path: 'namespace',
+        loadChildren: 'resource/workloads/namespace/module#NamespaceModule',
+
       },
       {
         path: 'cronjob',
@@ -156,7 +172,8 @@ const routes: Routes = [
         loadChildren: 'tenantmanagement/module#TenantManagementModule',
       },
       {
-        path: 'overview',
+        path: 'tenantmonitoring',
+
         loadChildren: 'tenantmanagement/tenantmonitoring/module#TenantMonitoringModule',
 
       },
@@ -165,11 +182,7 @@ const routes: Routes = [
         loadChildren: 'tenantmanagement/tenantnamespace/module#TenantNamespaceModule',
 
       },
-      {
-        path: 'tenantaccesscontrol',
-        loadChildren: 'tenantmanagement/tenantaccesscontrol/module#TenantAccessControlModule',
 
-      },
       {
         path: 'tenantquota',
         loadChildren: 'tenantmanagement/tenantquota/module#TenantQuotaModule',

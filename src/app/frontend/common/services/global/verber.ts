@@ -115,7 +115,7 @@ export class VerberService {
         }
       });
   }
-  // create Role
+  // create role
   showRoleCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
     const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
     this.dialog_
@@ -149,6 +149,21 @@ export class VerberService {
 
   // create node
   showNodeCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+    const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
+    this.dialog_
+      .open(CreateNodeDialog, dialogConfig)
+      .afterClosed()
+      .subscribe(result => {
+        if (result) {
+          const url = RawResource.getUrl(this.tenant_.current(), typeMeta, objectMeta);
+          this.http_
+            .post(url, JSON.parse(result), {headers: this.getHttpHeaders_()})
+            .subscribe(() => this.onCreateNode.emit(true), this.handleErrorResponse_.bind(this));
+        }
+      });
+  }
+
+  showRPCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
     const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
     this.dialog_
       .open(CreateNodeDialog, dialogConfig)

@@ -42,6 +42,8 @@ export enum Resource {
   event = 'event',
   container = 'container',
   tenant = 'tenant',
+  rp = 'rp',
+  role = 'role'
 }
 
 export enum Utility {

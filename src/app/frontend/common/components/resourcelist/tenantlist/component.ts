@@ -24,14 +24,7 @@ import {ResourceService} from '../../../services/resource/resource';
 import {NotificationsService} from '../../../services/global/notifications';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
-import {Namespace, NamespaceList} from '@api/backendapi';
 import {MatDialog, MatDialogConfig,MatExpansionModule} from '@angular/material/';
-import { CreateFromFormComponent } from 'create/from/form/component';
-import { CreatorCardComponent } from 'common/components/creator/component';
-import { CreateFromFileComponent } from 'create/from/file/component';
-import { Form } from '@angular/forms';
-import {MatMenuModule} from '@angular/material/menu';
-
 import {VerberService} from '../../../services/global/verber';
 
 @Component({
@@ -69,7 +62,6 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
   }
 
   map(tenantList: TenantList): Tenant[] {
-    console.log(tenantList.tenants)//added
     return tenantList.tenants ;
   }
 
