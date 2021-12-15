@@ -70,9 +70,7 @@ export interface ClusterRoleList extends ResourceList {
   items: ClusterRole[];
 }
 
-export interface RoleList extends ResourceList {
-  items: Role[];
-}
+
 
 export interface ConfigMapList extends ResourceList {
   items: ConfigMap[];
