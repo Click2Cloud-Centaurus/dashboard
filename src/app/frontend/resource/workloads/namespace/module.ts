@@ -14,15 +14,16 @@
 
 import {NgModule} from '@angular/core';
 
-import {ComponentsModule} from '../../common/components/module';
-import {SharedModule} from '../../shared.module';
+import {ComponentsModule} from '../../../common/components/module';
+import {SharedModule} from '../../../shared.module';
 
-import {TenantAccessControlDetailComponent} from './detail/component';
-import {TenantAccessControlListComponent} from './list/component';
-import {TenantAccessControlRoutingModule} from './routing';
+import {ActionbarComponent} from './detail/actionbar/component';
+import {NamespaceDetailComponent} from './detail/component';
+import {NamespaceListComponent} from './list/component';
+import {NamespaceRoutingModule} from './routing';
 
 @NgModule({
-  imports: [SharedModule, ComponentsModule, TenantAccessControlRoutingModule],
-  declarations: [TenantAccessControlListComponent, TenantAccessControlDetailComponent],
+  imports: [SharedModule, ComponentsModule, NamespaceRoutingModule],
+  declarations: [NamespaceListComponent, NamespaceDetailComponent, ActionbarComponent],
 })
-export class TenantAccessControlModule {}
+export class NamespaceModule {}
