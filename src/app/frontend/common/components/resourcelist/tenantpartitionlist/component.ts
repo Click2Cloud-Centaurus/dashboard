@@ -1,5 +1,4 @@
-// Copyright 2017 The Kubernetes Authors.
-// Copyright 2020 Authors of Arktos - file modified.
+// Copyright 2020 Authors of Arktos.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,34 +14,39 @@
 
 import {HttpParams} from '@angular/common/http';
 import {Component, Input} from '@angular/core';
-import {Namespace, NamespaceList} from '@api/backendapi';
+import { Tenant, TenantList} from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 
+
 import {ResourceListWithStatuses} from '../../../resources/list';
-import {NotificationsService} from '../../../services/global/notifications';
 import {EndpointManager, Resource} from '../../../services/resource/endpoint';
 import {ResourceService} from '../../../services/resource/resource';
-import {MenuComponent} from '../../list/column/menu/component';
+import {NotificationsService} from '../../../services/global/notifications';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
+import {MenuComponent} from '../../list/column/menu/component';
+import {MatDialog, MatDialogConfig,MatExpansionModule} from '@angular/material/';
 import {VerberService} from '../../../services/global/verber';
 
-
 @Component({
-  selector: 'kd-namespace-list',
+  selector: 'kd-tenant-partition-list',
   templateUrl: './template.html',
 })
-export class NamespaceListComponent extends ResourceListWithStatuses<NamespaceList, Namespace> {
-  @Input() endpoint = EndpointManager.resource(Resource.namespace, false, true).list();
+export class TenantPartitionListComponent extends ResourceListWithStatuses<TenantList, Tenant > {
+  @Input() endpoint = EndpointManager.resource(Resource.tenant).list();
+  // @Input() endpoint = EndpointManager.resource(Resource.tenant, true, true).list();
+
   displayName:any="";
   typeMeta:any="";
   objectMeta:any;
   constructor(
     private readonly verber_: VerberService,
-    private readonly namespace_: ResourceService<NamespaceList>,
+    private readonly tenant_: ResourceService<TenantList>,
+
     notifications: NotificationsService,
+    private dialog: MatDialog //add the code
   ) {
-    super('namespace', notifications);
-    this.id = ListIdentifier.namespace;
+    super('tenant', notifications);
+    this.id = ListIdentifier.tenant;
     this.groupId = ListGroupIdentifier.cluster;
 
     // Register status icon handlers
@@ -53,27 +57,28 @@ export class NamespaceListComponent extends ResourceListWithStatuses<NamespaceLi
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
   }
 
-  getResourceObservable(params?: HttpParams): Observable<NamespaceList> {
-    return this.namespace_.get(this.endpoint, undefined, params);
+  getResourceObservable(params?: HttpParams): Observable<TenantList> {
+    return this.tenant_.get(this.endpoint, undefined, params);
   }
 
-  map(namespaceList: NamespaceList): Namespace[] {
-    return namespaceList.namespaces;
+  map(tenantList: TenantList): Tenant[] {
+    return tenantList.tenants ;
   }
 
-  isInErrorState(resource: Namespace): boolean {
+  isInErrorState(resource: Tenant): boolean {
     return resource.phase === 'Terminating';
   }
 
-  isInSuccessState(resource: Namespace): boolean {
+  isInSuccessState(resource: Tenant): boolean {
     return resource.phase === 'Active';
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'labels', 'phase', 'age'];
+    return ['statusicon', 'name', 'phase', 'age'];
   }
+
   //added the code
   onClick(): void {
-    this.verber_.showNamespaceCreateDialog(this.displayName, this.typeMeta, this.objectMeta); //added showNamespaceCreateDialog
+    this.verber_.showTenantCreateDialog(this.displayName, this.typeMeta, this.objectMeta);  //changes needed
   }
 }
