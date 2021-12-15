@@ -136,6 +136,11 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.GET("/tenant/{name}").
 			To(apiHandler.handleGetTenantDetail).
 			Writes(tenant.TenantDetail{}))
+	//added post method for namespace under tenant
+	//apiV1Ws.Route(
+	//  apiV1Ws.POST("/tenant/{name}/namespace/{namespace}").
+	//    To(apiHandler.handleGetTenantDetail).
+	//    Writes(tenant.TenantDetail{}))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("csrftoken/{action}").
@@ -579,9 +584,10 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.POST("/tenants/{tenant}/namespace"). // TODO
-								To(apiHandler.handleCreateNamespace).
+								To(apiHandler.handleGetNamespacesWithMultiTenancy).
 								Reads(ns.NamespaceSpec{}).
 								Writes(ns.NamespaceSpec{}))
+
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/namespace").
 			To(apiHandler.handleGetNamespacesWithMultiTenancy).
@@ -828,6 +834,11 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.GET("/clusterrole").
 			To(apiHandler.handleGetClusterRoleList).
 			Writes(clusterrole.ClusterRoleList{}))
+	apiV1Ws.Route(
+		apiV1Ws.POST("/clusterrole").
+			To(apiHandler.handleCreateClusterRole).
+			Reads(clusterrole.ClusterRoleSpec{}).
+			Writes(clusterrole.ClusterRoleSpec{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/clusterrole/{name}").
 			To(apiHandler.handleGetClusterRoleDetail).
@@ -2666,6 +2677,25 @@ func (apiHandler *APIHandler) handleGetReplicationControllerPodsWithMultiTenancy
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleCreateClusterRole(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	clusterRoleSpec := new(clusterrole.ClusterRoleSpec)
+	if err := request.ReadEntity(clusterRoleSpec); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	if err := clusterrole.CreateClusterRole(clusterRoleSpec, k8sClient); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusCreated, clusterRoleSpec)
 }
 
 func (apiHandler *APIHandler) handleCreateNamespace(request *restful.Request, response *restful.Response) {
