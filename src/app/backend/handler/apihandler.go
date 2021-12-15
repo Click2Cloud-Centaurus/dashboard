@@ -132,6 +132,10 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.GET("/tenant/{name}").
 			To(apiHandler.handleGetTenantDetail).
 			Writes(tenant.TenantDetail{}))
+	//added Delete method for tenant
+	apiV1Ws.Route(
+		apiV1Ws.DELETE("/tenants/{tenant}").
+			To(apiHandler.handleDeleteTenant))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("csrftoken/{action}").
@@ -1045,6 +1049,42 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(logs.LogDetails{}))
 
 	return wsContainer, nil
+}
+
+//for tenant handlerCreateTenant method
+func (apiHandler *APIHandler) handleCreateTenant(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	tenantSpec := new(tenant.TenantSpec)
+	if err := request.ReadEntity(tenantSpec); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	if err := tenant.CreateTenant(tenantSpec, k8sClient); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusCreated, tenantSpec)
+}
+
+//for delete tenant
+func (apiHandler *APIHandler) handleDeleteTenant(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	tenantName := request.PathParameter("tenant")
+	if err := tenant.DeleteTenant(tenantName, k8sClient); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeader(http.StatusOK)
 }
 
 func (apiHandler *APIHandler) handleGetTenantList(request *restful.Request, response *restful.Response) {
