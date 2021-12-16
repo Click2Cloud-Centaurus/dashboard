@@ -14,35 +14,39 @@
 
 import {NgModule} from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
-import {DEFAULT_ACTIONBAR} from '../../common/components/actionbars/routing';
-import {TENANTMANAGEMENT_ROUTE} from '../routing';
-import {TenantAccessControlDetailComponent} from './detail/component';
-import {TenantAccessControlListComponent} from './list/component';
 
-const ROLE_LIST_ROUTE: Route = {
+import {WORKLOADS_ROUTE} from '../routing';
+
+import {ActionbarComponent} from './detail/actionbar/component';
+import {NamespaceDetailComponent} from './detail/component';
+import {NamespaceListComponent} from './list/component';
+
+const NAMESPACE_LIST_ROUTE: Route = {
   path: '',
-  component: TenantAccessControlListComponent,
+  component: NamespaceListComponent,
   data: {
-    breadcrumb: 'Access Control',
-    parent: TENANTMANAGEMENT_ROUTE,
+    breadcrumb: 'Namespaces',
+    parent: WORKLOADS_ROUTE,
   },
 };
 
-const ROLE_DETAIL_ROUTE: Route = {
+const NAMESPACE_DETAIL_ROUTE: Route = {
   path: ':resourceName',
-  component: TenantAccessControlDetailComponent,
+  component: NamespaceDetailComponent,
   data: {
     breadcrumb: '{{ resourceName }}',
-    parent: ROLE_LIST_ROUTE,
+    parent: NAMESPACE_LIST_ROUTE,
   },
+};
+
+export const ACTIONBAR = {
+  path: '',
+  component: ActionbarComponent,
+  outlet: 'actionbar',
 };
 
 @NgModule({
-  imports: [
-    RouterModule.forChild([ROLE_LIST_ROUTE, ROLE_DETAIL_ROUTE, DEFAULT_ACTIONBAR]),
-  ],
+  imports: [RouterModule.forChild([NAMESPACE_LIST_ROUTE, NAMESPACE_DETAIL_ROUTE, ACTIONBAR])],
   exports: [RouterModule],
 })
-export class TenantAccessControlRoutingModule {
-
-}
+export class NamespaceRoutingModule {}
