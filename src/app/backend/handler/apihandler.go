@@ -842,20 +842,20 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(clusterrole.ClusterRoleDetail{}))
 
 	apiV1Ws.Route(
-		apiV1Ws.GET("/role").
+		apiV1Ws.GET("/roles").
 			To(apiHandler.handleGetRoles).
 			Writes(role.RoleList{}))
 	apiV1Ws.Route(
-		apiV1Ws.GET("/namespace/{namespace}/role/{name}").
+		apiV1Ws.GET("/namespaces/{namespace}/roles/{name}").
 			To(apiHandler.handleGetRoleDetail).
 			Writes(role.RoleDetail{}))
 	apiV1Ws.Route(
-		apiV1Ws.POST("/role").
+		apiV1Ws.POST("/namespaces/{namespace}/roles").
 			To(apiHandler.handleCreateRole).
 			Reads(role.Role{}).
 			Writes(role.Role{}))
 	apiV1Ws.Route(
-		apiV1Ws.DELETE("/namespaces/{namespace}/role/{role}").
+		apiV1Ws.DELETE("/namespaces/{namespace}/roles/{role}").
 			To(apiHandler.handleDeleteRole))
 
 	apiV1Ws.Route(
@@ -1049,42 +1049,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(logs.LogDetails{}))
 
 	return wsContainer, nil
-}
-
-//for tenant handlerCreateTenant method
-func (apiHandler *APIHandler) handleCreateTenant(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
-	tenantSpec := new(tenant.TenantSpec)
-	if err := request.ReadEntity(tenantSpec); err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	if err := tenant.CreateTenant(tenantSpec, k8sClient); err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	response.WriteHeaderAndEntity(http.StatusCreated, tenantSpec)
-}
-
-//for delete tenant
-func (apiHandler *APIHandler) handleDeleteTenant(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
-	tenantName := request.PathParameter("tenant")
-	if err := tenant.DeleteTenant(tenantName, k8sClient); err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	response.WriteHeader(http.StatusOK)
 }
 
 func (apiHandler *APIHandler) handleGetTenantList(request *restful.Request, response *restful.Response) {
@@ -2818,6 +2782,7 @@ func (apiHandler *APIHandler) handleCreateNamespace(request *restful.Request, re
 	response.WriteHeaderAndEntity(http.StatusCreated, namespaceSpec)
 }
 
+//handlerCreateTenant method create tenant
 func (apiHandler *APIHandler) handleCreateTenant(request *restful.Request, response *restful.Response) {
 	k8sClient, err := apiHandler.cManager.Client(request)
 	if err != nil {
@@ -2837,6 +2802,7 @@ func (apiHandler *APIHandler) handleCreateTenant(request *restful.Request, respo
 	response.WriteHeaderAndEntity(http.StatusCreated, tenantSpec)
 }
 
+//handlerDeleteTenant method delete tenant
 func (apiHandler *APIHandler) handleDeleteTenant(request *restful.Request, response *restful.Response) {
 	k8sClient, err := apiHandler.cManager.Client(request)
 	if err != nil {
