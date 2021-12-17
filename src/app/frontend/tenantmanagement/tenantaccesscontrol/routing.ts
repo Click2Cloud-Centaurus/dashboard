@@ -15,9 +15,7 @@
 import {NgModule} from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
 import {DEFAULT_ACTIONBAR} from '../../common/components/actionbars/routing';
-
 import {TENANTMANAGEMENT_ROUTE} from '../routing';
-
 import {TenantAccessControlDetailComponent} from './detail/component';
 import {TenantAccessControlListComponent} from './list/component';
 
@@ -45,4 +43,6 @@ const ROLE_DETAIL_ROUTE: Route = {
   ],
   exports: [RouterModule],
 })
-export class TenantAccessControlRoutingModule {}
+export class TenantAccessControlRoutingModule {
+
+}

@@ -132,10 +132,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.GET("/tenant/{name}").
 			To(apiHandler.handleGetTenantDetail).
 			Writes(tenant.TenantDetail{}))
-	//added Delete method for tenant
-	apiV1Ws.Route(
-		apiV1Ws.DELETE("/tenants/{tenant}").
-			To(apiHandler.handleDeleteTenant))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("csrftoken/{action}").
@@ -590,6 +586,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 								To(apiHandler.handleCreateNamespace).
 								Reads(ns.NamespaceSpec{}).
 								Writes(ns.NamespaceSpec{}))
+
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/namespace").
 			To(apiHandler.handleGetNamespacesWithMultiTenancy).
@@ -837,6 +834,11 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			To(apiHandler.handleGetClusterRoleList).
 			Writes(clusterrole.ClusterRoleList{}))
 	apiV1Ws.Route(
+		apiV1Ws.POST("/clusterrole").
+			To(apiHandler.handleCreateClusterRole).
+			Reads(clusterrole.ClusterRoleSpec{}).
+			Writes(clusterrole.ClusterRoleSpec{}))
+	apiV1Ws.Route(
 		apiV1Ws.GET("/clusterrole/{name}").
 			To(apiHandler.handleGetClusterRoleDetail).
 			Writes(clusterrole.ClusterRoleDetail{}))
@@ -856,7 +858,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(role.Role{}))
 	apiV1Ws.Route(
 		apiV1Ws.DELETE("/namespaces/{namespace}/roles/{role}").
-			To(apiHandler.handleDeleteRole))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/serviceaccount").
@@ -2688,6 +2689,17 @@ func (apiHandler *APIHandler) handleGetReplicationControllerPodsWithMultiTenancy
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleCreateClusterRole(request *restful.Request, response *restful.Response) {
+  clusterRoleSpec := new(clusterrole.ClusterRoleSpec)
+  k8sClient, err := apiHandler.cManager.Client(request)
+
+  if err = clusterrole.CreateClusterRole(clusterRoleSpec, k8sClient); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusCreated, clusterRoleSpec)
 }
 
 func (apiHandler *APIHandler) handleGetRoles(request *restful.Request, response *restful.Response) {

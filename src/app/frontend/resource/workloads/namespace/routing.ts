@@ -15,33 +15,38 @@
 import {NgModule} from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
 
-import {TENANTMANAGEMENT_ROUTE} from '../routing';
-import {DEFAULT_ACTIONBAR} from "../../common/components/actionbars/routing";
-import {TenantQuotaDetailComponent} from 'tenantmanagement/tenantquota/detail/component';
-import {TenantQuotaListComponent} from 'tenantmanagement/tenantquota/list/component';
+import {WORKLOADS_ROUTE} from '../routing';
 
-const QUOTASNAMESPACE_LIST_ROUTE: Route = {
+import {ActionbarComponent} from './detail/actionbar/component';
+import {NamespaceDetailComponent} from './detail/component';
+import {NamespaceListComponent} from './list/component';
+
+const NAMESPACE_LIST_ROUTE: Route = {
   path: '',
-  component: TenantQuotaListComponent,
+  component: NamespaceListComponent,
   data: {
-    breadcrumb: 'Quota',
-    parent: TENANTMANAGEMENT_ROUTE,
+    breadcrumb: 'Namespaces',
+    parent: WORKLOADS_ROUTE,
   },
 };
 
-const QUOTASNAMESPACE_DETAIL_ROUTE: Route = {
+const NAMESPACE_DETAIL_ROUTE: Route = {
   path: ':resourceName',
-  component: TenantQuotaDetailComponent,
+  component: NamespaceDetailComponent,
   data: {
-    breadcrumb: ' {{ resourceName }} ',
-    parent: QUOTASNAMESPACE_LIST_ROUTE,
+    breadcrumb: '{{ resourceName }}',
+    parent: NAMESPACE_LIST_ROUTE,
   },
 };
 
-
+export const ACTIONBAR = {
+  path: '',
+  component: ActionbarComponent,
+  outlet: 'actionbar',
+};
 
 @NgModule({
-  imports: [RouterModule.forChild([QUOTASNAMESPACE_LIST_ROUTE, QUOTASNAMESPACE_DETAIL_ROUTE])],
+  imports: [RouterModule.forChild([NAMESPACE_LIST_ROUTE, NAMESPACE_DETAIL_ROUTE, ACTIONBAR])],
   exports: [RouterModule],
 })
-export class TenantQuotasRoutingModule {}
+export class NamespaceRoutingModule {}
