@@ -36,20 +36,21 @@ type TenantSpec struct {
 func CreateTenant(spec *TenantSpec, client kubernetes.Interface) error {
 	log.Printf("Creating tenant %s", spec.Name)
 
+	// setting default values if no values passed
+	if spec.StorageClusterId == "" {
+		spec.StorageClusterId = "0"
+	}
+
 	tenant := &v1.Tenant{
 		ObjectMeta: metaV1.ObjectMeta{
 			Name: spec.Name,
-			// Name: "",
 		},
 		Spec: v1.TenantSpec{
-			//StorageClusterId: spec.StorageClusterId,
-			StorageClusterId: "0",
+			StorageClusterId: spec.StorageClusterId,
 		},
 	}
 
 	_, err := client.CoreV1().Tenants().Create(tenant)
-	//log.Printf("Response of tenant creation 112 : %v", d)
-	//log.Printf("Error of tenant creation 112 : %s", err.Error())
 	return err
 }
 
@@ -59,6 +60,8 @@ func DeleteTenant(tenantName string, client kubernetes.Interface) error {
 	err := client.CoreV1().Tenants().Delete(tenantName, &metaV1.DeleteOptions{})
 	return err
 }
+
+// The code below allows to perform complex data section on []api.Tenant
 
 type TenantCell v1.Tenant
 
