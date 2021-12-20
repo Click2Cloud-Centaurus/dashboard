@@ -18,8 +18,10 @@ package models
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"log"
+	"os"
+
+	_ "github.com/lib/pq"
 )
 
 // User schema of the user table
@@ -33,14 +35,14 @@ type User struct {
 
 // CreateConnection create connection with postgres db
 func CreateConnection() *sql.DB {
-	//host:=os.Getenv('HOST')
-	//port:=os.Getenv('PORT')
-	//user:=os.Getenv('USER')
-	//password:=os.Getenv('PASSWORD')
-	//dbname:=os.Getenv('DB_NAME')
-	//sslmode:=os.Getenv('SSL')
+	DB_HOST := os.Getenv("DB_HOST")
+	DB_PORT := os.Getenv("DB_PORT")
+	POSTGRES_USER := os.Getenv("POSTGRES_USER")
+	POSTGRES_PASSWORD := os.Getenv("POSTGRES_PASSWORD")
+	POSTGRES_DB := os.Getenv("POSTGRES_DB")
+
 	// Open the connection
-	connStr := "host=192.168.1.240 port=5432 dbname=postgres user=postgres password=postgres123 sslmode=disable"
+	connStr := "host=" + DB_HOST + " port=" + DB_PORT + " dbname=" + POSTGRES_DB + " user=" + POSTGRES_USER + " password=" + POSTGRES_PASSWORD + " sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 
 	if err != nil {
