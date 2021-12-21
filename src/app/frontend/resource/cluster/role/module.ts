@@ -13,17 +13,16 @@
 // limitations under the License.
 
 import {NgModule} from '@angular/core';
-import {ComponentsModule} from '../../../common/components/module';
 
+import {ComponentsModule} from '../../../common/components/module';
 import {SharedModule} from '../../../shared.module';
-import {InstanceListComponent} from './list/component';
-import {InstanceRoutingModule} from './routing';
-import {MatExpansionModule} from '@angular/material/expansion';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatPaginatorModule} from '@angular/material/paginator';
+
+import {RoleDetailComponent} from './detail/component';
+import {RoleListComponent} from './list/component';
+import {RoleRoutingModule} from './routing';
 
 @NgModule({
-  imports: [SharedModule, ComponentsModule, InstanceRoutingModule, MatExpansionModule, MatFormFieldModule, MatPaginatorModule],
-  declarations: [InstanceListComponent],
+  imports: [SharedModule, ComponentsModule, RoleRoutingModule],
+  declarations: [RoleListComponent, RoleDetailComponent],
 })
-export class InstanceModule {}
+export class RoleModule {}

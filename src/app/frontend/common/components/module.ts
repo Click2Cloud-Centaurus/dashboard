@@ -177,6 +177,7 @@ const components = [
   ReplicaSetListComponent,
   ReplicationControllerListComponent,
   RowDetailComponent,
+  RoleListComponent,
 
   StorageClassListComponent,
   StatefulSetListComponent,

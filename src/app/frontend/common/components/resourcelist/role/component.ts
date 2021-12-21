@@ -25,6 +25,8 @@ import {MenuComponent} from '../../list/column/menu/component';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {VerberService} from "../../../services/global/verber";
 
+
+
 @Component({
   selector: 'kd-role-list',
   templateUrl: './template.html',
@@ -39,7 +41,6 @@ export class RoleListComponent extends ResourceListBase<RoleList, Role> {
     private readonly role_: NamespacedResourceService<RoleList>,
     notifications: NotificationsService,
     private readonly verber_: VerberService,
-
   ) {
     super('role', notifications);
     this.id = ListIdentifier.role;
@@ -71,5 +72,4 @@ export class RoleListComponent extends ResourceListBase<RoleList, Role> {
   onClick(): void {
     this.verber_.showRoleCreateDialog('Role name',this.typeMeta,this.objectMeta);
   }
-
 }
