@@ -98,6 +98,7 @@ import {UserListComponent} from "./resourcelist/user/component";
 import {QuotaListComponent} from "./resourcelist/quota/component";
 import {PartitionListComponent} from "./resourcelist/partitionlist/component";
 import {TenantPartitionListComponent} from "./resourcelist/tenantpartitionlist/component";
+import {RoleListComponent} from "./resourcelist/role/component";
 
 const components = [
   ActionbarDetailActionsComponent,
@@ -177,7 +178,6 @@ const components = [
   ReplicationControllerListComponent,
   RowDetailComponent,
 
-
   StorageClassListComponent,
   StatefulSetListComponent,
   SecretListComponent,
@@ -197,9 +197,10 @@ const components = [
   //added component
   TenantSelectorComponent,
   TenantListComponent,
-
+  RoleListComponent,
   UserListComponent,
   QuotaListComponent,
+
 ];
 
 @NgModule({

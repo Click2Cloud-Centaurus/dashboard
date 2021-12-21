@@ -25,13 +25,7 @@ limitations under the License.
       <kd-namespace-selector></kd-namespace-selector>
       <mat-divider></mat-divider>
     </div>
-
-
-<!--    <div class="kd-nav-group">-->
-<!--      <kd-nav-item class="kd-nav-group-item" state="/overview" i18n>-->
-<!--      </kd-nav-item>-->
-<!--    </div>-->
-
+    <mat-divider></mat-divider>
 
     <mat-accordion>
       <mat-expansion-panel [expanded]="true" *ngIf="isCurrentSystem">
@@ -75,9 +69,13 @@ limitations under the License.
 
           <kd-nav-item class="kd-nav-item" state="/tenantaccesscontrol" i18n>
             <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-            Access Control
+            Cluster Roles
           </kd-nav-item>
-          <kd-nav-item class="kd-nav-item" state="/quota" i18n>
+          <kd-nav-item class="kd-nav-item" state="/role" i18n>
+            <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
+            Roles
+          </kd-nav-item>
+          <kd-nav-item class="kd-nav-item" state="/tenantquota" i18n>
             <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
             Quota
           </kd-nav-item>

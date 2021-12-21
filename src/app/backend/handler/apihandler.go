@@ -124,6 +124,12 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 	systemBannerHandler := systembanner.NewSystemBannerHandler(sbManager)
 	systemBannerHandler.Install(apiV1Ws)
 
+	//added POST Method for tenant
+	apiV1Ws.Route(
+		apiV1Ws.POST("/tenant").
+			To(apiHandler.handleCreateTenant).
+			Reads(tenant.TenantSpec{}).
+			Writes(tenant.TenantSpec{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenant").
 			To(apiHandler.handleGetTenantList).
@@ -133,11 +139,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			To(apiHandler.handleGetTenantDetail).
 			Writes(tenant.TenantDetail{}))
 	//added Delete method for tenant
-	apiV1Ws.Route(
-		apiV1Ws.DELETE("/tenants/{tenant}").
-			To(apiHandler.handleDeleteTenant))
-
-  //added Delete method for tenant
 	apiV1Ws.Route(
 		apiV1Ws.DELETE("/tenants/{tenant}").
 			To(apiHandler.handleDeleteTenant))
@@ -570,14 +571,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Reads(ns.NamespaceSpec{}).
 			Writes(ns.NamespaceSpec{}))
 	apiV1Ws.Route(
-		apiV1Ws.POST("/tenant").
-			To(apiHandler.handleCreateTenant).
-			Reads(tenant.TenantSpec{}).
-			Writes(tenant.TenantSpec{}))
-	apiV1Ws.Route(
-		apiV1Ws.DELETE("/tenants/{tenant}").
-			To(apiHandler.handleDeleteTenant))
-	apiV1Ws.Route(
 		apiV1Ws.GET("/namespace").
 			To(apiHandler.handleGetNamespaces).
 			Writes(ns.NamespaceList{}))
@@ -595,7 +588,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 								To(apiHandler.handleCreateNamespace).
 								Reads(ns.NamespaceSpec{}).
 								Writes(ns.NamespaceSpec{}))
-
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/namespace").
 			To(apiHandler.handleGetNamespacesWithMultiTenancy).
@@ -838,6 +830,25 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.PUT("/tenants/{tenant}/_raw/{kind}/name/{name}").
 			To(apiHandler.handlePutResourceWithMultiTenancy))
 
+	//added for role
+	apiV1Ws.Route(
+		apiV1Ws.GET("/role/{namespace}").
+			To(apiHandler.handleGetRoleList).
+			Writes(role.RoleList{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/role/{namespace}/{name}").
+			To(apiHandler.handleGetRoleDetail).
+			Writes(role.RoleDetail{}))
+	apiV1Ws.Route(
+		apiV1Ws.DELETE("/namespaces/{namespace}/role/{role}").
+			To(apiHandler.handleDeleteRole))
+
+	apiV1Ws.Route(
+		apiV1Ws.POST("/role").
+			To(apiHandler.handleCreateRole).
+			Reads(role.Role{}).
+			Writes(role.Role{}))
+
 	apiV1Ws.Route(
 		apiV1Ws.GET("/clusterrole").
 			To(apiHandler.handleGetClusterRoleList).
@@ -851,23 +862,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.GET("/clusterrole/{name}").
 			To(apiHandler.handleGetClusterRoleDetail).
 			Writes(clusterrole.ClusterRoleDetail{}))
-
-	apiV1Ws.Route(
-		apiV1Ws.GET("/role").
-			To(apiHandler.handleGetRoles).
-			Writes(role.RoleList{}))
-	apiV1Ws.Route(
-		apiV1Ws.GET("/namespace/{namespace}/role/{name}").
-			To(apiHandler.handleGetRoleDetail).
-			Writes(role.RoleDetail{}))
-	apiV1Ws.Route(
-		apiV1Ws.POST("/role").
-			To(apiHandler.handleCreateRole).
-			Reads(role.Role{}).
-			Writes(role.Role{}))
-	apiV1Ws.Route(
-		apiV1Ws.DELETE("/namespaces/{namespace}/role/{role}").
-			To(apiHandler.handleDeleteRole))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/serviceaccount").
@@ -1129,6 +1123,57 @@ func (apiHandler *APIHandler) handleGetTenantDetail(request *restful.Request, re
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+//function for getting rolelist
+func (apiHandler *APIHandler) handleGetRoleList(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	namespace := parseNamespacePathParameter(request)
+	dataSelect := parseDataSelectPathParameter(request)
+	result, err := role.GetRoleList(k8sClient, namespace, dataSelect)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+//function for roledetail
+func (apiHandler *APIHandler) handleGetRoleDetail(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	namespace := request.PathParameter("namespace")
+	name := request.PathParameter("name")
+	result, err := role.GetRoleDetail(k8sClient, namespace, name)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+func (apiHandler *APIHandler) handleDeleteRole(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	roleName := request.PathParameter("role")
+	namespaceName := request.PathParameter("namespace")
+	if err := role.DeleteRole(namespaceName, roleName, k8sClient); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeader(http.StatusOK)
 }
 
 func (apiHandler *APIHandler) handleGetClusterRoleList(request *restful.Request, response *restful.Response) {
@@ -2738,10 +2783,10 @@ func (apiHandler *APIHandler) handleGetReplicationControllerPodsWithMultiTenancy
 }
 
 func (apiHandler *APIHandler) handleCreateClusterRole(request *restful.Request, response *restful.Response) {
-  clusterRoleSpec := new(clusterrole.ClusterRoleSpec)
-  k8sClient, err := apiHandler.cManager.Client(request)
+	clusterRoleSpec := new(clusterrole.ClusterRoleSpec)
+	k8sClient, err := apiHandler.cManager.Client(request)
 
-  if err = clusterrole.CreateClusterRole(clusterRoleSpec, k8sClient); err != nil {
+	if err = clusterrole.CreateClusterRole(clusterRoleSpec, k8sClient); err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
@@ -2755,30 +2800,13 @@ func (apiHandler *APIHandler) handleGetRoles(request *restful.Request, response 
 		return
 	}
 
-  Namespace := request.PathParameter("namespace")
+	Namespace := request.PathParameter("namespace")
 	var namespaces []string
 	namespaces = append(namespaces, Namespace)
 	namespace := common.NewNamespaceQuery(namespaces)
 	dataSelect := parseDataSelectPathParameter(request)
 
 	result, err := role.GetRoleList(k8sClient, namespace, dataSelect)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	response.WriteHeaderAndEntity(http.StatusOK, result)
-}
-
-func (apiHandler *APIHandler) handleGetRoleDetail(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
-	name := request.PathParameter("name")
-	namespace := request.PathParameter("namespace")
-	result, err := role.GetRoleDetail(k8sClient, namespace, name)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -2803,22 +2831,6 @@ func (apiHandler *APIHandler) handleCreateRole(request *restful.Request, respons
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, roleSpec)
-}
-
-func (apiHandler *APIHandler) handleDeleteRole(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
-	roleName := request.PathParameter("role")
-	namespaceName := request.PathParameter("namespace")
-	if err := role.DeleteRole(namespaceName, roleName, k8sClient); err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	response.WriteHeader(http.StatusOK)
 }
 
 func (apiHandler *APIHandler) handleCreateNamespace(request *restful.Request, response *restful.Response) {

@@ -69,9 +69,9 @@ export interface CapacityItem {
 export interface ClusterRoleList extends ResourceList {
   items: ClusterRole[];
 }
-
-
-
+export interface RoleList extends ResourceList {
+  items: Role[];
+}
 export interface ConfigMapList extends ResourceList {
   items: ConfigMap[];
 }
@@ -123,7 +123,6 @@ export interface JobList extends ResourceList {
 
 export interface NamespaceList extends ResourceList {
   namespaces: Namespace[];
-
 }
 
 export interface NodeList extends ResourceList {
@@ -438,6 +437,12 @@ export interface NamespaceDetail extends ResourceDetail {
   resourceLimits: LimitRange[];
   resourceQuotaList: ResourceQuotaDetailList;
 }
+export interface PartitionDetail extends ResourceDetail {
+  phase: string;
+  eventList: EventList;
+  resourceLimits: LimitRange[];
+  resourceQuotaList: ResourceQuotaDetailList;
+}
 
 export interface PolicyRule {
   verbs: string[];
@@ -450,7 +455,9 @@ export interface PolicyRule {
 export interface ClusterRoleDetail extends ResourceDetail {
   rules: PolicyRule[];
 }
-
+export interface RoleDetail extends ResourceDetail {
+  rules: PolicyRule[];
+}
 export interface SecretDetail extends ResourceDetail {
   type: string;
   data: StringMap;
@@ -556,7 +563,6 @@ export interface NodeDetail extends ResourceDetail {
   podList: PodList;
   eventList: EventList;
 }
-
 export interface PartitionDetail extends ResourceDetail {
   phase: string;
   podCIDR: string;
@@ -572,7 +578,6 @@ export interface PartitionDetail extends ResourceDetail {
   podList: PodList;
   eventList: EventList;
 }
-
 
 export interface HorizontalPodAutoscalerDetail extends ResourceDetail {
   scaleTargetRef: ScaleTargetRef;
@@ -853,12 +858,12 @@ export interface NodeInfo {
   architecture: string;
 }
 
+
 export interface NodeAddress {
   type: string;
   address: string;
 }
-
-export interface PartitionAddress {
+export interface PartitionAddress{
   type: string;
   address: string;
 }
@@ -869,7 +874,6 @@ export interface NodeTaint {
   effect: string;
   timeAdded: number;
 }
-
 export interface PartitionTaint {
   key: string;
   value: string;

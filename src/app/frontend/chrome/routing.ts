@@ -16,6 +16,7 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {AuthGuard} from '../common/services/guard/auth';
+import {SystemGuard} from '../common/services/guard/system';
 import {ChromeComponent} from './component';
 
 
@@ -48,7 +49,10 @@ const routes: Routes = [
         path: 'tenant',
         loadChildren: 'resource/cluster/tenant/module#TenantModule',
       },
-
+      {
+        path: 'quota',
+        loadChildren: 'resource/cluster/quota/module#QuotaModule',
+      },
       {
         path: 'namespace',
         loadChildren: 'resource/cluster/namespace/module#NamespaceModule',
@@ -178,9 +182,7 @@ const routes: Routes = [
       },
 
       // Custom resource definitions
-      {
-        path: 'customresourcedefinition',
-        loadChildren: 'crd/module#CrdModule'},
+      {path: 'customresourcedefinition', loadChildren: 'crd/module#CrdModule'},
 
       // Others
       {
@@ -196,10 +198,6 @@ const routes: Routes = [
         loadChildren: 'tenantmanagement/module#TenantManagementModule',
       },
       {
-        path: 'tenantaccesscontrol',
-        loadChildren: 'tenantmanagement/tenantaccesscontrol/module#TenantAccessControlModule',
-      },
-      {
         path: 'tenantmonitoring',
         loadChildren: 'tenantmanagement/tenantmonitoring/module#TenantMonitoringModule',
 
@@ -209,13 +207,43 @@ const routes: Routes = [
         loadChildren: 'tenantmanagement/tenantnamespace/module#TenantNamespaceModule',
 
       },
+      {
+        path: 'tenantaccesscontrol',
+        loadChildren: 'tenantmanagement/tenantaccesscontrol/module#TenantAccessControlModule',
 
+      },
+      {
+        path: 'role',
+        loadChildren: 'tenantmanagement/role/module#RoleModule',
+
+      },
+      {
+        path: 'tenantquota',
+        loadChildren: 'tenantmanagement/tenantquota/module#TenantQuotaModule',
+
+      },
       {
         path: 'tenantuser',
         loadChildren: 'tenantmanagement/tenantuser/module#TenantUsersModule',
 
       },
       //here
+
+      {
+        path: 'usermanagement',
+        loadChildren: 'usermanagement/module#UserManagementModule',
+      },
+      {
+        path: 'usermonitoring',
+        loadChildren: 'usermanagement/usermonitoring/module#UserMonitoringModule',
+
+      },
+      {
+        path: 'usernamespace',
+        loadChildren: 'usermanagement/usernamespace/module#UserNamespaceModule',
+
+      },
+
       {
         path: 'create',
         loadChildren: 'create/module#CreateModule',

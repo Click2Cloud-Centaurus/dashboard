@@ -43,7 +43,8 @@ export enum Resource {
   container = 'container',
   tenant = 'tenant',
   partition = 'partition',
-  quota = 'quota'
+  quota = 'quota',
+  role   = 'role'
 }
 
 export enum Utility {
