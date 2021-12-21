@@ -23,7 +23,8 @@ import {EndpointManager, Resource} from '../../../services/resource/endpoint';
 import {NamespacedResourceService, ResourceService} from '../../../services/resource/resource';
 import {MenuComponent} from '../../list/column/menu/component';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
-import {VerberService} from "../../../services/global/verber";
+import {VerberService} from '../../../services/global/verber';
+
 
 @Component({
   selector: 'kd-role-list',
@@ -32,44 +33,42 @@ import {VerberService} from "../../../services/global/verber";
 })
 export class RoleListComponent extends ResourceListBase<RoleList, Role> {
   @Input() endpoint = EndpointManager.resource(Resource.role, true).list();
-
   typeMeta:any="";
   objectMeta:any;
   constructor(
     private readonly role_: NamespacedResourceService<RoleList>,
     notifications: NotificationsService,
     private readonly verber_: VerberService,
+    
+) {
+  super('role', notifications);
+  this.id = ListIdentifier.role;
+  this.groupId = ListGroupIdentifier.cluster;
 
-  ) {
-    super('role', notifications);
-    this.id = ListIdentifier.role;
-    this.groupId = ListGroupIdentifier.cluster;
+  // Register action columns.
+  this.registerActionColumn<MenuComponent>('menu', MenuComponent);
 
-    // Register action columns.
-    this.registerActionColumn<MenuComponent>('menu', MenuComponent);
+  // Register dynamic columns.
+  this.registerDynamicColumn('namespace', 'name', this.shouldShowNamespaceColumn_.bind(this));
+}
 
-    // Register dynamic columns.
-    this.registerDynamicColumn('namespace', 'name', this.shouldShowNamespaceColumn_.bind(this));
-  }
+private shouldShowNamespaceColumn_(): boolean {
+  return this.namespaceService_.areMultipleNamespacesSelected();
+}
 
-  private shouldShowNamespaceColumn_(): boolean {
-    return this.namespaceService_.areMultipleNamespacesSelected();
-  }
+getResourceObservable(params?: HttpParams): Observable<RoleList> {
+  return this.role_.get(this.endpoint, undefined, undefined, params);
+}
 
-  getResourceObservable(params?: HttpParams): Observable<RoleList> {
-    return this.role_.get(this.endpoint, undefined, undefined, params);
-  }
+map(roleList: RoleList): Role[] {
+  return roleList.items;
+}
 
-  map(roleList: RoleList): Role[] {
-    return roleList.items;
-  }
+getDisplayColumns(): string[] {
+  return ['name', 'created'];
+}
 
-  getDisplayColumns(): string[] {
-    return ['name', 'created'];
-  }
-
-  onClick(): void {
-    this.verber_.showRoleCreateDialog('Role name',this.typeMeta,this.objectMeta);
-  }
-
+onClick(): void {
+  this.verber_.showRoleCreateDialog('Role name',this.typeMeta,this.objectMeta);
+}
 }

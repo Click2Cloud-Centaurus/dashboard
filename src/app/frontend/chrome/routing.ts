@@ -46,6 +46,10 @@ const routes: Routes = [
         loadChildren: 'resource/cluster/quota/module#QuotaModule',
       },
       {
+        path: 'role',
+        loadChildren: 'resource/cluster/role/module#RoleModule',
+      },
+      {
         path: 'tenant',
         loadChildren: 'resource/cluster/tenant/module#TenantModule',
       },

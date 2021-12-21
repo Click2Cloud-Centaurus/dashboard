@@ -1,10 +1,12 @@
 
 <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-  <div class="create_btn_sec mt_10" align="end">
+
+  <div class="create_btn_sec mt_10" align="right">
     <button mat-raised-button matTooltip="Add Role" color="primary" (click)="onClick()">
       <img class="add_icon" src="assets/images/plus_icon_white.svg" alt="">
       Add Role</button>
   </div>
+</div>
 <kd-card role="table"
          [hidden]="isHidden()">
   <div title
@@ -34,7 +36,7 @@
                          i18n>Name</mat-header-cell>
         <mat-cell *matCellDef="let role">
           <a [routerLink]="getDetailsHref(role.objectMeta.name)"
-             queryParamsHandling="preserve">{{role.objectMeta.name}}</a>
+            queryParamsHandling="preserve">{{role.objectMeta.name}}</a>
         </mat-cell>
       </ng-container>
 
@@ -80,5 +82,5 @@
     <kd-list-zero-state></kd-list-zero-state>
   </div>
 </kd-card>
-
 </div>
+

@@ -69,9 +69,12 @@ export interface CapacityItem {
 export interface ClusterRoleList extends ResourceList {
   items: ClusterRole[];
 }
+
 export interface RoleList extends ResourceList {
   items: Role[];
 }
+
+
 export interface ConfigMapList extends ResourceList {
   items: ConfigMap[];
 }
@@ -437,12 +440,6 @@ export interface NamespaceDetail extends ResourceDetail {
   resourceLimits: LimitRange[];
   resourceQuotaList: ResourceQuotaDetailList;
 }
-export interface PartitionDetail extends ResourceDetail {
-  phase: string;
-  eventList: EventList;
-  resourceLimits: LimitRange[];
-  resourceQuotaList: ResourceQuotaDetailList;
-}
 
 export interface PolicyRule {
   verbs: string[];
@@ -455,9 +452,11 @@ export interface PolicyRule {
 export interface ClusterRoleDetail extends ResourceDetail {
   rules: PolicyRule[];
 }
+
 export interface RoleDetail extends ResourceDetail {
   rules: PolicyRule[];
 }
+
 export interface SecretDetail extends ResourceDetail {
   type: string;
   data: StringMap;
@@ -858,11 +857,11 @@ export interface NodeInfo {
   architecture: string;
 }
 
-
 export interface NodeAddress {
   type: string;
   address: string;
 }
+
 export interface PartitionAddress{
   type: string;
   address: string;
@@ -874,6 +873,7 @@ export interface NodeTaint {
   effect: string;
   timeAdded: number;
 }
+
 export interface PartitionTaint {
   key: string;
   value: string;
@@ -1190,9 +1190,17 @@ export interface Tenant extends Resource {
   phase: string;
 }
 
+export interface Role extends Resource {
+}
+
 export interface TenantList extends ResourceList {
   tenants: Tenant[];
 }
+
+export interface RoleList extends ResourceList {
+  roles: Role[];
+}
+
 
 export interface TenantDetail extends ResourceDetail {
   phase: string;
