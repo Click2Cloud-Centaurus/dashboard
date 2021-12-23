@@ -855,15 +855,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.GET("/clusterrole/{name}").
 			To(apiHandler.handleGetClusterRoleDetail).
 			Writes(clusterrole.ClusterRoleDetail{}))
-
-	apiV1Ws.Route(
-		apiV1Ws.GET("/role").
-			To(apiHandler.handleGetRoles).
-			Writes(role.RoleList{}))
-	apiV1Ws.Route(
-		apiV1Ws.GET("/namespace/{namespace}/role/{name}").
-			To(apiHandler.handleGetRoleDetail).
-			Writes(role.RoleDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.POST("/role").
 			To(apiHandler.handleCreateRole).
@@ -2805,7 +2796,6 @@ func (apiHandler *APIHandler) handleGetRoleDetail(request *restful.Request, resp
 		errors.HandleInternalError(response, err)
 		return
 	}
-
 	name := request.PathParameter("name")
 	namespace := request.PathParameter("namespace")
 	result, err := role.GetRoleDetail(k8sClient, namespace, name)
