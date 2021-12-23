@@ -59,7 +59,11 @@ export class PartitionListComponent extends ResourceListWithStatuses<NodeList, N
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'age'];
+    return ['statusicon', 'name', 'nodecount','cpulim','memlim','health','etcd'];
+  }
+
+  getDisplayColumns2(): string[] {
+    return ['statusicon', 'name', 'nodecount','cpulim','memlim','tentcount','health','etcd'];
   }
 
   //added the code
