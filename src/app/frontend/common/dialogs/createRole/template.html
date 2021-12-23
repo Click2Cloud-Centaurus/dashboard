@@ -43,9 +43,7 @@
       <div class="row checkbox_section">
         <div class="col-12 col-sm-12 col-md-12 col-lg-12">
           <label class="chk_container">
-            <input type="checkbox" [(ngModel)]="masterSelected" name="list_name" value="m1"
-                   (change)="checkUncheckAll()" /> <strong>Select/ Unselect All</strong>
-
+            <input type="checkbox">
             <span class="checkmark"></span>
             <span class="chk_text">All</span>
           </label>
@@ -128,5 +126,6 @@
         <button mat-button [mat-dialog-close]="true" type="submit" (click)="createrole()">Create</button>
       </mat-dialog-actions>
     </div>
+
   </div>
 </form>

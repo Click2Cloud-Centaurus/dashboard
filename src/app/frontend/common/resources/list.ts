@@ -167,7 +167,6 @@ export abstract class ResourceListBase<T extends ResourceList, R extends Resourc
         displayColumns.splice(afterColIdx + 1, 0, condition.col);
       }
     }
-
     return displayColumns.concat(...actionColumns);
   }
 

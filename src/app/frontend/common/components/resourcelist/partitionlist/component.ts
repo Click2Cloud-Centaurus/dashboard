@@ -31,7 +31,6 @@ export class PartitionListComponent extends ResourceListWithStatuses<NodeList, N
 
     // Register action columns.
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
-
     // Register status icon handlers
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
     this.registerBinding(this.icon.help, 'kd-muted', this.isInUnknownState);
