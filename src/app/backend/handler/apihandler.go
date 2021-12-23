@@ -833,7 +833,15 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 	apiV1Ws.Route(
 		apiV1Ws.PUT("/tenants/{tenant}/_raw/{kind}/name/{name}").
 			To(apiHandler.handlePutResourceWithMultiTenancy))
-
+	//added for role
+	apiV1Ws.Route(
+		apiV1Ws.GET("/role/{namespace}").
+			To(apiHandler.handleGetRoleList).
+			Writes(role.RoleList{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/role/{namespace}/{name}").
+			To(apiHandler.handleGetRoleDetail).
+			Writes(role.RoleDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/clusterrole").
 			To(apiHandler.handleGetClusterRoleList).
@@ -1120,6 +1128,24 @@ func (apiHandler *APIHandler) handleGetTenantDetail(request *restful.Request, re
 	name := request.PathParameter("name")
 
 	result, err := tenant.GetTenantDetail(k8sClient, name)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+//for role
+func (apiHandler *APIHandler) handleGetRoleList(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	namespace := parseNamespacePathParameter(request)
+	dataSelect := parseDataSelectPathParameter(request)
+	result, err := role.GetRoleList(k8sClient, namespace, dataSelect)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
