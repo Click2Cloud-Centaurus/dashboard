@@ -1,5 +1,4 @@
 // Copyright 2017 The Kubernetes Authors.
-// Copyright 2020 Authors of Arktos - file modified.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,49 +14,51 @@
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {NamespaceDetail} from '@api/backendapi';
-import {Subscription} from 'rxjs/Subscription';
+import {RoleDetail} from '@api/backendapi';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 import {ActionbarService, ResourceMeta} from '../../../common/services/global/actionbar';
 import {NotificationsService} from '../../../common/services/global/notifications';
 import {EndpointManager, Resource} from '../../../common/services/resource/endpoint';
-import {ResourceService} from '../../../common/services/resource/resource';
+import {NamespacedResourceService} from '../../../common/services/resource/resource';
 
 @Component({
-  selector: 'kd-cluster-namespace-detail',
+  selector: 'kd-role-detail',
   templateUrl: './template.html',
 })
-export class UserNamespaceDetailComponent implements OnInit, OnDestroy {
-  private namespaceSubscription_: Subscription;
-  private readonly endpoint_ = EndpointManager.resource(Resource.namespace, false, true);
-  namespace: NamespaceDetail;
+export class RoleDetailComponent implements OnInit, OnDestroy {
+  private readonly endpoint_ = EndpointManager.resource(Resource.role, true);
+  private readonly unsubscribe_ = new Subject<void>();
+
+  role: RoleDetail;
   isInitialized = false;
-  eventListEndpoint: string;
 
   constructor(
-    private readonly namespace_: ResourceService<NamespaceDetail>,
+    private readonly role_: NamespacedResourceService<RoleDetail>,
     private readonly actionbar_: ActionbarService,
-    private readonly activatedRoute_: ActivatedRoute,
-    private readonly notifications_: NotificationsService,
+    private readonly route_: ActivatedRoute,
+    private readonly notifications_: NotificationsService
   ) {}
 
   ngOnInit(): void {
-    const resourceName = this.activatedRoute_.snapshot.params.resourceName;
+    const resourceName = this.route_.snapshot.params.resourceName;
+    const resourceNamespace = this.route_.snapshot.params.resourceNamespace;
 
-    this.eventListEndpoint = this.endpoint_.child(resourceName, Resource.event);
-
-    this.namespaceSubscription_ = this.namespace_
-      .get(this.endpoint_.detail(), resourceName)
-      .subscribe((d: NamespaceDetail) => {
-        this.namespace = d;
+    this.role_
+      .get(this.endpoint_.detail(), resourceName, resourceNamespace)
+      .pipe(takeUntil(this.unsubscribe_))
+      .subscribe((d: RoleDetail) => {
+        this.role = d;
         this.notifications_.pushErrors(d.errors);
-        this.actionbar_.onInit.emit(new ResourceMeta('Namespace', d.objectMeta, d.typeMeta));
+        this.actionbar_.onInit.emit(new ResourceMeta('Role', d.objectMeta, d.typeMeta));
         this.isInitialized = true;
       });
   }
 
   ngOnDestroy(): void {
-    this.namespaceSubscription_.unsubscribe();
+    this.unsubscribe_.next();
+    this.unsubscribe_.complete();
     this.actionbar_.onDetailsLeave.emit();
   }
 }

@@ -17,14 +17,12 @@ import {NgModule} from '@angular/core';
 import {ComponentsModule} from '../../common/components/module';
 import {SharedModule} from '../../shared.module';
 
-import {NactionbarComponent} from './detail/nactionbar/component';
-import {UserNamespaceDetailComponent} from './detail/component';
-import {UserNamespaceListComponent} from './list/component';
-import {ClusterNamespaceRoutingModule} from './routing';
+import {ClusterRoleDetailComponent} from './detail/component';
+import {ClusterRoleListComponent} from './list/component';
+import {ClusterRoutingModule} from './routing';
 
 @NgModule({
-  imports: [SharedModule, ComponentsModule, ClusterNamespaceRoutingModule],
-  declarations: [UserNamespaceListComponent, UserNamespaceDetailComponent, NactionbarComponent],
+  imports: [SharedModule, ComponentsModule, ClusterRoutingModule],
+  declarations: [ClusterRoleListComponent, ClusterRoleDetailComponent],
 })
-export class UserNamespaceModule {}
-
+export class ClusterRoleModule {}

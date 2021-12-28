@@ -1,4 +1,5 @@
 // Copyright 2017 The Kubernetes Authors.
+// Copyright 2020 Authors of Arktos - file modified.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {NodeAddress, NodeDetail, NodeTaint} from '@api/backendapi';
+import {ClusterRoleDetail} from '@api/backendapi';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ActionbarService, ResourceMeta} from '../../../common/services/global/actionbar';
@@ -23,55 +24,37 @@ import {EndpointManager, Resource} from '../../../common/services/resource/endpo
 import {ResourceService} from '../../../common/services/resource/resource';
 
 @Component({
-  selector: 'kd-cluster-health-detail',
+  selector: 'kd-cluster-role-detail',
   templateUrl: './template.html',
-  styleUrls: ['./style.scss'],
 })
-export class UserMonitoringDetailComponent implements OnInit, OnDestroy {
-  private nodeSubscription_: Subscription;
-  private readonly endpoint_ = EndpointManager.resource(Resource.node);
-  node: NodeDetail;
+export class ClusterRoleDetailComponent implements OnInit, OnDestroy {
+  private clusterRoleSubscription_: Subscription;
+  private readonly endpoint_ = EndpointManager.resource(Resource.clusterRole, false, true);
+  clusterRole: ClusterRoleDetail;
   isInitialized = false;
-  podListEndpoint: string;
-  eventListEndpoint: string;
 
   constructor(
-    private readonly node_: ResourceService<NodeDetail>,
+    private readonly clusterRole_: ResourceService<ClusterRoleDetail>,
     private readonly actionbar_: ActionbarService,
-    private readonly activatedRoute_: ActivatedRoute,
-    private readonly notifications_: NotificationsService,
+    private readonly route_: ActivatedRoute,
+    private readonly notifications_: NotificationsService
   ) {}
 
   ngOnInit(): void {
-    const resourceName = this.activatedRoute_.snapshot.params.resourceName;
+    const resourceName = this.route_.snapshot.params.resourceName;
 
-    this.podListEndpoint = this.endpoint_.child(resourceName, Resource.pod);
-    this.eventListEndpoint = this.endpoint_.child(resourceName, Resource.event);
-
-    this.nodeSubscription_ = this.node_
+    this.clusterRoleSubscription_ = this.clusterRole_
       .get(this.endpoint_.detail(), resourceName)
-      .subscribe((d: NodeDetail) => {
-        this.node = d;
+      .subscribe((d: ClusterRoleDetail) => {
+        this.clusterRole = d;
         this.notifications_.pushErrors(d.errors);
-        this.actionbar_.onInit.emit(new ResourceMeta('Node', d.objectMeta, d.typeMeta));
+        this.actionbar_.onInit.emit(new ResourceMeta('Cluster Role', d.objectMeta, d.typeMeta));
         this.isInitialized = true;
       });
   }
 
   ngOnDestroy(): void {
-    this.nodeSubscription_.unsubscribe();
+    this.clusterRoleSubscription_.unsubscribe();
     this.actionbar_.onDetailsLeave.emit();
-  }
-
-  getAddresses(): string[] {
-    return this.node.addresses.map((address: NodeAddress) => `${address.type}: ${address.address}`);
-  }
-
-  getTaints(): string[] {
-    return this.node.taints.map((taint: NodeTaint) => {
-      return taint.value
-        ? `${taint.key}=${taint.value}:${taint.effect}`
-        : `${taint.key}=${taint.effect}`;
-    });
   }
 }
