@@ -43,7 +43,7 @@ export enum Resource {
   container = 'container',
   tenant = 'tenant',
   partition = 'partition',
-  quota = 'quota',
+  resourcequota = 'resourcequota',
   role = 'role',
   tenantpartition = 'tenantpartition',
 }
