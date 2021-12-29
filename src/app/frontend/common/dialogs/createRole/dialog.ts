@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-
 import {Component, OnInit, Inject} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
@@ -41,8 +39,6 @@ export class CreateRoleDialog implements OnInit {
   private readonly config_ = CONFIG;
   RoleMaxLength = 63;
   RolePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
-  name:string = "adminrole"
-  myverbs: string[] =  ["get","put"]
   apigroups1: string[]
   resources1: string[]
   verbs1 : string[]
@@ -113,14 +109,13 @@ export class CreateRoleDialog implements OnInit {
     this.resources1 = this.resources.value.split(',')
     this.verbs1 = this.verbs.value.split(',')
 
-    const tenantSpec= {name: this.role.value, namespace: this.namespace.value, apiGroups: this.apigroups1,verbs: this.verbs1,resources: this.resources1};
-    console.log(tenantSpec)
+    const roleSpec= {name: this.role.value, namespace: this.namespace.value, apiGroups: this.apigroups1,verbs: this.verbs1,resources: this.resources1};
     const tokenPromise = this.csrfToken_.getTokenForAction('role');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(
           'api/v1/role',
-          {...tenantSpec},
+          {...roleSpec},
           {
             headers: new HttpHeaders().set(this.config_.csrfHeaderName, csrfToken.token),
           },
@@ -128,7 +123,6 @@ export class CreateRoleDialog implements OnInit {
         .subscribe(
           () => {
             this.dialogRef.close(this.role.value);
-            console.log("role created ")
           },
           error => {
             this.dialogRef.close();
@@ -149,5 +143,4 @@ export class CreateRoleDialog implements OnInit {
   cancel(): void {
     this.dialogRef.close();
   }
-
 }
