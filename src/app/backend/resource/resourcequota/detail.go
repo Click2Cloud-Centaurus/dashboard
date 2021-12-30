@@ -172,6 +172,7 @@ func GetResourceQuotaLists(client k8sClient.Interface, namespace string, tenant 
 	}
 
 	return result, nil
+
 }
 
 func ToResourceQuotaDetail(rawResourceQuota *v1.ResourceQuota) *ResourceQuotaDetail {

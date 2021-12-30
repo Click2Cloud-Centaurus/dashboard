@@ -32,7 +32,6 @@ export class assignQuotaDialog implements OnInit {
   form1: FormGroup;
 
   private readonly config_ = CONFIG;
-
   constructor(
     public dialogRef: MatDialogRef<assignQuotaDialog>,
     @Inject(MAT_DIALOG_DATA) public data: assignQuotaDialogMeta,
@@ -146,10 +145,13 @@ get config_maps(): AbstractControl {
     });
   }
 
+
+
   isDisabled(): boolean {
     return this.data.quotanames.indexOf(this.quotanames.value) >= 0;
   }
   cancel(): void {
     this.dialogRef.close();
   }
+
 }

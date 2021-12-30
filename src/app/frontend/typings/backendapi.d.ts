@@ -16,6 +16,7 @@
 // Shared resource types
 import {KdError} from '@api/frontendapi';
 
+
 export interface TypeMeta {
   kind: string;
 }
@@ -1204,7 +1205,6 @@ export interface Role extends Resource {
 export interface TenantList extends ResourceList {
   tenants: Tenant[];
 }
-
 export interface ResourceQuotaList extends ResourceList {
   items: ResourceQuota[];
 }
@@ -1212,8 +1212,6 @@ export interface ResourceQuotaList extends ResourceList {
 export interface RoleList extends ResourceList {
   roles: Role[];
 }
-
-
 export interface TenantDetail extends ResourceDetail {
   phase: string;
 }

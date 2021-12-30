@@ -16,6 +16,11 @@
 package handler
 
 import (
+	"log"
+	"net/http"
+	"strconv"
+	"strings"
+
 	restful "github.com/emicklei/go-restful"
 	"github.com/kubernetes/dashboard/src/app/backend/api"
 	"github.com/kubernetes/dashboard/src/app/backend/auth"
@@ -66,10 +71,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/remotecommand"
-	"log"
-	"net/http"
-	"strconv"
-	"strings"
 )
 
 const (
@@ -104,7 +105,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 	wsContainer.EnableContentEncoding(true)
 
 	apiV1Ws := new(restful.WebService)
-
 	InstallFilters(apiV1Ws, cManager)
 
 	apiV1Ws.Path("/api/v1").

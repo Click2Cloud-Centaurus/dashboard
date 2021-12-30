@@ -38,15 +38,22 @@
                                disableClear="true"
                                i18n>Name</mat-header-cell>
               <mat-cell *matCellDef="let resourcequota">
-                <a [routerLink]="getDetailsHref(resourcequota.objectMeta.name)"
-                   queryParamsHandling="preserve">
-                  {{resourcequota.objectMeta.name}}
-                </a>
+                {{resourcequota.objectMeta.name}}
               </mat-cell>
             </ng-container>
 
 
             <ng-container [matColumnDef]="getColumns()[2]">
+              <mat-header-cell *matHeaderCellDef
+                               mat-sort-header
+                               disableClear="true"
+                               i18n>Namespace</mat-header-cell>
+              <mat-cell *matCellDef="let resourcequota">
+                {{resourcequota.objectMeta.namespace}}
+              </mat-cell>
+            </ng-container>
+
+            <ng-container [matColumnDef]="getColumns()[3]">
               <mat-header-cell *matHeaderCellDef
                                mat-sort-header
                                disableClear="true"
@@ -56,6 +63,18 @@
                          relative></kd-date>
               </mat-cell>
             </ng-container>
+
+            <ng-container [matColumnDef]="getColumns()[4]">
+              <mat-header-cell *matHeaderCellDef
+                               mat-sort-header
+                               disableClear="true"
+                               i18n>Status</mat-header-cell>
+              <mat-cell *matCellDef="let resourcequota">
+                <ng-container *ngIf="resourcequota.statusList">{{resourcequota.statusList | json}}</ng-container>
+                <ng-container *ngIf="!resourcequota.statusList">-</ng-container>
+              </mat-cell>
+            </ng-container>
+
 
             <ng-container *ngFor="let col of getActionColumns()"
                           [matColumnDef]="col.name">

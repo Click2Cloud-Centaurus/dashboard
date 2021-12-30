@@ -18,7 +18,6 @@ import {RouterModule, Routes} from '@angular/router';
 import {AuthGuard} from '../common/services/guard/auth';
 import {ChromeComponent} from './component';
 
-
 const routes: Routes = [
   {path: '', redirectTo: '/tenantmonitoring', pathMatch: 'full'},
   {
@@ -72,8 +71,6 @@ const routes: Routes = [
         loadChildren: 'resource/cluster/tenantpartition/module#TenantPartitionModule',
 
       },
-
-
       // Overview
       {
         path: 'overview',
@@ -222,8 +219,6 @@ const routes: Routes = [
         path: 'shell',
         loadChildren: 'shell/module#ShellModule',
       },
-
-
       {
         path: 'search',
         loadChildren: 'search/module#SearchModule',

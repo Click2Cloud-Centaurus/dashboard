@@ -28,12 +28,19 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
     private readonly resourcequota_: NamespacedResourceService<ResourceQuotaList>, notifications: NotificationsService,
     private dialog: MatDialog //add the code
   ) {
+
     super('resourcequota', notifications);
     this.id = ListIdentifier.resourcequota;
     this.groupId = ListGroupIdentifier.cluster;
 
     // Register action columns.
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
+
+    this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
+  }
+
+  isInSuccessState(): boolean {
+    return true;
   }
 
   getResourceObservable(params?: HttpParams): Observable<ResourceQuotaList> {
@@ -46,17 +53,15 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'age'];
+    return ['statusicon', 'name', 'namespace', 'age', 'status'];
   }
 
   getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'age'];
+    return ['statusicon', 'name', 'namespace', 'age', 'status'];
   }
 
   //added the code
   onClick(): void {
     this.verber_.showResourceQuotaCreateDialog(this.displayName, this.typeMeta, this.objectMeta);  //changes needed
   }
-
-
 }

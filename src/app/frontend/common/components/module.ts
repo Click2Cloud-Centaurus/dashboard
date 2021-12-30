@@ -135,11 +135,9 @@ const components = [
   DateComponent,
   DeploymentListComponent,
   DefaultActionbar,
-
   EndpointListComponent,
   ExternalEndpointComponent,
   EventListComponent,
-
   HiddenPropertyComponent,
 
   IngressListComponent,
