@@ -201,7 +201,7 @@ const components = [
   TenantListComponent,
 
   UserListComponent,
-  //QuotaListComponent,
+  QuotaListComponent,
   ServiceAccountListComponent
 
 ];
