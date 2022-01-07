@@ -27,7 +27,7 @@ limitations under the License.
     </div>
 
     <mat-accordion>
-      <mat-expansion-panel [expanded]="true" *ngIf=show>
+      <mat-expansion-panel [expanded]="true" *ngIf=showCluster>
         <mat-expansion-panel-header>
           <mat-panel-title>
             <kd-nav-item class="kd-nav-group-item" state="/cluster" i18n>
@@ -51,7 +51,7 @@ limitations under the License.
     </mat-accordion>
 
     <mat-accordion>
-      <mat-expansion-panel [expanded]="true" *ngIf=show1 i18n>
+      <mat-expansion-panel [expanded]="true" *ngIf=showTenant i18n>
         <mat-expansion-panel-header>
           <mat-panel-title>
             <kd-nav-item class="kd-nav-group-item" state="/cluster" i18n>
@@ -85,7 +85,7 @@ limitations under the License.
     </mat-accordion>
 
     <mat-accordion>
-      <mat-expansion-panel [expanded]="true" *ngIf="show2">
+      <mat-expansion-panel [expanded]="true" *ngIf="showUser">
         <mat-expansion-panel-header>
           <mat-panel-title>
             <kd-nav-item class="kd-nav-group-item" state="/cluster" i18n>

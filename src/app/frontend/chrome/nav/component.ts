@@ -25,9 +25,9 @@ import {TenantService} from 'common/services/global/tenant';
 })
 export class NavComponent implements OnInit {
   @ViewChild(MatDrawer, {static: true}) private readonly nav_: MatDrawer;
-  show:boolean=true;
-  show1:boolean=true;
-  show2:boolean=true;
+  showCluster:boolean=true;
+  showTenant:boolean=true;
+  showUser:boolean=true;
 
   constructor(
     private readonly navService_: NavService,
@@ -36,21 +36,21 @@ export class NavComponent implements OnInit {
     const usertype = sessionStorage.getItem('type');//added
 
     if(usertype=='cluster-admin'){
-      this.show=this.show;
-      this.show1=this.show1;
-      this.show2=this.show2;
+      this.showCluster=this.showCluster;
+      this.showTenant=this.showTenant;
+      this.showUser=this.showUser;
     }
 
     else if(usertype=='tenant-admin'){
-      this.show=!this.show;
-      this.show1=this.show1;
-      this.show2=this.show2;
+      this.showCluster=!this.showCluster;
+      this.showTenant=this.showTenant;
+      this.showUser=this.showUser;
     }
 
     else{
-      this.show=!this.show;
-      this.show1=!this.show1;
-      this.show2=this.show2;
+      this.showCluster=!this.showCluster;
+      this.showTenant=!this.showTenant;
+      this.showUser=!this.showUser;
     }
   }
 
