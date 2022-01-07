@@ -27,7 +27,7 @@ limitations under the License.
     </div>
 
     <mat-accordion>
-      <mat-expansion-panel [expanded]="true" *ngIf="isCurrentSystem">
+      <mat-expansion-panel [expanded]="true" *ngIf=show>
         <mat-expansion-panel-header>
           <mat-panel-title>
             <kd-nav-item class="kd-nav-group-item" state="/cluster" i18n>
@@ -51,7 +51,7 @@ limitations under the License.
     </mat-accordion>
 
     <mat-accordion>
-      <mat-expansion-panel [expanded]="true" *ngIf="isSystem">
+      <mat-expansion-panel [expanded]="true" *ngIf=show1 i18n>
         <mat-expansion-panel-header>
           <mat-panel-title>
             <kd-nav-item class="kd-nav-group-item" state="/cluster" i18n>
@@ -79,14 +79,28 @@ limitations under the License.
             <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
             Quota
           </kd-nav-item>
-          <kd-nav-item class="kd-nav-item" state="/tenantuser" i18n>
-            <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-            Users
-          </kd-nav-item>
         </div>
+        <mat-divider></mat-divider>
       </mat-expansion-panel>
     </mat-accordion>
-    <mat-divider></mat-divider>
+
+    <mat-accordion>
+      <mat-expansion-panel [expanded]="true" *ngIf="show2">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <kd-nav-item class="kd-nav-group-item" state="/cluster" i18n>
+              <img class="menu_icon" src="assets/images/tenant_management_icon.svg" alt="">
+              User Management
+            </kd-nav-item>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <kd-nav-item class="kd-nav-item" state="/tenantuser" i18n>
+          <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
+          Users
+        </kd-nav-item>
+        <mat-divider></mat-divider>
+      </mat-expansion-panel>
+    </mat-accordion>
 
     <mat-accordion>
       <mat-expansion-panel [expanded]="true">
@@ -99,6 +113,10 @@ limitations under the License.
           </mat-panel-title>
         </mat-expansion-panel-header>
         <div class="kd-nav-group">
+          <kd-nav-item class="kd-nav-item" state="/workloadoverview" i18n>
+            <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
+            Overview
+          </kd-nav-item>
           <kd-nav-item class="kd-nav-item" state="/namespace" i18n>
             <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
             Namespaces
@@ -148,7 +166,7 @@ limitations under the License.
       <mat-expansion-panel [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title>
-            <kd-nav-item class="kd-nav-group-item" i18n>
+            <kd-nav-item class="kd-nav-group-item" i18n >
               <img class="menu_icon" src="assets/images/discovery_load_balancing_icon.svg" alt="">
               Virtual Machine
             </kd-nav-item>

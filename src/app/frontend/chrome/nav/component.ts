@@ -15,8 +15,6 @@
 
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatDrawer} from '@angular/material';
-
-import {CONFIG} from '../../index.config';
 import {NavService} from '../../common/services/nav/service';
 import {TenantService} from 'common/services/global/tenant';
 
@@ -27,11 +25,34 @@ import {TenantService} from 'common/services/global/tenant';
 })
 export class NavComponent implements OnInit {
   @ViewChild(MatDrawer, {static: true}) private readonly nav_: MatDrawer;
+  show:boolean=true;
+  show1:boolean=true;
+  show2:boolean=true;
 
   constructor(
     private readonly navService_: NavService,
     private readonly tenantService_: TenantService,
-  ) {}
+  ) {
+    const usertype = sessionStorage.getItem('type');//added
+
+    if(usertype=='cluster-admin'){
+      this.show=this.show;
+      this.show1=this.show1;
+      this.show2=this.show2;
+    }
+
+    else if(usertype=='tenant-admin'){
+      this.show=!this.show;
+      this.show1=this.show1;
+      this.show2=this.show2;
+    }
+
+    else{
+      this.show=!this.show;
+      this.show1=!this.show1;
+      this.show2=this.show2;
+    }
+  }
 
   get isSystem(): boolean {
     return this.tenantService_.isSystem();
