@@ -96,7 +96,14 @@ export class LoginComponent implements OnInit {
         }
 
         this.ngZone_.run(() => {
-          this.state_.navigate(['overview']);
+          const usertype = sessionStorage.getItem('type');
+          if(usertype =='cluster-admin') {
+            this.state_.navigate(['partition']);
+          }else if(usertype =='tenant-admin'){
+            this.state_.navigate(['overview']);
+          }else{
+            this.state_.navigate(['workloadoverview']);
+          }
         });
       },
       (err: HttpErrorResponse) => {
@@ -152,6 +159,9 @@ export class LoginComponent implements OnInit {
         return {token: this.token_} as LoginSpec;
       case LoginModes.Basic:
         this.responseData = await this.GetCurrentUserInformation(this.username_)
+        this.setTenantname(this.responseData.objectMeta.tenant);//added
+        this.setTenanttype(this.responseData.objectMeta.type);//added
+
         if (this.responseData.objectMeta.password == this.password_){
           return this.responseData.objectMeta as LoginSpec;
         }
@@ -165,6 +175,13 @@ export class LoginComponent implements OnInit {
 
   private setUsername (username_:string) {
     sessionStorage.setItem('username', username_);
+  }
+
+  private setTenantname (tenant_:string) {//added
+    sessionStorage.setItem('tenant', tenant_);
+  }
+  private setTenanttype (type_:string) {//added
+    sessionStorage.setItem('type', type_);
   }
 
 }

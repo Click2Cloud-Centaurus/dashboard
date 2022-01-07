@@ -174,13 +174,13 @@ export class TenantSelectorComponent implements OnInit {
   }
 
   getTenant_(): string {
-    const username = sessionStorage.getItem('username');
+    const tenantname = sessionStorage.getItem('tenant');
     // let tenantType = 'cluster-admin'
-    if ( username === 'admin'){
+    if ( tenantname === 'admin'){
       return 'system'
     }
     else{
-      return username
+      return tenantname
     }
   }
 
