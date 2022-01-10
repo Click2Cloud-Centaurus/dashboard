@@ -174,6 +174,10 @@ export class LoginComponent implements OnInit {
     }
   }
 
+  private setUsername (username_:string) {
+    sessionStorage.setItem('username', username_);
+  }
+
   private setUserType(userType : string){
     sessionStorage.setItem('userType', userType);
   }
