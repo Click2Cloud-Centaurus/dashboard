@@ -51,11 +51,6 @@ const routes: Routes = [
         path: 'tenant',
         loadChildren: 'resource/cluster/tenant/module#TenantModule',
       },
-
-      {
-        path: 'namespace',
-        loadChildren: 'resource/cluster/namespace/module#NamespaceModule',
-      },
       {
         path: 'node',
         loadChildren: 'resource/cluster/node/module#NodeModule',
@@ -76,6 +71,10 @@ const routes: Routes = [
         path: 'overview',
         loadChildren: 'overview/module#OverviewModule',
       },
+      {
+        path: 'usermanagement',
+        loadChildren: 'usermanagement/module#UserManagementModule',
+      },
 
       // Workloads group
       {
@@ -85,6 +84,16 @@ const routes: Routes = [
       {
         path: 'namespace',
         loadChildren: 'resource/workloads/namespace/module#NamespaceModule',
+      },
+      {
+
+        path: 'serviceaccount',
+        loadChildren: 'resource/workloads/serviceaccount/module#ServiceAccountModule',
+
+      },
+      {
+        path: 'workloadoverview',
+        loadChildren: 'resource/workloads/workloadoverview/module#WorkloadOverviewModule',
 
       },
       {
@@ -180,7 +189,8 @@ const routes: Routes = [
       // Custom resource definitions
       {
         path: 'customresourcedefinition',
-        loadChildren: 'crd/module#CrdModule'},
+        loadChildren: 'crd/module#CrdModule'
+      },
 
       // Others
       {
@@ -200,12 +210,6 @@ const routes: Routes = [
         loadChildren: 'tenantmanagement/tenantmonitoring/module#TenantMonitoringModule',
 
       },
-      {
-        path: 'tenantnamespace',
-        loadChildren: 'tenantmanagement/tenantnamespace/module#TenantNamespaceModule',
-
-      },
-
       {
         path: 'tenantuser',
         loadChildren: 'tenantmanagement/tenantuser/module#TenantUsersModule',
