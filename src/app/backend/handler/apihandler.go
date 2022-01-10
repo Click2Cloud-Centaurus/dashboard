@@ -17,6 +17,7 @@ package handler
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -5133,15 +5134,34 @@ func (apiHandler *APIHandler) CreateUser(w *restful.Request, r *restful.Response
 func (apiHandler *APIHandler) GetUser(w *restful.Request, r *restful.Response) {
 	// get the userid from the request params, key is "id"
 	username := w.PathParameter("username")
+	decode, err := base64.StdEncoding.DecodeString(username)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%s\n", decode)
+	substrings := strings.Split(string(decode), "+")
+	//
+	fmt.Printf("Username is : %s\n", substrings[0])
+	fmt.Printf("Password is : %s\n", substrings[1])
 
 	// call the getUser function with user id to retrieve a single user
-	user, err := getUser(username)
-
+	user, err := getUser(substrings[0])
 	if err != nil {
-		log.Fatalf("Unable to get user. %v", err)
+		log.Printf("Unable to get user. %v", err)
+		r.WriteHeaderAndEntity(http.StatusUnauthorized, err.Error())
+		return
 	}
 
+	if user.ObjectMeta.Username != substrings[0] || user.ObjectMeta.Password != substrings[1] {
+		ErrMsg := ErrorMsg{Msg: "Invalid Username or Password"}
+		r.WriteHeaderAndEntity(http.StatusUnauthorized, ErrMsg)
+		return
+	}
 	r.WriteHeaderAndEntity(http.StatusOK, user)
+}
+
+type ErrorMsg struct {
+	Msg string `json:"msg"`
 }
 
 // GetAllUser will return all the users
