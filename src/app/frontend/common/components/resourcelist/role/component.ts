@@ -36,7 +36,7 @@ export class RoleListComponent extends ResourceListBase<RoleList, Role> {
   objectMeta:any;
 
   constructor(
-    private readonly role_: NamespacedResourceService<RoleList>,
+    public readonly role_: NamespacedResourceService<RoleList>,
     private readonly verber_: VerberService,
     notifications: NotificationsService,
   ) {
