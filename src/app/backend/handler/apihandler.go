@@ -5140,10 +5140,6 @@ func (apiHandler *APIHandler) GetUser(w *restful.Request, r *restful.Response) {
 	}
 	fmt.Printf("%s\n", decode)
 	substrings := strings.Split(string(decode), "+")
-	//
-	fmt.Printf("Username is : %s\n", substrings[0])
-	fmt.Printf("Password is : %s\n", substrings[1])
-
 	// call the getUser function with user id to retrieve a single user
 	user, err := getUser(substrings[0])
 	if err != nil {
