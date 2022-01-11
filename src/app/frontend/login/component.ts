@@ -98,7 +98,7 @@ export class LoginComponent implements OnInit {
         }
 
         this.ngZone_.run(() => {
-          const usertype = sessionStorage.getItem('type');
+          const usertype = sessionStorage.getItem('userType');
           if(usertype =='cluster-admin') {
             this.state_.navigate(['partition']);
           }else if(usertype =='tenant-admin'){
