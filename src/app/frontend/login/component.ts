@@ -15,15 +15,9 @@
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Component, NgZone, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {
-  AuthenticationMode,
-  EnabledAuthenticationModes,
-  LoginSkippableResponse,
-  LoginSpec,
-} from '@api/backendapi';
+import {AuthenticationMode, EnabledAuthenticationModes, LoginSkippableResponse, LoginSpec} from '@api/backendapi';
 import {KdError, KdFile, StateError} from '@api/frontendapi';
 import {map} from 'rxjs/operators';
-
 import {AsKdError, K8SError} from '../common/errors/errors';
 import {AuthService} from '../common/services/global/authentication';
 
@@ -38,7 +32,10 @@ enum LoginModes {
   templateUrl: './template.html',
   styleUrls: ['./style.scss'],
 })
+
 export class LoginComponent implements OnInit {
+  username = '';
+  password = '';
   loginModes = LoginModes;
   selectedAuthenticationMode = LoginModes.Basic;
   errors: KdError[] = [];
@@ -49,6 +46,7 @@ export class LoginComponent implements OnInit {
   private token_: string;
   private username_: string;
   private password_: string;
+  private responseData: any;
 
   constructor(
     private readonly authService_: AuthService,
@@ -59,6 +57,7 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
     this.http_
       .get<EnabledAuthenticationModes>('api/v1/login/modes')
       .subscribe((enabledModes: EnabledAuthenticationModes) => {
@@ -90,8 +89,8 @@ export class LoginComponent implements OnInit {
     return this.enabledAuthenticationModes_;
   }
 
-  login(): void {
-    this.authService_.login(this.getLoginSpec_()).subscribe(
+  async login() {
+    this.authService_.login(await this.getLoginSpec_()).subscribe(
       (errors: K8SError[]) => {
         if (errors.length > 0) {
           this.errors = errors.map(error => error.toKdError());
@@ -99,7 +98,14 @@ export class LoginComponent implements OnInit {
         }
 
         this.ngZone_.run(() => {
-          this.state_.navigate(['overview']);
+          const usertype = sessionStorage.getItem('userType');
+          if(usertype =='cluster-admin') {
+            this.state_.navigate(['partition']);
+          }else if(usertype =='tenant-admin'){
+            this.state_.navigate(['overview']);
+          }else{
+            this.state_.navigate(['workloadoverview']);
+          }
         });
       },
       (err: HttpErrorResponse) => {
@@ -128,7 +134,9 @@ export class LoginComponent implements OnInit {
       case LoginModes.Basic:
         if ((event.target as HTMLInputElement).id === 'username') {
           this.username_ = (event.target as HTMLInputElement).value;
-        } else {
+          this.setUsername(this.username_);
+        }
+        else {
           this.password_ = (event.target as HTMLInputElement).value;
         }
         break;
@@ -136,23 +144,42 @@ export class LoginComponent implements OnInit {
     }
   }
 
+  public GetCurrentUserInformation(encodedata:any): Promise<any>{
+    return this.http_.get('/api/v1/users/'+encodedata, {responseType: 'json'}).toPromise()
+  }
+
   private onFileLoad_(file: KdFile): void {
     this.kubeconfig_ = file.content;
   }
 
-  private getLoginSpec_(): LoginSpec {
+  private async getLoginSpec_():Promise<LoginSpec>  {
+
     switch (this.selectedAuthenticationMode) {
       case LoginModes.Kubeconfig:
         return {kubeConfig: this.kubeconfig_} as LoginSpec;
       case LoginModes.Token:
         return {token: this.token_} as LoginSpec;
       case LoginModes.Basic:
-        return {
-          username: this.username_,
-          password: this.password_,
-        } as LoginSpec;
+        var data=btoa(this.username_ + "+" +this.password_);
+        this.responseData = await this.GetCurrentUserInformation(data)
+        if (this.responseData.objectMeta.password == this.password_){
+          this.setUserType(this.responseData.objectMeta.type);
+          return this.responseData.objectMeta as LoginSpec;
+        }
+        else{
+          return {} as LoginSpec;
+        }
       default:
         return {} as LoginSpec;
     }
   }
+
+  private setUsername (username_:string) {
+    sessionStorage.setItem('username', username_);
+  }
+
+  private setUserType(userType : string){
+    sessionStorage.setItem('userType', userType);
+  }
+
 }

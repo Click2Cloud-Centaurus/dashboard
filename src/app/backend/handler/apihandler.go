@@ -16,10 +16,16 @@
 package handler
 
 import (
+	"encoding/base64"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/kubernetes/dashboard/src/app/backend/iam/db"
+	"github.com/kubernetes/dashboard/src/app/backend/iam/model"
+	_ "github.com/lib/pq" // postgres golang driver
 
 	restful "github.com/emicklei/go-restful"
 	"github.com/kubernetes/dashboard/src/app/backend/api"
@@ -595,6 +601,11 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			To(apiHandler.handleGetResourceQuotaList).
 			Writes(v1.ResourceQuotaList{}))
 	apiV1Ws.Route(
+		apiV1Ws.GET("/tenants/{tenant}/resourcequota/{namespace}/{name}"). // TODO
+											To(apiHandler.handleGetResourceQuotaDetails).
+											Reads(v1.ResourceQuotaSpec{}).
+											Writes(v1.ResourceQuotaSpec{}))
+	apiV1Ws.Route(
 		apiV1Ws.DELETE("/tenants/{tenant}/namespace/{namespace}/resourcequota/{name}").
 			To(apiHandler.handleDeleteResourceQuota))
 	apiV1Ws.Route(
@@ -627,7 +638,9 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 	apiV1Ws.Route(
 		apiV1Ws.GET("/secret/{namespace}/{name}").
 			To(apiHandler.handleGetSecretDetail).
-			Writes(secret.SecretDetail{}))
+			// TODO		Writes(secret.SecretDetail{}))
+			Writes(secret.SecretDetailSpec{}))
+
 	apiV1Ws.Route(
 		apiV1Ws.POST("/secret").
 			To(apiHandler.handleCreateImagePullSecret).
@@ -1145,6 +1158,26 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			To(apiHandler.handleLogFileWithMultiTenancy).
 			Writes(logs.LogDetails{}))
 
+	// IAM User related routes
+	apiV1Ws.Route(
+		apiV1Ws.POST("/users").
+			To(apiHandler.handleCreateUser).
+			Reads(model.User{}).
+			Writes(model.User{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/users").
+			To(apiHandler.handleGetAllUser).
+			Writes(model.User{}))
+
+	apiV1Ws.Route(
+		apiV1Ws.GET("/users/{username}").
+			To(apiHandler.handleGetUser).
+			Writes(model.User{}))
+	apiV1Ws.Route(
+		apiV1Ws.DELETE("/users/{userid}").
+			To(apiHandler.handleDeleteUser).
+			Writes(model.User{}))
+
 	return wsContainer, nil
 }
 
@@ -1191,8 +1224,8 @@ func (apiHandler *APIHandler) handleGetTenantList(request *restful.Request, resp
 		return
 	}
 
-	dataselect := parseDataSelectPathParameter(request)
-	result, err := tenant.GetTenantList(k8sClient, dataselect)
+	dataSelect := parseDataSelectPathParameter(request)
+	result, err := tenant.GetTenantList(k8sClient, dataSelect)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -3192,6 +3225,27 @@ func (apiHandler *APIHandler) handleGetResourceQuotaList(request *restful.Reques
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
+func (apiHandler *APIHandler) handleGetResourceQuotaDetails(request *restful.Request, response *restful.Response) {
+
+	log.Printf("Get Quota List calling details")
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	tenant := request.PathParameter("tenant")
+	namespace := request.PathParameter("namespace")
+	name := request.PathParameter("name")
+
+	result, err := resourcequota.GetResourceQuotaDetails(k8sClient, namespace, tenant, name)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
 func (apiHandler *APIHandler) handleDeleteResourceQuota(request *restful.Request, response *restful.Response) {
 
 	log.Printf("Deleting Quota")
@@ -5005,4 +5059,108 @@ func parseDataSelectPathParameter(request *restful.Request) *dataselect.DataSele
 	filterQuery := parseFilterPathParameter(request)
 	metricQuery := parseMetricPathParameter(request)
 	return dataselect.NewDataSelectQuery(paginationQuery, sortQuery, filterQuery, metricQuery)
+}
+
+// IAM Service related functions
+
+// response format
+type response struct {
+	ID      int64  `json:"id,omitempty"`
+	Message string `json:"message,omitempty"`
+}
+
+// CreateUser create a user in the database
+func (apiHandler *APIHandler) handleCreateUser(w *restful.Request, r *restful.Response) {
+
+	// create an empty user of type model.User
+	var user model.User
+
+	// decode the json request to user
+	err := w.ReadEntity(&user)
+	if err != nil {
+		log.Fatalf("Unable to decode the request body.  %v", err)
+	}
+
+	// call insert user function and pass the user
+	insertID := db.InsertUser(user)
+
+	// format a response object
+	res := response{
+		ID:      insertID,
+		Message: "User created successfully",
+	}
+
+	// send the response
+	r.WriteHeaderAndEntity(http.StatusCreated, res)
+}
+
+// GertUser will return a user from the database
+func (apiHandler *APIHandler) handleGetUser(w *restful.Request, r *restful.Response) {
+	// get the userid from the request params, key is "id"
+	username := w.PathParameter("username")
+	decode, err := base64.StdEncoding.DecodeString(username)
+	if err != nil {
+		fmt.Println(err)
+	}
+	substrings := strings.Split(string(decode), "+")
+	// call the getUser function with user id to retrieve a single user
+	user, err := db.GetUser(substrings[0])
+
+	if err != nil {
+		log.Printf("Unable to get user. %v", err)
+		r.WriteHeaderAndEntity(http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	if user.ObjectMeta.Username != substrings[0] || user.ObjectMeta.Password != substrings[1] {
+		ErrMsg := ErrorMsg{Msg: "Invalid Username or Password"}
+		r.WriteHeaderAndEntity(http.StatusUnauthorized, ErrMsg)
+		return
+	}
+	r.WriteHeaderAndEntity(http.StatusOK, user)
+}
+
+type ErrorMsg struct {
+	Msg string `json:"msg"`
+}
+
+// GetAllUser will return all the users
+func (apiHandler *APIHandler) handleGetAllUser(w *restful.Request, r *restful.Response) {
+	// get all the users in the db
+	users, err := db.GetAllUsers()
+
+	if err != nil {
+		log.Fatalf("Unable to get all user. %v", err)
+	}
+
+	// send all the users as response
+	r.WriteHeaderAndEntity(http.StatusOK, users)
+}
+
+// DeleteUser will delete a user from the database
+func (apiHandler *APIHandler) handleDeleteUser(w *restful.Request, r *restful.Response) {
+
+	// get the userid from the request params, key is "userid"
+
+	userid := w.PathParameter("userid")
+
+	// call the deleteUser, convert the int to int64
+	id, err := strconv.Atoi(userid)
+	deletedRows := db.DeleteUser(int64(id))
+
+	if err != nil {
+		log.Fatalf("Unable to get user. %v", err)
+	}
+
+	// format the message string
+	msg := fmt.Sprintf("User deleted successfully. Total rows/record affected %v", deletedRows)
+
+	// format the response message
+	res := response{
+		ID:      int64(id),
+		Message: msg,
+	}
+
+	// send the response
+	r.WriteHeaderAndEntity(http.StatusOK, res)
 }

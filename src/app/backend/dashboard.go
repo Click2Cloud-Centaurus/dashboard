@@ -20,6 +20,8 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"github.com/kubernetes/dashboard/src/app/backend/iam"
+	"github.com/kubernetes/dashboard/src/app/backend/iam/db"
 	"log"
 	"net"
 	"net/http"
@@ -103,6 +105,12 @@ func main() {
 		log.Printf("Using namespace: %s", args.Holder.GetNamespace())
 	}
 
+	// Create table in Postgres Database
+	CreateTable()
+	err := iam.CreateClusterAdmin()
+	if err != nil {
+		log.Printf("Failed to create admin user: %s \n", err.Error())
+	}
 	clientManager := client.NewClientManager(args.Holder.GetKubeConfigFile(), args.Holder.GetApiServerHost())
 	versionInfo, err := clientManager.InsecureClient().Discovery().ServerVersion()
 	if err != nil {
@@ -284,4 +292,23 @@ func getEnv(key, fallback string) string {
 		value = fallback
 	}
 	return value
+}
+
+func CreateTable() {
+	// create the postgres db connection
+	db := db.CreateConnection()
+
+	// close the db connection
+	defer db.Close()
+
+	sqlStatement := `CREATE TABLE IF NOT EXISTS users (userid SERIAL PRIMARY KEY,username TEXT,password TEXT,token TEXT,type TEXT,tenant TEXT);`
+
+	// execute the sql statement
+	res, err := db.Exec(sqlStatement)
+
+	if err != nil {
+		fmt.Printf("Unable to execute the query. %s", err)
+		return
+	}
+	fmt.Printf("Table Created in database %v\n", res)
 }

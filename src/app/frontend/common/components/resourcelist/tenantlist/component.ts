@@ -23,12 +23,7 @@ import {ResourceService} from '../../../services/resource/resource';
 import {NotificationsService} from '../../../services/global/notifications';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
-import {MatDialog, MatDialogConfig,MatExpansionModule} from '@angular/material/';
-import { CreateFromFormComponent } from 'create/from/form/component';
-import { CreatorCardComponent } from 'common/components/creator/component';
-import { CreateFromFileComponent } from 'create/from/file/component';
-import { Form } from '@angular/forms';
-import {MatMenuModule} from '@angular/material/menu';
+import {MatDialog} from '@angular/material';
 
 import {VerberService} from '../../../services/global/verber';
 
@@ -38,11 +33,11 @@ import {VerberService} from '../../../services/global/verber';
 })
 export class TenantListComponent extends ResourceListWithStatuses<TenantList, Tenant> {
   @Input() endpoint = EndpointManager.resource(Resource.tenant).list();
-  displayName:any="";
-  typeMeta:any="";
+  displayName:any;
+  typeMeta:any;
   objectMeta:any;
   constructor(
-    private readonly verber_: VerberService,
+    public readonly verber_: VerberService,
     private readonly tenant_: ResourceService<TenantList>,
     notifications: NotificationsService,
     private dialog: MatDialog //add the code
