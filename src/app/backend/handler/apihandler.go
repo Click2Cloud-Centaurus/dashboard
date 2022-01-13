@@ -5068,8 +5068,14 @@ type response struct {
 }
 
 func (apiHandler *APIHandler) handleCreateUser(w *restful.Request, r *restful.Response) {
-	var user model.User
+	_, error := apiHandler.cManager.Client(w)
+	if error != nil {
+		ErrMsg := ErrorMsg{Msg: error.Error()}
+		r.WriteHeaderAndEntity(http.StatusUnauthorized, ErrMsg)
+		return
+	}
 
+	var user model.User
 	err := w.ReadEntity(&user)
 	if err != nil {
 		log.Fatalf("Unable to decode the request body.  %v", err)
@@ -5085,17 +5091,14 @@ func (apiHandler *APIHandler) handleCreateUser(w *restful.Request, r *restful.Re
 }
 
 func (apiHandler *APIHandler) handleGetUser(w *restful.Request, r *restful.Response) {
-	_, err := apiHandler.cManager.Client(w)
-	if err != nil {
-		errors.HandleInternalError(r, err)
-		return
-	}
 	username := w.PathParameter("username")
-
 	decode, err := base64.StdEncoding.DecodeString(username)
 	if err != nil {
-		fmt.Println(err)
+		ErrMsg := ErrorMsg{Msg: err.Error()}
+		r.WriteHeaderAndEntity(http.StatusUnauthorized, ErrMsg)
+		return
 	}
+
 	substrings := strings.Split(string(decode), "+")
 	user, err := db.GetUser(substrings[0])
 
