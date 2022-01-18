@@ -381,7 +381,6 @@ export class CreateUserDialog implements OnInit {
 
     } else {
       if(this.usertype.value == "cluster-admin") {
-        console.log("hi")
         this.adminroleUsed = "admin-role"
       }
       else{
