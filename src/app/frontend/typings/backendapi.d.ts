@@ -137,14 +137,19 @@ export interface NodeList extends ResourceList {
   nodes: Node[];
 }
 
+export interface ResourcePartitionList extends ResourceList {
+  resourcePartitions: ResourcePartition[];
+}
+
+export interface TenantPartitionList extends ResourceList {
+  tenantPartitions: TenantPartition[];
+}
+
 export interface QuotaList extends ResourceList {
   quotas: Node[];
 }
 
-export interface PartitionList extends ResourceList {
-  partitions: Partition[];
-}
-
+export interface PartitionList extends ResourceList {}
 
 export interface PersistentVolumeClaimList extends ResourceList {
   items: PersistentVolumeClaim[];
@@ -311,14 +316,28 @@ export interface Node extends Resource {
   ready: string;
 }
 
+export interface ResourcePartition extends Resource {
+  name: string
+  nodeCount: number
+  cpuLimit: number
+  memoryLimit: number
+  healthyNodeCount: number
+}
+
+export interface TenantPartition extends Resource {
+  name: string
+  tenantCount: number
+  cpuLimit: number
+  memoryLimit: number
+  healthyNodeCount: number
+}
+
 export interface Quota extends Resource {
   ready: string;
 }
 
 
-export interface Partition extends Resource {
-  ready: string;
-}
+export interface Partition extends Resource {}
 
 export interface PersistentVolume extends Resource {
   capacity: StringMap;
