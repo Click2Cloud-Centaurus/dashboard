@@ -64,14 +64,9 @@ export class CreateUserDialog implements OnInit {
 
   private readonly config_ = CONFIG;
 
-  /**
-   * Max-length validation rule for tenant
-   */
   tenantMaxLength = 24;
   storageidMaxLength =10;
-  /**
-   * Pattern validation rule for tenant
-   */
+
   tenantPattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
   storageidPattern: RegExp = new RegExp('^[0-9]$');
 
