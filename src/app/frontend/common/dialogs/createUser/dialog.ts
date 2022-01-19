@@ -54,8 +54,8 @@ export class CreateUserDialog implements OnInit {
   roles:string[];
   namespaceUsed = "centaurus-dashboard"
   adminroleUsed = "admin-role";
-  apiGroups : string [] =["*"]
-  resources : string [] =["*"]
+  apiGroups : string [] =["", "extensions", "apps"]
+  resources : string [] =["deployments", "pods", "services", "secrets", "namespaces"]
   verbs :string []= ["*"]
   serviceAccountCreated:any[] = [];
   secretDetails:any[] = [];
