@@ -16,6 +16,7 @@
         <div description><span class="kd-muted-light" i18n>Items:&nbsp;</span>{{totalItems}}
         </div>
 
+
         <div content [hidden]="showZeroState()">
           <div kdLoadingSpinner [isLoading]="isLoading"></div>
 
@@ -40,7 +41,7 @@
                                matSortDirection="asc"
                                i18n>Name</mat-header-cell>
               <mat-cell *matCellDef="let user">
-                  {{user.objectMeta.name}}
+                {{user.objectMeta.name}}
               </mat-cell>
             </ng-container>
 

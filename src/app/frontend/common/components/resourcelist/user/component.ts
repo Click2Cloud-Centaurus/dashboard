@@ -3,6 +3,7 @@ import {Component, Input, ViewChild} from '@angular/core';
 import {User, UserList} from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 import {MatDrawer} from '@angular/material';
+
 import {ResourceListWithStatuses} from '../../../resources/list';
 import {EndpointManager, Resource} from '../../../services/resource/endpoint';
 import {ResourceService} from '../../../services/resource/resource';
@@ -15,6 +16,7 @@ import {VerberService} from "../../../../../frontend/common/services/global/verb
 @Component({
   selector: 'kd-user-list',
   templateUrl: './template.html',
+  styleUrls: ['./style.scss'],
 })
 
 export class UserListComponent extends ResourceListWithStatuses<UserList, User> {
@@ -48,20 +50,19 @@ export class UserListComponent extends ResourceListWithStatuses<UserList, User> 
   }
 
   map(userList: UserList): User[] {
-    const userdata:any=[];
     const userType=sessionStorage.getItem('userType');
-
     const data=userList.users
+    const userdata:any=[];
     data.map((elem)=>{
-        if(userType.split("-")[0]==='tenant')
-        {
-          if (elem.objectMeta.type.includes('tenant')) {
-            return userdata.push(elem)
-          }
-        }
-        else {
+      if(userType.split("-")[0]==='tenant')
+      {
+        if (elem.objectMeta.type.includes('tenant')) {
           return userdata.push(elem)
         }
+      }
+      else {
+        return userdata.push(elem)
+      }
     })
     return userdata
   }
