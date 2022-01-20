@@ -16,7 +16,7 @@ import {VerberService} from "../../../../../frontend/common/services/global/verb
 @Component({
   selector: 'kd-user-list',
   templateUrl: './template.html',
-  styleUrls: ['./style.scss'],
+
 })
 
 export class UserListComponent extends ResourceListWithStatuses<UserList, User> {
