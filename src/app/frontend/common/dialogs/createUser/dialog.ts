@@ -55,6 +55,7 @@ export class CreateUserDialog implements OnInit {
   roles:string[];
   namespaceUsed = "centaurus-dashboard"
   adminroleUsed = "admin-role";
+
   apiGroups : string [] =["", "extensions", "apps","rbac.authorization.k8s.io"]
   resources : string [] =["*"]
   verbs :string []= ["*"]
@@ -62,7 +63,6 @@ export class CreateUserDialog implements OnInit {
   secretDetails:any[] = [];
   selected = '';
   Usertype='';
-
 
   private readonly config_ = CONFIG
   tenantMaxLength = 24;
@@ -84,6 +84,7 @@ export class CreateUserDialog implements OnInit {
     private readonly tenantService_ : TenantService,
     private readonly dialog_: MatDialog,
     private readonly route_: ActivatedRoute,
+
     private readonly ngZone_: NgZone,
   ) {}
 
@@ -104,6 +105,7 @@ export class CreateUserDialog implements OnInit {
           Validators.pattern(this.tenantPattern),
         ]),
        ],
+
         username: [
           '',
           Validators.compose([
@@ -147,9 +149,6 @@ export class CreateUserDialog implements OnInit {
         this.Usertype=usertype
       });
 
-
-  }
-
   selectUserType(event:any)
   {
     this.selected=event;
@@ -163,6 +162,7 @@ export class CreateUserDialog implements OnInit {
   resetImagePullSecret(): void {
     this.imagePullSecret.patchValue('');
   }
+
   get tenant(): any {
     return this.tenantService_.current()
   }
@@ -190,7 +190,7 @@ export class CreateUserDialog implements OnInit {
   createUser() {
     let response = this.http_.get('api/v1/tenant/'+this.user.value)
     this.getToken(async (token_:any)=>{
-      const userSpec= {username: this.user.value, password:this.pass.value, token:token_, type:this.usertype.value,tenant:this.tenant};
+      const userSpec= {username: this.user.value, password:this.pass.value, token:token_, type:this.usertype.value,tenant:this.tenant.value};
       const userTokenPromise = await this.csrfToken_.getTokenForAction('users');
       userTokenPromise.subscribe(csrfToken => {
         return this.http_
