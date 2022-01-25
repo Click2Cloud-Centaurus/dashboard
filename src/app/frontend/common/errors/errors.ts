@@ -17,7 +17,7 @@ import {ErrStatus, K8sError as K8SApiError} from '@api/backendapi';
 import {KdError as KdApiError} from '@api/frontendapi';
 
 export enum ApiError {
-  invalidUsernameorPassword = 'MSG_INVALID_USERNAME_OR_PASSWORD',
+  tokenExpired = 'MSG_TOKEN_EXPIRED_ERROR',
   encryptionKeyChanged = 'MSG_ENCRYPTION_KEY_CHANGED',
 }
 
@@ -35,8 +35,8 @@ export enum ErrorCode {
 }
 
 const localizedErrors: {[key: string]: string} = {
-  MSG_INVALID_USERNAME_OR_PASSWORD: 'Unable to Login because The Username or Password you Typed is Incorrect',
-  MSG_ENCRYPTION_KEY_CHANGED: 'You have been logged out because your token is invalid.',
+  MSG_TOKEN_EXPIRED_ERROR: 'You have been logged out because your credentials are expired.',
+  MSG_ENCRYPTION_KEY_CHANGED: 'You have been logged out because your credentials are invalid.',
   MSG_ACCESS_DENIED: 'Access denied.',
   MSG_DASHBOARD_EXCLUSIVE_RESOURCE_ERROR: 'Trying to access/modify dashboard exclusive resource.',
 };
