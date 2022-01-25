@@ -5108,12 +5108,15 @@ func (apiHandler *APIHandler) handleGetUser(w *restful.Request, r *restful.Respo
 		return
 	}
 
-	if user.ObjectMeta.Username != substrings[0] || user.ObjectMeta.Password != substrings[1] {
-		ErrMsg := ErrorMsg{Msg: "Invalid Username or Password"}
-		r.WriteHeaderAndEntity(http.StatusUnauthorized, ErrMsg)
-		return
+	//if user.ObjectMeta.Username != substrings[0] || user.ObjectMeta.Password != substrings[1] {
+	//ErrMsg := ErrorMsg{Msg: "Invalid Username or Password"}
+	//r.WriteHeaderAndEntity(http.StatusUnauthorized, ErrMsg)
+	//return
+	//}
+	{
+		r.WriteHeaderAndEntity(http.StatusOK, user)
 	}
-	r.WriteHeaderAndEntity(http.StatusOK, user)
+
 }
 
 type ErrorMsg struct {
