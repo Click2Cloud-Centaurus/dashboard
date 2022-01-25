@@ -35,7 +35,7 @@ export enum ErrorCode {
 }
 
 const localizedErrors: {[key: string]: string} = {
-  MSG_TOKEN_EXPIRED_ERROR: 'You have been logged out because your credentials are expired.',
+  MSG_TOKEN_EXPIRED_ERROR: 'You have been logged out because your credentials have expired.',
   MSG_ENCRYPTION_KEY_CHANGED: 'You have been logged out because your credentials are invalid.',
   MSG_ACCESS_DENIED: 'Access denied.',
   MSG_DASHBOARD_EXCLUSIVE_RESOURCE_ERROR: 'Trying to access/modify dashboard exclusive resource.',
