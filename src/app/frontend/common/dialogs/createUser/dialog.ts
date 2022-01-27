@@ -53,13 +53,12 @@ export class CreateUserDialog implements OnInit {
   roles:string[];
   namespaceUsed = "default"
   adminroleUsed = "admin-role";
-  apiGroups : string [] =["", "extensions", "apps","rbac.authorization.k8s.io"]
-  resources : string [] =["*"]
+  apiGroups : string [] =["", "extensions", "apps"]
+  resources : string [] =["deployments", "pods", "services", "secrets", "namespaces"]
   verbs :string []= ["*"]
   serviceAccountCreated:any[] = [];
   secretDetails:any[] = [];
   selected = '';
-  Usertype='';
 
 
   private readonly config_ = CONFIG
@@ -126,6 +125,19 @@ export class CreateUserDialog implements OnInit {
 
       },
     );
+    this.tenant.valueChanges.subscribe((tenant: string) => {
+      this.name.clearAsyncValidators();
+      this.name.setAsyncValidators(validateUniqueName(this.http_, tenant));
+      this.name.updateValueAndValidity();
+    });
+    this.http_.get('api/v1/tenant').subscribe((result: TenantList) => {
+      this.tenants = result.tenants.map((tenant: Tenant) => tenant.objectMeta.name);
+      this.tenant.patchValue(
+        !this.tenantService_.isCurrentSystem()
+          ? this.route_.snapshot.params.tenant || this.tenants[0]
+          : this.tenants[0],
+      );
+    });
     this.role.valueChanges.subscribe((role: string) => {
       this.name.clearAsyncValidators();
       this.name.setAsyncValidators(validateUniqueName(this.http_, role));
@@ -272,7 +284,7 @@ export class CreateUserDialog implements OnInit {
 
   // create service account
   createServiceAccount() {
-    if(this.Usertype == "tenant-admin") {
+    if(this.usertype.value == "tenant-user") {
       this.namespaceUsed = "default"
     }
     const serviceAccountSpec= {name: this.user.value,namespace: this.namespaceUsed};
@@ -318,35 +330,7 @@ export class CreateUserDialog implements OnInit {
     })
 
   }
-  //  Creates new tenant based on the state of the controller.
-  createTenant(): void {
-    const tenantSpec= {name: this.user.value,storageclusterid: this.storageclusterid.value};
-    const tokenPromise = this.csrfToken_.getTokenForAction('tenant');
-    tokenPromise.subscribe(csrfToken => {
-      return this.http_
-        .post<{valid: boolean}>(
-          'api/v1/tenant',
-          {...tenantSpec},
-          {
-            headers: new HttpHeaders().set(this.config_.csrfHeaderName, csrfToken.token),
-          },
-        )
-        .subscribe(
-          () => {
-            this.dialogRef.close(this.tenant.value);
-          },
-          error => {
-            this.dialogRef.close();
-            const configData: AlertDialogConfig = {
-              title: 'Tenant Already Exists',
-              message: error.data,
-              confirmLabel: 'OK',
-            };
-            this.matDialog_.open(AlertDialog, {data: configData});
-          },
-        );
-    });
-  }
+
   createClusterRoleBinding(): void{
     if( this.usertype.value == "tenant-admin")
     {
@@ -395,8 +379,7 @@ export class CreateUserDialog implements OnInit {
   createTenantUser() {
     this.createServiceAccount()
     if(this.usertype.value == "tenant-user"){
-      this.createTenant()
-      this.createRoleBinding()
+       this.createRoleBinding()
 
     } else {
       if(this.usertype.value == "cluster-admin") {
