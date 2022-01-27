@@ -23,17 +23,15 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 import {AbstractControl, Validators,FormBuilder} from '@angular/forms';
 
 import {FormGroup} from '@angular/forms';
-import {FormControl} from '@angular/forms';
 import {CONFIG} from "../../../index.config";
 import {CsrfTokenService} from "../../services/global/csrftoken";
 import {AlertDialog, AlertDialogConfig} from "../alert/dialog";
 
 import {NamespacedResourceService} from '../../services/resource/resource';
 import {TenantService} from "../../services/global/tenant";
-import {CreateSecretDialog} from "../../../create/from/form/createsecret/dialog";
 import {SecretDetail,Role,RoleList} from '../../../typings/backendapi';
 import {validateUniqueName} from "../../../create/from/form/validator/uniquename.validator";
-//import {LoginComponent} from "../../../login/component";
+
 
 export interface UserToken {
   token: string;
@@ -53,7 +51,7 @@ export class CreateUserDialog implements OnInit {
   tenants: string[];
   secrets: string[];
   roles:string[];
-  namespaceUsed = "centaurus-dashboard"
+  namespaceUsed = "default"
   adminroleUsed = "admin-role";
   apiGroups : string [] =["", "extensions", "apps","rbac.authorization.k8s.io"]
   resources : string [] =["*"]
@@ -89,7 +87,7 @@ export class CreateUserDialog implements OnInit {
 
   ngOnInit(): void {
     this.form1 = this.fb_.group({
-      role: [this.route_.snapshot.params.role || '', Validators.required],
+        role: [this.route_.snapshot.params.role || '', Validators.required],
         usertype: [
           '',
           Validators.compose([
@@ -97,13 +95,13 @@ export class CreateUserDialog implements OnInit {
             Validators.pattern(this.tenantPattern),
           ]),
         ],
-      tenant: [
-        '',
-        Validators.compose([
-          Validators.maxLength(this.tenantMaxLength),
-          Validators.pattern(this.tenantPattern),
-        ]),
-       ],
+        tenant: [
+          '',
+          Validators.compose([
+            Validators.maxLength(this.tenantMaxLength),
+            Validators.pattern(this.tenantPattern),
+          ]),
+        ],
         username: [
           '',
           Validators.compose([
@@ -142,10 +140,10 @@ export class CreateUserDialog implements OnInit {
       );
     });
 
-      this.ngZone_.run(() => {
-        const usertype = sessionStorage.getItem('userType');
-        this.Usertype=usertype
-      });
+    this.ngZone_.run(() => {
+      const usertype = sessionStorage.getItem('userType');
+      this.Usertype=usertype
+    });
 
 
   }
@@ -214,9 +212,6 @@ export class CreateUserDialog implements OnInit {
 
   // create role
   createRole(): void {
-    if(this.usertype.value == "tenant-user") {
-      this.namespaceUsed = "default"
-    }
     const roleSpec= {name: this.user.value, namespace: this.namespaceUsed, apiGroups: this.apiGroups,verbs: this.verbs,resources: this.resources};
     const tokenPromise = this.csrfToken_.getTokenForAction('role');
     tokenPromise.subscribe(csrfToken => {
@@ -295,7 +290,7 @@ export class CreateUserDialog implements OnInit {
           (data) => {
             this.dialogRef.close(this.user.value);
             this.serviceAccountCreated.push(Object.entries(data))
-            },
+          },
         );
     })
   }
@@ -393,7 +388,7 @@ export class CreateUserDialog implements OnInit {
           }
         });
       });
-      }, 3000);
+    }, 3000);
 
 
   }
@@ -401,7 +396,7 @@ export class CreateUserDialog implements OnInit {
     this.createServiceAccount()
     if(this.usertype.value == "tenant-user"){
       this.createTenant()
-       this.createRoleBinding()
+      this.createRoleBinding()
 
     } else {
       if(this.usertype.value == "cluster-admin") {
