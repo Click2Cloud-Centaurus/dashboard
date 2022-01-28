@@ -202,7 +202,9 @@ export class CreateUserDialog implements OnInit {
     }
 
     this.getToken(async (token_:any)=>{
+
       const userSpec= {username: this.user.value, password:this.pass.value, token:token_, type:this.usertype.value,tenant:this.tenant_};
+
       const userTokenPromise = await this.csrfToken_.getTokenForAction('users');
       userTokenPromise.subscribe(csrfToken => {
         return this.http_
