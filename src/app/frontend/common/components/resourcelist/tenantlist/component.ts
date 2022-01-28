@@ -23,9 +23,9 @@ import {ResourceService} from '../../../services/resource/resource';
 import {NotificationsService} from '../../../services/global/notifications';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
-import {MatDialog} from '@angular/material';
-
 import {VerberService} from '../../../services/global/verber';
+import {ActivatedRoute} from "@angular/router";
+import {isNil} from "lodash";
 
 @Component({
   selector: 'kd-tenant-list',
@@ -36,15 +36,22 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
   displayName:any;
   typeMeta:any;
   objectMeta:any;
+  nodeName: any
+  clusterName: any
+  tenantList: Tenant[]
+  tenantCount: number
+
   constructor(
-    public readonly verber_: VerberService,
+    readonly verber_: VerberService,
     private readonly tenant_: ResourceService<TenantList>,
+    private readonly route_: ActivatedRoute,
     notifications: NotificationsService,
-    private dialog: MatDialog //add the code
   ) {
     super('tenant', notifications);
     this.id = ListIdentifier.tenant;
     this.groupId = ListGroupIdentifier.cluster;
+
+    this.nodeName = this.route_.snapshot.params.resourceName
 
     // Register status icon handlers
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
@@ -59,7 +66,13 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
   }
 
   map(tenantList: TenantList): Tenant[] {
-    return tenantList.tenants;
+    this.tenantList = []
+    this.tenantCount = 0
+    if (isNil(this.nodeName) && tenantList.tenants != null){
+      this.tenantList = tenantList.tenants
+      this.tenantCount = this.tenantList.length
+    }
+    return this.tenantList;
   }
 
   isInErrorState(resource: Tenant): boolean {
@@ -71,11 +84,11 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'phase', 'age'];
+    return ['statusicon', 'clusterName', 'name', 'phase', 'age'];
   }
 
   getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'phase', 'age'];
+    return ['statusicon', 'clusterName', 'name', 'phase', 'age'];
   }
 
   //added the code

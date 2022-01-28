@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	// Resource clustermanagement that are used as csrf token storage. Can be accessible by multiple dashboard replicas.
+	// Resource information that are used as csrf token storage. Can be accessible by multiple dashboard replicas.
 	CsrfTokenSecretName = "kubernetes-dashboard-csrf"
 
 	// Name of the data var that holds the csrf token inside the secret.
@@ -52,6 +52,7 @@ type ClientManager interface {
 	VerberClient(req *restful.Request, config *rest.Config) (ResourceVerber, error)
 	SetTokenManager(manager authApi.TokenManager)
 	GetTenant(authInfo api.AuthInfo) (string, error)
+	GetClusterName() string
 }
 
 // ResourceVerber is responsible for performing generic CRUD operations on all supported resources.

@@ -23,18 +23,25 @@ import {ResourceService} from '../../../services/resource/resource';
 import {MenuComponent} from '../../list/column/menu/component';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {VerberService} from "../../../services/global/verber";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'kd-node-list',
   templateUrl: './template.html',
 })
+// @ts-ignore
 export class NodeListComponent extends ResourceListWithStatuses<NodeList, Node> {
   @Input() endpoint = EndpointManager.resource(Resource.node).list();
-  displayName:any="";
-  typeMeta:any="";
+  displayName:any;
+  typeMeta:any;
   objectMeta:any;
+  nodeCount: number;
+  partitions: [];
+  clusterName: string;
+
   constructor(
-    public readonly verber_: VerberService,
+    readonly verber_: VerberService,
+    private readonly router_: Router,
     private readonly node_: ResourceService<NodeList>,
     notifications: NotificationsService,
   ) {
@@ -49,6 +56,9 @@ export class NodeListComponent extends ResourceListWithStatuses<NodeList, Node> 
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
     this.registerBinding(this.icon.help, 'kd-muted', this.isInUnknownState);
     this.registerBinding(this.icon.error, 'kd-error', this.isInErrorState);
+
+    const routeInfo = this.router_.getCurrentNavigation();
+    this.clusterName = (routeInfo.extras.state['clusterName']).toString();
   }
 
   getResourceObservable(params?: HttpParams): Observable<NodeList> {
@@ -56,7 +66,52 @@ export class NodeListComponent extends ResourceListWithStatuses<NodeList, Node> 
   }
 
   map(nodeList: NodeList): Node[] {
-    return nodeList.nodes;
+    this.nodeCount = 0
+    const resourcePartitionList: any = [];
+    const tenantPartitionList: any = [];
+    const nonScaleOutPartitionList: any = [];
+
+    nodeList.nodes.map((node)=>{
+      if(node['objectMeta']['name'].includes("-rp"))
+      {
+        resourcePartitionList.push(node);
+      } else if(node['objectMeta']['name'].includes("-tp")){
+        tenantPartitionList.push(node);
+      }
+      else{
+        nonScaleOutPartitionList.push(node);
+      }
+    })
+
+    const resourcePartitions = resourcePartitionList.reduce((acc:any, item:any) => {
+      acc[`${item.clusterName}`] = (acc[`${item.clusterName}`] || []);
+      acc[`${item.clusterName}`].push(item);
+      return acc;
+    }, {});
+
+    const tenantPartitions = tenantPartitionList.reduce((acc:any, item:any) => {
+      acc[`${item.clusterName}`] = (acc[`${item.clusterName}`] || []);
+      acc[`${item.clusterName}`].push(item);
+      return acc;
+    }, {});
+
+    const nonScaleOutPartitions = nonScaleOutPartitionList.reduce((acc:any, item:any) => {
+      acc[`${item.clusterName}`] = (acc[`${item.clusterName}`] || []);
+      acc[`${item.clusterName}`].push(item);
+      return acc;
+    }, {});
+
+    if (this.clusterName.includes("-rp")){
+      this.partitions = resourcePartitions[this.clusterName];
+      this.nodeCount = resourcePartitions[this.clusterName].length
+    }else if (this.clusterName.includes("-tp")){
+      this.partitions = tenantPartitions[this.clusterName]
+      this.nodeCount = tenantPartitions[this.clusterName].length
+    }else{
+      this.partitions = nonScaleOutPartitions[this.clusterName]
+      this.nodeCount = nonScaleOutPartitions[this.clusterName].length
+    }
+    return this.partitions;
   }
 
   isInErrorState(resource: Node): boolean {

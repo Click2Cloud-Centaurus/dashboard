@@ -16,7 +16,11 @@
 package client
 
 import (
+	"fmt"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"log"
+	"path/filepath"
 	"strings"
 
 	restful "github.com/emicklei/go-restful"
@@ -48,7 +52,7 @@ const (
 	DefaultContentType = "application/vnd.kubernetes.protobuf"
 	// Default cluster/context/auth name to be set in clientcmd config
 	DefaultCmdConfigName = "kubernetes"
-	// Header name that contains token used for authorization. See TokenManager for more clustermanagement.
+	// Header name that contains token used for authorization. See TokenManager for more information.
 	JWETokenHeader = "jweToken"
 	// Default http header for user-agent
 	DefaultUserAgent = "dashboard"
@@ -86,6 +90,11 @@ type clientManager struct {
 	// to service account used by dashboard or kubeconfig file if it was passed during dashboard
 	// init.
 	insecureConfig *rest.Config
+	clustername    string
+}
+
+func (self *clientManager) GetClusterName() string {
+	return self.clustername
 }
 
 // Client returns a kubernetes client. In case dashboard login is enabled and option to skip
@@ -198,7 +207,7 @@ func (self *clientManager) CanI(req *restful.Request, ssar *v1.SelfSubjectAccess
 	return response.Status.Allowed
 }
 
-// ClientCmdConfig creates ClientCmd Config based on authentication clustermanagement extracted from request.
+// ClientCmdConfig creates ClientCmd Config based on authentication information extracted from request.
 // Currently request header is only checked for existence of 'Authentication: BearerToken'
 func (self *clientManager) ClientCmdConfig(req *restful.Request) (clientcmd.ClientConfig, error) {
 	authInfo, err := self.extractAuthInfo(req)
@@ -266,7 +275,7 @@ func (self *clientManager) HasAccess(authInfo api.AuthInfo) error {
 	return err
 }
 
-// VerberClient returns new verber client based on authentication clustermanagement extracted from request
+// VerberClient returns new verber client based on authentication information extracted from request
 func (self *clientManager) VerberClient(req *restful.Request, config *rest.Config) (clientapi.ResourceVerber, error) {
 	k8sClient, err := self.Client(req)
 	if err != nil {
@@ -336,7 +345,7 @@ func (self *clientManager) buildCmdConfig(authInfo *api.AuthInfo, cfg *rest.Conf
 	)
 }
 
-// Extracts authorization clustermanagement from the request header
+// Extracts authorization information from the request header
 func (self *clientManager) extractAuthInfo(req *restful.Request) (*api.AuthInfo, error) {
 	authHeader := req.HeaderParameter("Authorization")
 	impersonationHeader := req.HeaderParameter("Impersonate-User")
@@ -379,7 +388,7 @@ func (self *clientManager) extractAuthInfo(req *restful.Request) (*api.AuthInfo,
 	return nil, errors.NewUnauthorized(errors.MsgLoginUnauthorizedError)
 }
 
-// Checks if request headers contain any auth clustermanagement without parsing.
+// Checks if request headers contain any auth information without parsing.
 func (self *clientManager) containsAuthInfo(req *restful.Request) bool {
 	authHeader := req.HeaderParameter("Authorization")
 	jweToken := req.HeaderParameter(JWETokenHeader)
@@ -534,6 +543,8 @@ func (self *clientManager) initInsecureConfig() {
 	if err != nil {
 		panic(err)
 	}
+	clusterName, err := GetClusternName(self.kubeConfigPath)
+	self.clustername = clusterName
 
 	self.initConfig(cfg)
 	self.insecureConfig = cfg
@@ -554,4 +565,29 @@ func NewClientManager(kubeConfigPath, apiserverHost string) clientapi.ClientMana
 
 	result.init()
 	return result
+}
+
+func GetClusternName(config string) (cName string, err error) {
+	filename, _ := filepath.Abs(config)
+	yamlFile, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	var clusterDetail ClusterDetail
+
+	err = yaml.Unmarshal(yamlFile, &clusterDetail)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Value: %s \n", clusterDetail.Clusters[0].Name)
+	return clusterDetail.Clusters[0].Name, nil
+}
+
+type ClusterDetail struct {
+	APIVersion string `yaml:"apiVersion"`
+	Clusters   []struct {
+		Name string `yaml:"name"`
+	} `yaml:"clusters"`
 }

@@ -14,75 +14,73 @@
 
 import {HttpParams} from '@angular/common/http';
 import {Component, Input} from '@angular/core';
-import { Tenant, TenantList} from '@api/backendapi';
+import {TenantPartitionList, TenantPartition} from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 
-
 import {ResourceListWithStatuses} from '../../../resources/list';
+import {NotificationsService} from '../../../services/global/notifications';
 import {EndpointManager, Resource} from '../../../services/resource/endpoint';
 import {ResourceService} from '../../../services/resource/resource';
-import {NotificationsService} from '../../../services/global/notifications';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
-import {MatDialog, MatDialogConfig,MatExpansionModule} from '@angular/material/';
 import {VerberService} from '../../../services/global/verber';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'kd-tenant-partition-list',
   templateUrl: './template.html',
 })
-export class TenantPartitionListComponent extends ResourceListWithStatuses<TenantList, Tenant > {
-  @Input() endpoint = EndpointManager.resource(Resource.tenant).list();
-  // @Input() endpoint = EndpointManager.resource(Resource.tenant, true, true).list();
-
-  displayName:any="";
-  typeMeta:any="";
+// @ts-ignore
+export class TenantPartitionListComponent extends ResourceListWithStatuses<TenantPartitionList, TenantPartition> {
+  @Input() endpointTp = EndpointManager.resource(Resource.tenantPartition).list();
+  displayName:any;
+  typeMeta:any;
   objectMeta:any;
+
   constructor(
-    public readonly verber_: VerberService,
-    private readonly tenant_: ResourceService<TenantList>,
-
+    readonly verber_: VerberService,
+    private readonly router_: Router,
+    private readonly tenantPartition_: ResourceService<TenantPartitionList>,
     notifications: NotificationsService,
-    private dialog: MatDialog //add the code
   ) {
-    super('tenant', notifications);
-    this.id = ListIdentifier.tenant;
+    super('tenantPartition', notifications);
+    this.id = ListIdentifier.tenantPartition;
     this.groupId = ListGroupIdentifier.cluster;
-
-    // Register status icon handlers
-    this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
-    this.registerBinding(this.icon.error, 'kd-error', this.isInErrorState);
 
     // Register action columns.
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
+
+    // Register status icon handlers
+    this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
   }
 
-  getResourceObservable(params?: HttpParams): Observable<TenantList> {
-    return this.tenant_.get(this.endpoint, undefined, params);
+  setClusterName($event:any) {
+    const clusterName = $event.target.innerHTML.replace(/^\s+|\s+$/gm,'');
+    this.router_.navigateByUrl('/tptenant', {state: {clusterName}});
   }
 
-  map(tenantList: TenantList): Tenant[] {
-    return tenantList.tenants ;
+  getResourceObservable(params?: HttpParams): Observable<TenantPartitionList> {
+    return this.tenantPartition_.get(this.endpointTp, undefined, params);
   }
 
-  isInErrorState(resource: Tenant): boolean {
-    return resource.phase === 'Terminating';
+  map(tenantPartitionList: TenantPartitionList): TenantPartition[] {
+    return tenantPartitionList.tenantPartitions
   }
 
-  isInSuccessState(resource: Tenant): boolean {
-    return resource.phase === 'Active';
+  isInSuccessState(): boolean {
+    return true;
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'phase', 'age'];
+    return ['statusicon', 'name', 'tenantcount','cpulim','memlim','health','etcd'];
   }
 
   getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'nodecount','cpulim','memlim','tentcount','health','etcd'];
+    return ['statusicon', 'name', 'tenantcount','cpulim','memlim','health','etcd'];
   }
 
   //added the code
   onClick(): void {
-    this.verber_.showTenantCreateDialog(this.displayName, this.typeMeta, this.objectMeta);  //changes needed
+    this.verber_.showNodeCreateDialog(this.displayName, this.typeMeta, this.objectMeta); //added
   }
 }

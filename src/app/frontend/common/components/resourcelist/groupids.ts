@@ -42,6 +42,9 @@ export enum ListIdentifier {
   tenantpartition = 'tenantpartition',
   user = 'users',
   serviceaccount= 'serviceaccount',
+  resourcePartition = 'resourcepartition',
+  tenantPartition = 'tenantpartition',
+  tpTenant = 'tptenant',
 }
 
 export enum ListGroupIdentifier {

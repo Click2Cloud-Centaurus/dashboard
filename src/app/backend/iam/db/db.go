@@ -67,13 +67,13 @@ func InsertUser(user model.User) int64 {
 
 	// create the insert sql query
 	// returning userid will return the id of the inserted user
-	sqlStatement := `INSERT INTO users (username, password, token, type, tenant) VALUES ($1, $2, $3, $4, $5) ON CONFLICT ON CONSTRAINT users_username_key DO UPDATE SET username=EXCLUDED.username RETURNING userid;`
+	sqlStatement := `INSERT INTO userdetails (username, password, token, type, tenant, role, creationTime) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT ON CONSTRAINT userdetails_username_key DO UPDATE SET username=EXCLUDED.username RETURNING userid;`
 	// the inserted id will store in this id
 	var id int64
 
 	// execute the sql statement
 	// Scan function will save the insert id in the id
-	err := db.QueryRow(sqlStatement, user.Username, user.Password, user.Token, user.Type, user.Tenant).Scan(&id)
+	err := db.QueryRow(sqlStatement, user.Username, user.Password, user.Token, user.Type, user.Tenant, user.Role, user.CreationTime).Scan(&id)
 
 	if err != nil {
 		log.Fatalf("Unable to execute the query. %v", err)
@@ -99,13 +99,13 @@ func GetUser(param string) (model.UserDetails, error) {
 	user.TypeMeta.Kind = "User"
 
 	// create the select sql query
-	sqlStatement := `SELECT * FROM users WHERE username=$1`
+	sqlStatement := `SELECT * FROM userdetails WHERE username=$1`
 
 	// execute the sql statement
 	row := db.QueryRow(sqlStatement, param)
 
 	// unmarshal the row object to user
-	err := row.Scan(&user.ObjectMeta.ID, &user.ObjectMeta.Username, &user.ObjectMeta.Password, &user.ObjectMeta.Token, &user.ObjectMeta.Type, &user.ObjectMeta.Tenant)
+	err := row.Scan(&user.ObjectMeta.ID, &user.ObjectMeta.Username, &user.ObjectMeta.Password, &user.ObjectMeta.Token, &user.ObjectMeta.Type, &user.ObjectMeta.Tenant, &user.ObjectMeta.Role, &user.ObjectMeta.CreationTime)
 
 	switch err {
 	case sql.ErrNoRows:
@@ -132,7 +132,7 @@ func GetAllUsers() (*model.UserList, error) {
 	userList := new(model.UserList)
 
 	// create the select sql query
-	sqlStatement := `SELECT * FROM users`
+	sqlStatement := `SELECT * FROM userdetails`
 
 	// execute the sql statement
 	rows, err := db.Query(sqlStatement)
@@ -150,7 +150,7 @@ func GetAllUsers() (*model.UserList, error) {
 		var user model.UserDetails
 
 		// unmarshal the row object to user
-		err = rows.Scan(&user.ObjectMeta.ID, &user.ObjectMeta.Username, &user.ObjectMeta.Password, &user.ObjectMeta.Token, &user.ObjectMeta.Type, &user.ObjectMeta.Tenant)
+		err = rows.Scan(&user.ObjectMeta.ID, &user.ObjectMeta.Username, &user.ObjectMeta.Password, &user.ObjectMeta.Token, &user.ObjectMeta.Type, &user.ObjectMeta.Tenant, &user.ObjectMeta.Role, &user.ObjectMeta.CreationTime)
 
 		if err != nil {
 			log.Fatalf("Unable to scan the row. %v", err)
@@ -178,7 +178,7 @@ func DeleteUser(id int64) int64 {
 	defer db.Close()
 
 	// create the delete sql query
-	sqlStatement := `DELETE FROM users WHERE userid=$1`
+	sqlStatement := `DELETE FROM userdetails WHERE userid=$1`
 
 	// execute the sql statement
 	res, err := db.Exec(sqlStatement, id)
