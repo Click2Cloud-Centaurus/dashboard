@@ -70,8 +70,8 @@ export class CreateUserDialog implements OnInit {
 
   secret: SecretDetail;
   secretName =""
-  private currentTenant: string;
 
+  private currentTenant: string;
   private tenant_: string;
 
   constructor(
@@ -109,7 +109,6 @@ export class CreateUserDialog implements OnInit {
             Validators.pattern(this.tenantPattern),
           ]),
         ],
-
         username: [
           '',
           Validators.compose([
@@ -131,13 +130,14 @@ export class CreateUserDialog implements OnInit {
             Validators.pattern(this.storageidPattern),
           ]),
         ],
-
       },
     );
     this.role.valueChanges.subscribe((role: string) => {
-      this.name.clearAsyncValidators();
-      this.name.setAsyncValidators(validateUniqueName(this.http_, role));
-      this.name.updateValueAndValidity();
+      if (this.name !== null) {
+        this.name.clearAsyncValidators();
+        this.name.setAsyncValidators(validateUniqueName(this.http_, role));
+        this.name.updateValueAndValidity();
+      }
     });
 
     this.http_.get(`api/v1/tenants/${this.currentTenant}/role/default`).subscribe((result: RoleList) => {
@@ -171,7 +171,7 @@ export class CreateUserDialog implements OnInit {
   get tenant(): any {
     return this.tenantService_.current()
   }
- get role(): any {
+  get role(): any {
     return this.form1.get('role');
   }
   get user(): AbstractControl {
@@ -193,9 +193,7 @@ export class CreateUserDialog implements OnInit {
   }
 
   createUser() {
-
     const currentType = sessionStorage.getItem('userType')
-
     if (this.usertype.value === 'tenant-admin' && currentType === 'cluster-admin') {
       this.tenant_ = this.user.value
     } else if (this.usertype.value === 'tenant-admin' && currentType === 'tenant-admin') {
@@ -207,15 +205,13 @@ export class CreateUserDialog implements OnInit {
     }
 
     this.getToken(async (token_:any)=>{
-      if(this.selected == "tenant-admin") {
-        var commaSeperatedString = this.role.value.toString();
-        this.role.value=commaSeperatedString
-      }
-
-      else if (this.selected == "tenant-user"){
-        this.role.value = this.role.value
-      }
       const userSpec= {name: this.user.value, password:this.pass.value, token:token_, type:this.usertype.value,tenant:this.tenant,role:this.role.value};
+      if (this.selected === "tenant-user") {
+        userSpec.role = this.role.value;
+      }
+      else {
+        userSpec.role = '';
+      }
       const userTokenPromise = await this.csrfToken_.getTokenForAction('users');
       userTokenPromise.subscribe(csrfToken => {
         return this.http_
