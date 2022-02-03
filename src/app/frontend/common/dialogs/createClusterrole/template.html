@@ -10,9 +10,9 @@
         <input matInput type="text" formControlName="clusterrole" required autocomplete="off"/>
       </mat-form-field>
       <div class="error_sec" *ngIf="clusterrole.errors && (clusterrole.dirty || clusterrole.touched)">
-        <span class="red" *ngIf="clusterrole.errors.required">ClusterRole is required.</span>
-        <span class="red" *ngIf="clusterrole.hasError('pattern')">ClusterRole must be alphanumeric and may contain dashes.</span>
-        <span class="red" *ngIf="clusterrole.hasError('maxlength')">ClusterRole should not be greater than 24 characters.</span>
+        <span class="red" *ngIf="clusterrole.errors.required">Name is required.</span>
+        <span class="red" *ngIf="clusterrole.hasError('pattern')">Name must be alphanumeric and may contain dashes.</span>
+        <span class="red" *ngIf="clusterrole.hasError('maxlength')">Name should not be greater than 24 characters.</span>
       </div>
     </div>
 

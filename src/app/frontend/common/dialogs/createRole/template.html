@@ -11,9 +11,9 @@
         <mat-hint align="end"></mat-hint>
       </mat-form-field>
       <div class="error_sec" *ngIf="role.errors && (role.dirty || role.touched)">
-        <span class="red" *ngIf="role.errors.required">Role is required.</span>
-        <span class="red" *ngIf="role.hasError('pattern')">Role must be alphanumeric and may contain dashes.</span>
-        <span class="red" *ngIf="role.hasError('maxlength')">Role should not be greater than 24 characters.</span>
+        <span class="red" *ngIf="role.errors.required">Name is required.</span>
+        <span class="red" *ngIf="role.hasError('pattern')">Name must be alphanumeric and may contain dashes.</span>
+        <span class="red" *ngIf="role.hasError('maxlength')">Name should not be greater than 24 characters.</span>
       </div>
     </div>
     <div class="col-10 col-sm-10 col-md-10 col-lg-10">
@@ -23,9 +23,9 @@
         <mat-hint align="end"></mat-hint>
       </mat-form-field>
       <div class="error_sec" *ngIf="namespace.errors && (namespace.dirty || namespace.touched)">
-        <span class="red" *ngIf="namespace.errors.required">Namespace is required.</span>
-        <span class="red" *ngIf="namespace.hasError('pattern')">Namespace must be alphanumeric and may contain dashes.</span>
-        <span class="red" *ngIf="namespace.hasError('maxlength')">Namespace should not be greater than 63 characters.</span>
+        <span class="red" *ngIf="namespace.errors.required">Name is required.</span>
+        <span class="red" *ngIf="namespace.hasError('pattern')">Name must be alphanumeric and may contain dashes.</span>
+        <span class="red" *ngIf="namespace.hasError('maxlength')">Name should not be greater than 63 characters.</span>
       </div>
     </div>
 

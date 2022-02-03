@@ -12,9 +12,9 @@
         <mat-hint align="end"></mat-hint>
       </mat-form-field>
       <div class="error_sec" *ngIf="quotaname.errors && (quotaname.dirty || quotaname.touched)">
-        <span class="red" *ngIf="quotaname.errors.required">Quota is required.</span>
-        <span class="red" *ngIf="quotaname.hasError('pattern')">Quota must be alphanumeric and may contain dashes.</span>
-        <span class="red" *ngIf="quotaname.hasError('maxlength')">Quota should not be greater than 24 characters.</span>
+        <span class="red" *ngIf="quotaname.errors.required">Name is required.</span>
+        <span class="red" *ngIf="quotaname.hasError('pattern')">Name must be alphanumeric and may contain dashes.</span>
+        <span class="red" *ngIf="quotaname.hasError('maxlength')">Name should not be greater than 24 characters.</span>
       </div>
     </div>
 
@@ -24,9 +24,9 @@
         <input type="text" matInput formControlName="tenant" required autocomplete="off"/>
       </mat-form-field>
       <div class="error_sec" *ngIf="tenants.errors && (tenants.dirty || tenants.touched)">
-        <span class="red" *ngIf="tenants.errors.required">Tenant is required.</span>
-        <span class="red" *ngIf="tenants.hasError('pattern')">Tenant must be alphanumeric and may contain dashes.</span>
-        <span class="red" *ngIf="tenants.hasError('maxlength')">Tenant should not be greater than 24 characters.</span>
+        <span class="red" *ngIf="tenants.errors.required">Name is required.</span>
+        <span class="red" *ngIf="tenants.hasError('pattern')">Name must be alphanumeric and may contain dashes.</span>
+        <span class="red" *ngIf="tenants.hasError('maxlength')">Name should not be greater than 24 characters.</span>
       </div>
     </div>
 
@@ -36,9 +36,9 @@
         <input type="text" matInput formControlName="namespace" required autocomplete="off"/>
       </mat-form-field>
       <div class="error_sec" *ngIf="namespaces.errors && (namespaces.dirty || namespaces.touched)">
-        <span class="red" *ngIf="namespaces.errors.required">Namespace is required.</span>
-        <span class="red" *ngIf="namespaces.hasError('pattern')">Namespace must be alphanumeric and may contain dashes.</span>
-        <span class="red" *ngIf="namespaces.hasError('maxlength')">Namespace should not be greater than 63 characters.</span>
+        <span class="red" *ngIf="namespaces.errors.required">Name is required.</span>
+        <span class="red" *ngIf="namespaces.hasError('pattern')">Name must be alphanumeric and may contain dashes.</span>
+        <span class="red" *ngIf="namespaces.hasError('maxlength')">Name should not be greater than 63 characters.</span>
       </div>
     </div>
 

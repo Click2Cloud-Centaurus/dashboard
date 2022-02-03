@@ -26,9 +26,6 @@ export class CreateNamespaceDialog implements OnInit {
   namespaceMaxLength = 63;
   namespacePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
 
-  tenantMaxLength = 24;
-  tenantPattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
-
   constructor(
     public dialogRef: MatDialogRef<CreateNamespaceDialog>,
     @Inject(MAT_DIALOG_DATA) public data: CreateNamespaceDialogMeta,
@@ -50,22 +47,11 @@ export class CreateNamespaceDialog implements OnInit {
           Validators.pattern(this.namespacePattern),
         ]),
       ],
-      tenant: [
-        '',
-        Validators.compose([
-          Validators.maxLength(this.tenantMaxLength),
-          Validators.pattern(this.tenantPattern),
-        ]),
-      ],
     });
   }
 
   get namespace(): AbstractControl {
     return this.form1.get('namespace');
-  }
-
-  get tenant(): AbstractControl {
-    return this.form1.get('tenant');
   }
 
   createNamespace(): void {
