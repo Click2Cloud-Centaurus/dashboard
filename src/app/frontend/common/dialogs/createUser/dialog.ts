@@ -170,7 +170,7 @@ export class CreateUserDialog implements OnInit {
     });
 
   }
-  
+
   passwordTimeout() {
     this.message = true;
     this.success = 'Password must contain uppercase,lowercase,number,special characters only!'
