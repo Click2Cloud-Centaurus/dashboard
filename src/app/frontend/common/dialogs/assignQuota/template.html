@@ -13,7 +13,7 @@
       </mat-form-field>
       <div class="error_sec" *ngIf="quotaname.errors && (quotaname.dirty || quotaname.touched)">
         <span class="red" *ngIf="quotaname.errors.required">Quota is required.</span>
-        <span class="red" *ngIf="quotaname.hasError('pattern')">Quota must be in small alphanumeric characters or '-'.</span>
+        <span class="red" *ngIf="quotaname.hasError('pattern')">Quota must be alphanumeric and may contain dashes.</span>
         <span class="red" *ngIf="quotaname.hasError('maxlength')">Quota should not be greater than 24 characters.</span>
       </div>
     </div>
