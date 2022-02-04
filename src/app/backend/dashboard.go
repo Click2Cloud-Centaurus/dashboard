@@ -51,6 +51,8 @@ import (
 )
 
 var (
+	configfilecheck        bool
+	configDir              = "."
 	argInsecurePort        = pflag.Int("insecure-port", 9090, "The port to listen to for incoming HTTP requests.")
 	argPort                = pflag.Int("port", 8443, "The secure port to listen to for incoming HTTPS requests.")
 	argInsecureBindAddress = pflag.IP("insecure-bind-address", net.IPv4(127, 0, 0, 1), "The IP address on which to serve the --insecure-port (set to 127.0.0.1 for all interfaces).")
@@ -98,7 +100,7 @@ func main() {
 	// Initializes dashboard arguments holder so we can read them in other packages
 	initArgHolder()
 	configs := make(map[string][]byte)
-	var Tp1Config, Tp2Config, Rp1Config, Rp2Config []byte
+	//var Tp1Config, Tp2Config, Rp1Config, Rp2Config []byte
 	if args.Holder.GetApiServerHost() != "" {
 		log.Printf("Using apiserver-host location: %s", args.Holder.GetApiServerHost())
 	}
@@ -108,25 +110,54 @@ func main() {
 	if args.Holder.GetNamespace() != "" {
 		log.Printf("Using namespace: %s", args.Holder.GetNamespace())
 	}
-	if tp1config := os.Getenv("TP1_CONFIG"); tp1config != "" {
-		Tp1Config, _ = base64.StdEncoding.DecodeString(tp1config)
-		configs["tp1config"] = Tp1Config
-		log.Printf("Using tp1config: %s", Tp1Config)
+
+	fileInfo, err := os.ReadDir(configDir)
+	if err != nil {
+		panic(err)
 	}
-	if tp2config := os.Getenv("TP2_CONFIG"); tp2config != "" {
-		Tp2Config, _ = base64.StdEncoding.DecodeString(tp2config)
-		configs["tp2config"] = Tp2Config
-		log.Printf("Using tp2config: %s", Tp2Config)
+	//for kubeconfig files
+	for _, fileinfo := range fileInfo {
+		if strings.HasPrefix(fileinfo.Name(), "kubeconfig.") {
+			configfilecheck = true
+			fmt.Println(fileinfo.Name())
+			//filename
+			filename := strings.Split(strings.Split(fileinfo.Name(), ".")[1], "-")
+
+			config, err := os.ReadFile(configDir + "/" + fileinfo.Name())
+			if err != nil {
+				panic(err)
+			}
+			filenamestr := filename[0] + filename[1] + "config"
+			configs[filenamestr] = config
+			fmt.Println(string(config))
+		}
+
 	}
-	if rp1config := os.Getenv("RP1_CONFIG"); rp1config != "" {
-		Rp1Config, _ = base64.StdEncoding.DecodeString(rp1config)
-		configs["rp1config"] = Rp1Config
-		log.Printf("Using rp1config: %s", Rp1Config)
-	}
-	if rp2config := os.Getenv("RP2_CONFIG"); rp2config != "" {
-		Rp2Config, _ = base64.StdEncoding.DecodeString(rp2config)
-		configs["rp2config"] = Rp2Config
-		log.Printf("Using rp2config: %s", Rp2Config)
+	//for env configs
+	if !configfilecheck {
+		for _, envs := range os.Environ() {
+			//for tp configs
+			if strings.HasPrefix(envs, "TP") {
+				env := strings.Split(envs, "=")
+				envstr := strings.ToLower(strings.Split(env[0], "_")[0]) + "config"
+				//for mapping
+				fmt.Println(envstr)
+				fmt.Println("tpenvvalue: ", os.Getenv(env[0]))
+				tpconfig := os.Getenv(env[0])
+				config, _ := base64.StdEncoding.DecodeString(tpconfig)
+				configs[envstr] = config
+			} else if strings.HasPrefix(envs, "RP") {
+				//for rp configs
+				env := strings.Split(envs, "=")
+				//for mapping
+				envstr := strings.ToLower(strings.Split(env[0], "_")[0]) + "config"
+				fmt.Println(envstr)
+				fmt.Println("rpenvvalue: ", os.Getenv(env[0]))
+				rpconfig := os.Getenv(env[0])
+				config, _ := base64.StdEncoding.DecodeString(rpconfig)
+				configs[envstr] = config
+			}
+		}
 	}
 
 	for name, config := range configs {
