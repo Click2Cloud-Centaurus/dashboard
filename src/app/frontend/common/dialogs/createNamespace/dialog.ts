@@ -1,16 +1,3 @@
-// Copyright 2020 Authors of Arktos - file modified.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Component, Inject, OnInit} from '@angular/core';
@@ -19,11 +6,11 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material';
 import {AlertDialog, AlertDialogConfig} from '../../../common/dialogs/alert/dialog';
 import {CsrfTokenService} from '../../../common/services/global/csrftoken';
 import {CONFIG} from '../../../index.config';
-
+import {NamespacedResourceService} from "../../services/resource/resource";
+import {TenantDetail} from "@api/backendapi";
 
 export interface CreateNamespaceDialogMeta {
   namespaces: string[];
-  tenants: string[];
 }
 
 @Component({
@@ -34,13 +21,10 @@ export class CreateNamespaceDialog implements OnInit {
   form1: FormGroup;
 
   private readonly config_ = CONFIG;
+  private currentTenant:string
 
-  //validations
   namespaceMaxLength = 63;
   namespacePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
-
-  tenantMaxLength = 63;
-  tenantPattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
 
   constructor(
     public dialogRef: MatDialogRef<CreateNamespaceDialog>,
@@ -49,22 +33,18 @@ export class CreateNamespaceDialog implements OnInit {
     private readonly csrfToken_: CsrfTokenService,
     private readonly matDialog_: MatDialog,
     private readonly fb_: FormBuilder,
+    private readonly tenant_: NamespacedResourceService<TenantDetail>,
   ) {}
 
   ngOnInit(): void {
+    this.currentTenant = this.tenant_['tenant_']['currentTenant_']
+
     this.form1 = this.fb_.group({
       namespace: [
         '',
         Validators.compose([
           Validators.maxLength(this.namespaceMaxLength),
           Validators.pattern(this.namespacePattern),
-        ]),
-      ],
-      tenant: [
-        '',
-        Validators.compose([
-          Validators.maxLength(this.tenantMaxLength),
-          Validators.pattern(this.tenantPattern),
         ]),
       ],
     });
@@ -74,15 +54,9 @@ export class CreateNamespaceDialog implements OnInit {
     return this.form1.get('namespace');
   }
 
-  get tenant(): AbstractControl {
-    return this.form1.get('tenant');
-  }
-  /**
-   * Creates new namespace based on the state of the controller.
-   */
   createNamespace(): void {
     if (!this.form1.valid) return;
-    const namespaceSpec = {name: this.namespace.value, tenant: this.tenant.value};
+    const namespaceSpec = {name: this.namespace.value, tenant: this.currentTenant};
     const tokenPromise = this.csrfToken_.getTokenForAction('namespace');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
@@ -95,11 +69,9 @@ export class CreateNamespaceDialog implements OnInit {
         )
         .subscribe(
           () => {
-            // this.log_.info('Successfully created namespace:', savedConfig);
             this.dialogRef.close(this.namespace.value);
           },
           error => {
-            // this.log_.info('Error creating namespace:', err);
             this.dialogRef.close();
             const configData: AlertDialogConfig = {
               title: 'Error creating namespace',
@@ -112,17 +84,10 @@ export class CreateNamespaceDialog implements OnInit {
     });
   }
 
-  /**
-   * Returns true if new namespace name hasn't been filled by the user, i.e, is empty.
-   */
-
   isDisabled(): boolean {
     return this.data.namespaces.indexOf(this.namespace.value) >= 0;
   }
 
-  /**
-   * Cancels the new namespace form.
-   */
   cancel(): void {
     this.dialogRef.close();
   }

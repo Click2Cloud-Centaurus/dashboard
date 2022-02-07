@@ -1,16 +1,3 @@
-// Copyright 2020 Authors of Arktos - file modified.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 
 import {Component, OnInit, Inject} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
@@ -44,16 +31,16 @@ export class CreateRoleDialog implements OnInit {
   roleMaxLength = 24;
   rolePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
 
-  namespaceMaxLength = 24;
+  namespaceMaxLength = 63;
   namespacePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
 
-  apiGroupsMaxLength = 24;
+  apiGroupsMaxLength = 63;
   apiGroupsPattern: RegExp = new RegExp('^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{\'\\|<>\\[&\\+-]*$');
 
-  resourceMaxLength = 24;
+  resourceMaxLength = 63;
   resourcePattern: RegExp = new RegExp('^^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{\'\\|<>\\[&\\+-]*$');
 
-  verbsMaxLength = 24;
+  verbsMaxLength = 63;
   verbsPattern: RegExp = new RegExp('^^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{\'\\|<>\\[&\\+-]*$');
 
   apiGroups1: string[]
@@ -136,7 +123,34 @@ export class CreateRoleDialog implements OnInit {
     this.resources1 = this.resources.value.split(',')
     this.verbs1 = this.verbs.value.split(',')
 
-    const roleSpec= {name: this.role.value, tenant: this.currentTenant, namespace: this.namespace.value, apiGroups: this.apiGroups1,verbs: this.verbs1,resources: this.resources1};
+    const tenantRoleSpec = {name: this.role.value, namespace: this.namespace.value, apiGroups: this.apiGroups1,verbs: this.verbs1,resources: this.resources1};
+    const tenantTokenPromise = this.csrfToken_.getTokenForAction('role');
+    tenantTokenPromise.subscribe(csrfToken => {
+      return this.http_
+        .post<{valid: boolean}>(
+          'api/v1/role',
+          {...tenantRoleSpec},
+          {
+            headers: new HttpHeaders().set(this.config_.csrfHeaderName, csrfToken.token),
+          },
+        )
+        .subscribe(
+          () => {
+            this.dialogRef.close(this.role.value);
+          },
+          error => {
+            this.dialogRef.close();
+            const configData: AlertDialogConfig = {
+              title: 'Error creating Role',
+              message: error.data,
+              confirmLabel: 'OK',
+            };
+            this.matDialog_.open(AlertDialog, {data: configData});
+          },
+        );
+    });
+
+    const roleSpec = {name: this.role.value, tenant: this.currentTenant, namespace: this.namespace.value, apiGroups: this.apiGroups1,verbs: this.verbs1,resources: this.resources1};
     const tokenPromise = this.csrfToken_.getTokenForAction('roles');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
