@@ -26,6 +26,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -129,7 +130,6 @@ func main() {
 			}
 			filenamestr := filename[0] + filename[1] + "config"
 			configs[filenamestr] = config
-			fmt.Println(string(config))
 		}
 
 	}
@@ -172,7 +172,8 @@ func main() {
 		configfile.Close()
 	}
 
-	var clients []clientapi.ClientManager
+	var clients = make([]clientapi.ClientManager, len(configs)/2)
+	//var clients []clientapi.ClientManager
 	var rpclients []clientapi.ClientManager
 	clientManager := client.NewClientManager(args.Holder.GetKubeConfigFile(), args.Holder.GetApiServerHost())
 	versionInfo, err := clientManager.InsecureClient().Discovery().ServerVersion()
@@ -191,7 +192,9 @@ func main() {
 			//For rpconfigs
 			rpclients = append(rpclients, newclientmanager)
 		} else {
-			clients = append(clients, newclientmanager)
+			tps := strings.Split(strings.Split(name, "tp")[1], "config")
+			tp, _ := strconv.Atoi(tps[0])
+			clients[tp-1] = newclientmanager
 		}
 	}
 

@@ -110,17 +110,25 @@ type TerminalResponse struct {
 	Id string `json:"id"`
 }
 
-func ResourceAllocator(tenant string, clients []clientapi.ClientManager) clientapi.ClientManager {
+//ResourceAllocator Allocates tenant resources to clients
+func ResourceAllocator(tenantname string, clients []clientapi.ClientManager) clientapi.ClientManager {
 	if clienlen := len(clients); clienlen > 1 {
-
-		pref := []rune(strings.ToUpper(tenant))
-		log.Printf("prefix:%v", pref[0])
-		if pref[0] <= rune(77) {
-			log.Printf("client[0]")
-			return clients[0]
-		} else {
-			log.Printf("client[1]")
-			return clients[1]
+		start := 65
+		quo, rem := func(dvdnd, dvsr int) (quo, rem int) {
+			quo = dvdnd / dvsr
+			rem = dvdnd % dvsr
+			return quo, rem
+		}(26, clienlen)
+		tenantpref := []rune(strings.ToUpper(tenantname))
+		temp := start + quo + rem
+		for i := 0; i < len(clients); i++ {
+			if tenantpref[0] <= rune(temp) {
+				fmt.Println("match", i)
+				fmt.Println(clients[i])
+				return clients[i]
+			} else {
+				temp = temp + quo
+			}
 		}
 	}
 	return clients[0]
