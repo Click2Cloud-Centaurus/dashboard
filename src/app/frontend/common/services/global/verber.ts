@@ -220,6 +220,7 @@ export class VerberService {
       });
   }
 
+
   showScaleDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
     const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
     const current = this.tenant_.current();

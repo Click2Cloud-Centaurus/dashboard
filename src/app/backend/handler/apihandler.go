@@ -30,6 +30,7 @@ import (
 	"github.com/kubernetes/dashboard/src/app/backend/iam/model"
 	_ "github.com/lib/pq" // postgres golang driver
 
+	er "errors"
 	restful "github.com/emicklei/go-restful"
 	"github.com/kubernetes/dashboard/src/app/backend/api"
 	"github.com/kubernetes/dashboard/src/app/backend/auth"
@@ -1256,7 +1257,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			To(apiHandler.handleGetUserDetail).
 			Writes(model.User{}))
 	apiV1Ws.Route(
-		apiV1Ws.DELETE("/users/{userid}").
+		apiV1Ws.DELETE("/tenants/{tenant}/users/{username}/{userid}").
 			To(apiHandler.handleDeleteUser).
 			Writes(model.User{}))
 
@@ -5648,12 +5649,31 @@ func (apiHandler *APIHandler) handleGetAllUser(w *restful.Request, r *restful.Re
 }
 
 func (apiHandler *APIHandler) handleDeleteUser(w *restful.Request, r *restful.Response) {
-	_, err := apiHandler.cManager.Client(w)
+	k8sClient, err := apiHandler.cManager.Client(w)
+
+	tenantName := w.PathParameter("tenant")
+	userName := w.PathParameter("username")
+	userid := w.PathParameter("userid")
+
 	if err != nil {
 		errors.HandleInternalError(r, err)
 		return
 	}
-	userid := w.PathParameter("userid")
+
+	userDetail, err := db.GetUser(userName)
+
+	if tenantName == userDetail.ObjectMeta.Username {
+		errors.HandleInternalError(r, er.New("unable to delete itself"))
+		return
+	}
+
+	if userDetail.ObjectMeta.Type != `cluster-admin` {
+		if err := tenant.DeleteTenant(userName, k8sClient); err != nil {
+			errors.HandleInternalError(r, err)
+			return
+		}
+	}
+
 	id, err := strconv.Atoi(userid)
 	deletedRows := db.DeleteUser(int64(id))
 
