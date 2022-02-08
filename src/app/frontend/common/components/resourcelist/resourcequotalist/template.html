@@ -38,7 +38,6 @@
               </mat-cell>
             </ng-container>
 
-
             <ng-container [matColumnDef]="getColumns()[1]">
               <mat-header-cell *matHeaderCellDef
                                mat-sort-header
@@ -73,16 +72,6 @@
               </mat-cell>
             </ng-container>
 
-            <ng-container [matColumnDef]="getColumns()[4]">
-              <mat-header-cell *matHeaderCellDef
-                               mat-sort-header
-                               disableClear="true"
-                               i18n>Status</mat-header-cell>
-              <mat-cell *matCellDef="let resourcequota">
-                <ng-container *ngIf="resourcequota.statusList">{{resourcequota.statusList | json}}</ng-container>
-                <ng-container *ngIf="!resourcequota.statusList">-</ng-container>
-              </mat-cell>
-            </ng-container>
 
             <ng-container *ngFor="let col of getActionColumns()"
                           [matColumnDef]="col.name">

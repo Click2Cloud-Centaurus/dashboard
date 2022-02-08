@@ -52,11 +52,11 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'namespace', 'age', 'status'];
+    return ['statusicon', 'name', 'namespace', 'age'];
   }
 
   getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'namespace', 'age', 'status'];
+    return ['statusicon', 'name', 'namespace', 'age'];
   }
 
   //added the code
