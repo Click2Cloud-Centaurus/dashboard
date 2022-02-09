@@ -693,6 +693,7 @@ export interface AppDeploymentSpec {
   labels: Label[];
   replicas: number;
   namespace: string;
+  tenant: string;
   memoryRequirement?: string;
   cpuRequirement?: number;
   runAsPrivileged: boolean;

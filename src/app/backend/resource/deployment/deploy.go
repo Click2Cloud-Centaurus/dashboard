@@ -89,6 +89,8 @@ type AppDeploymentSpec struct {
 
 	// Whether to run the container as privileged user (essentially equivalent to root on the host).
 	RunAsPrivileged bool `json:"runAsPrivileged"`
+
+	Tenant string `json:"tenant"`
 }
 
 // AppDeploymentFromFileSpec is a specification for deployment from file
@@ -225,7 +227,11 @@ func DeployApp(spec *AppDeploymentSpec, client client.Interface) error {
 			},
 		},
 	}
-	_, err := client.AppsV1().Deployments(spec.Namespace).Create(deployment)
+	if spec.Tenant == "" {
+		spec.Tenant = "system"
+	}
+	log.Printf("Bharath Namespace : %s", spec.Tenant)
+	_, err := client.AppsV1().DeploymentsWithMultiTenancy(spec.Namespace, spec.Tenant).Create(deployment)
 
 	if err != nil {
 		return err
@@ -259,7 +265,7 @@ func DeployApp(spec *AppDeploymentSpec, client client.Interface) error {
 			service.Spec.Ports = append(service.Spec.Ports, servicePort)
 		}
 
-		_, err = client.CoreV1().Services(spec.Namespace).Create(service)
+		_, err = client.CoreV1().ServicesWithMultiTenancy(spec.Namespace, spec.Tenant).Create(service)
 		return err
 	}
 
