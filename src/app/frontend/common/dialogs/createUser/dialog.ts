@@ -31,7 +31,7 @@ import {NamespacedResourceService} from '../../services/resource/resource';
 import {TenantService} from "../../services/global/tenant";
 import {SecretDetail, Role, RoleList, NamespaceList, Namespace} from '../../../typings/backendapi';
 import {validateUniqueName} from "../../../create/from/form/validator/uniquename.validator";
-import {TenantDetail,NamespaceDetail} from "@api/backendapi";
+import {TenantDetail} from "@api/backendapi";
 import {NamespaceService} from "../../services/global/namespace";
 
 export interface UserToken {
@@ -105,6 +105,7 @@ export class CreateUserDialog implements OnInit {
     private readonly route_: ActivatedRoute,
     private readonly ngZone_: NgZone,
     private readonly tenants_: NamespacedResourceService<TenantDetail>,
+    private readonly namespace_: NamespaceService,
   ) {}
 
   ngOnInit(): void {
