@@ -38,10 +38,8 @@ export class NamespaceService {
 
   current(): string {
     const nameSpace = sessionStorage.getItem('namespace');
-    if (nameSpace !== ''){
+    if (nameSpace !== 'default'){
       this.currentNamespace_ = nameSpace
-    } else {
-      this.currentNamespace_ = 'default'
     }
     return this.currentNamespace_;
   }

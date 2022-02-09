@@ -17,6 +17,8 @@ import {Component, OnInit} from '@angular/core';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MatDialog} from '@angular/material';
 import {ActivatedRoute} from '@angular/router';
+import {TenantDetail} from "@api/backendapi";
+import {NamespacedResourceService} from '../../../../frontend/common/services/resource/resource';
 import {
   AppDeploymentSpec,
   EnvironmentVariable,
@@ -56,6 +58,7 @@ export class CreateFromFormComponent implements OnInit {
   labelArr: DeployLabel[] = [];
 
   form: FormGroup;
+  private currentTenant: string;
 
   constructor(
     private readonly namespace_: NamespaceService,
@@ -65,9 +68,11 @@ export class CreateFromFormComponent implements OnInit {
     private readonly route_: ActivatedRoute,
     private readonly fb_: FormBuilder,
     private readonly dialog_: MatDialog,
+    private readonly tenants_: NamespacedResourceService<TenantDetail>,
   ) {}
 
   ngOnInit(): void {
+    this.currentTenant = this.tenants_['tenant_']['currentTenant_']
     this.form = this.fb_.group({
       name: ['', Validators.compose([Validators.required, FormValidators.namePattern])],
       containerImage: ['', Validators.required],
@@ -94,7 +99,7 @@ export class CreateFromFormComponent implements OnInit {
       this.name.setAsyncValidators(validateUniqueName(this.http_, namespace));
       this.name.updateValueAndValidity();
     });
-    this.http_.get('api/v1/namespace').subscribe((result: NamespaceList) => {
+    this.http_.get(`api/v1/tenants/${this.currentTenant}/namespace`).subscribe((result: NamespaceList) => {
       this.namespaces = result.namespaces.map((namespace: Namespace) => namespace.objectMeta.name);
       this.namespace.patchValue(
         !this.namespace_.areMultipleNamespacesSelected()

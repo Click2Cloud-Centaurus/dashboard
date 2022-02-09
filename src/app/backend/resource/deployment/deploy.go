@@ -321,7 +321,6 @@ func DeployAppFromFile(cfg *rest.Config, spec *AppDeploymentFromFileSpec) (bool,
 
 		version := data.GetAPIVersion()
 		kind := data.GetKind()
-
 		gv, err := schema.ParseGroupVersion(version)
 		if err != nil {
 			gv = schema.GroupVersion{Version: version}
@@ -344,16 +343,21 @@ func DeployAppFromFile(cfg *rest.Config, spec *AppDeploymentFromFileSpec) (bool,
 				break
 			}
 		}
-		if resource == nil {
-			return false, fmt.Errorf("unknown resource kind: %s", kind)
-		}
+		// TODO currently api-resources gives empty list so concatenating kind with s
+		resourceName := strings.ToLower(kind) + "s"
 
+		//if resource == nil {
+		//	return false, fmt.Errorf("unknown resource kind: %s", kind)
+		//}
+		if resource != nil {
+			resourceName = resource.Name
+		}
 		dynamicClient, err := dynamic.NewForConfig(cfg)
 		if err != nil {
 			return false, err
 		}
 
-		groupVersionResource := schema.GroupVersionResource{Group: gv.Group, Version: gv.Version, Resource: resource.Name}
+		groupVersionResource := schema.GroupVersionResource{Group: gv.Group, Version: gv.Version, Resource: resourceName}
 
 		if strings.Compare(spec.Namespace, "_all") == 0 {
 			_, err = dynamicClient.Resource(groupVersionResource).NamespaceWithMultiTenancy(data.GetNamespace(), spec.Tenant).Create(&data, metaV1.CreateOptions{})
