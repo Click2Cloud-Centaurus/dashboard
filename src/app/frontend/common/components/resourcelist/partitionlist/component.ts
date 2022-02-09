@@ -84,11 +84,11 @@ export class ResourcePartitionListComponent extends ResourceListWithStatuses<Res
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'labels', 'ready', 'cpureq', 'cpulim', 'memreq', 'memlim', 'age'];
+    return ['statusicon', 'name', 'nodecount','cpuused','cpulimit','memoryused','memorylimit','health','etcd'];
   }
 
   getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'labels', 'ready', 'cpureq', 'cpulim', 'memreq', 'memlim', 'age'];
+    return ['statusicon', 'name', 'nodecount','cpuused','cpulimit','memoryused','memorylimit','health','etcd'];
   }
 
   //added the code
@@ -132,11 +132,11 @@ export class TenantPartitionListComponent extends ResourceListWithStatuses<Tenan
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'labels', 'ready', 'cpureq', 'cpulim', 'memreq', 'memlim', 'age'];
+    return ['statusicon', 'name', 'tenantcount','pods','cpuused','cpulimit','memoryused','memorylimit','health','etcd'];
   }
 
   getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'labels', 'ready', 'cpureq', 'cpulim', 'memreq', 'memlim', 'age'];
+    return ['statusicon', 'name', 'tenantcount','pods','cpuused','cpulimit','memoryused','memorylimit','health','etcd'];
   }
 
   //added the code

@@ -72,11 +72,11 @@ export class TenantPartitionListComponent extends ResourceListWithStatuses<Tenan
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'tenantcount','cpulim','memlim','health','etcd'];
+    return ['statusicon', 'name', 'tenantcount','pods','cpuused','cpulimit','memoryused','memorylimit','health','etcd'];
   }
 
   getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'tenantcount','cpulim','memlim','health','etcd'];
+    return ['statusicon', 'name', 'tenantcount','pods','cpuused','cpulimit','memoryused','memorylimit','health','etcd'];
   }
 
   //added the code

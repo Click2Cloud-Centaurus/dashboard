@@ -1008,7 +1008,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			To(apiHandler.handleGetRoles).
 			Writes(role.RoleList{}))
 	apiV1Ws.Route(
-		apiV1Ws.GET("/tenants/{tenant}/role/{namespace}/").
+		apiV1Ws.GET("/tenants/{tenant}/role/{namespace}").
 			To(apiHandler.handleGetRolesWithMultiTenancy).
 			Writes(role.RoleList{}))
 	apiV1Ws.Route(
