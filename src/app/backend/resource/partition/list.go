@@ -3,6 +3,7 @@ package partition
 import (
 	"github.com/kubernetes/dashboard/src/app/backend/api"
 	metricapi "github.com/kubernetes/dashboard/src/app/backend/integration/metric/api"
+	resource "github.com/kubernetes/dashboard/src/app/backend/resource/node"
 	v1 "k8s.io/api/core/v1"
 	client "k8s.io/client-go/kubernetes"
 )
@@ -35,19 +36,69 @@ type TenantPartitionDetail struct {
 }
 
 type ResourcePartition struct {
-	Name             string `json:"name"`
-	NodeCount        int    `json:"nodeCount"`
-	CPULimit         int64  `json:"cpuLimit"`
-	MemoryLimit      int64  `json:"memoryLimit"`
-	HealthyNodeCount int64  `json:"healthyNodeCount"`
+	Name             string  `json:"name"`
+	NodeCount        int     `json:"nodeCount"`
+	CPULimit         int64   `json:"cpuLimit"`
+	CPUUsed          float64 `json:"cpuUsed"`
+	MemoryLimit      int64   `json:"memoryLimit"`
+	MemoryUsed       float64 `json:"memoryUsed"`
+	HealthyNodeCount int64   `json:"healthyNodeCount"`
 }
 
 type TenantPartition struct {
-	Name             string `json:"name"`
-	TenantCount      int    `json:"tenantCount"`
-	CPULimit         int64  `json:"cpuLimit"`
-	MemoryLimit      int64  `json:"memoryLimit"`
-	HealthyNodeCount int64  `json:"healthyNodeCount"`
+	Name             string  `json:"name"`
+	NodeName         string  `json:"nodeName"`
+	PodCount         int64   `json:"podCount"`
+	TotalPods        int64   `json:"totalPods"`
+	TenantCount      int     `json:"tenantCount"`
+	CPUUsed          float64 `json:"cpuUsed"`
+	CPULimit         int64   `json:"cpuLimit"`
+	MemoryUsed       float64 `json:"memoryUsed"`
+	MemoryLimit      int64   `json:"memoryLimit"`
+	HealthyNodeCount int64   `json:"healthyNodeCount"`
+}
+
+type NodeAllocatedResources struct {
+	// CPURequests is number of allocated milicores.
+	CPURequests int64 `json:"cpuRequests"`
+
+	// CPURequestsFraction is a fraction of CPU, that is allocated.
+	CPURequestsFraction float64 `json:"cpuRequestsFraction"`
+
+	// CPULimits is defined CPU limit.
+	CPULimits int64 `json:"cpuLimits"`
+
+	// CPULimitsFraction is a fraction of defined CPU limit, can be over 100%, i.e.
+	// overcommitted.
+	CPULimitsFraction float64 `json:"cpuLimitsFraction"`
+
+	// CPUCapacity is specified node CPU capacity in milicores.
+	CPUCapacity int64 `json:"cpuCapacity"`
+
+	// MemoryRequests is a fraction of memory, that is allocated.
+	MemoryRequests int64 `json:"memoryRequests"`
+
+	// MemoryRequestsFraction is a fraction of memory, that is allocated.
+	MemoryRequestsFraction float64 `json:"memoryRequestsFraction"`
+
+	// MemoryLimits is defined memory limit.
+	MemoryLimits int64 `json:"memoryLimits"`
+
+	// MemoryLimitsFraction is a fraction of defined memory limit, can be over 100%, i.e.
+	// overcommitted.
+	MemoryLimitsFraction float64 `json:"memoryLimitsFraction"`
+
+	// MemoryCapacity is specified node memory capacity in bytes.
+	MemoryCapacity int64 `json:"memoryCapacity"`
+
+	// AllocatedPods in number of currently allocated pods on the node.
+	AllocatedPods int `json:"allocatedPods"`
+
+	// PodCapacity is maximum number of pods, that can be allocated on the node.
+	PodCapacity int64 `json:"podCapacity"`
+
+	// PodFraction is a fraction of pods, that can be allocated on given node.
+	PodFraction float64 `json:"podFraction"`
 }
 
 func GetResourcePartitionDetail(client client.Interface, clusterName string) (*ResourcePartitionDetail, error) {
@@ -56,19 +107,20 @@ func GetResourcePartitionDetail(client client.Interface, clusterName string) (*R
 		return nil, err
 	}
 	var cpuLimit int64 = 0
-	var cpuFree int64 = 0
+	var cpuUsed float64 = 0
 	var memoryLimit int64 = 0
-	var memoryFree int64 = 0
+	var memoryUsed float64 = 0
 	var healthyNodeCount int64 = 0
 	for _, node := range nodes.Items {
-		cpuLimit += node.Status.Capacity.Cpu().MilliValue()
-		cpuFree += node.Status.Allocatable.Cpu().MilliValue()
-		memoryLimit += node.Status.Capacity.Memory().Value()
-		memoryFree += node.Status.Allocatable.Memory().Value()
+		pods, _ := resource.GetNodePodsDetails(client, node)
+		allocatedResources, _ := resource.GetNodeAllocatedResources(node, pods)
 
-		//if node.Status.Conditions[0].Status == v1.ConditionTrue {
-		//	healthyNodeCount++
-		//}
+		cpuLimit += allocatedResources.CPUCapacity
+		cpuUsed += allocatedResources.CPULimitsFraction
+
+		memoryLimit += allocatedResources.MemoryCapacity
+		memoryUsed += allocatedResources.MemoryLimitsFraction
+
 		for _, condition := range node.Status.Conditions {
 			if condition.Type == v1.NodeConditionType("Ready") && condition.Status == v1.ConditionTrue {
 				healthyNodeCount++
@@ -76,12 +128,13 @@ func GetResourcePartitionDetail(client client.Interface, clusterName string) (*R
 			}
 		}
 	}
-	var cpuUsed int64 = int64((cpuLimit - cpuFree) * 100 / cpuLimit)
-	var memoryUsed int64 = int64((memoryLimit - memoryFree) * 100 / memoryLimit)
+
 	partitionDetail := new(ResourcePartitionDetail)
 	partitionDetail.ObjectMeta.NodeCount = len(nodes.Items)
-	partitionDetail.ObjectMeta.CPULimit = cpuUsed
-	partitionDetail.ObjectMeta.MemoryLimit = memoryUsed
+	partitionDetail.ObjectMeta.CPUUsed = cpuUsed
+	partitionDetail.ObjectMeta.CPULimit = cpuLimit
+	partitionDetail.ObjectMeta.MemoryUsed = memoryUsed
+	partitionDetail.ObjectMeta.MemoryLimit = memoryLimit
 	partitionDetail.ObjectMeta.HealthyNodeCount = healthyNodeCount
 	partitionDetail.ObjectMeta.Name = clusterName
 	partitionDetail.TypeMeta.Kind = "ResourcePartition"
@@ -94,19 +147,28 @@ func GetTenantPartitionDetail(client client.Interface, clusterName string) (*Ten
 		return nil, err
 	}
 	var cpuLimit int64 = 0
-	var cpuFree int64 = 0
+	var cpuUsed float64 = 0
 	var memoryLimit int64 = 0
-	var memoryFree int64 = 0
+	var memoryUsed float64 = 0
 	var healthyNodeCount int64 = 0
-	for _, node := range nodes.Items {
-		cpuLimit += node.Status.Capacity.Cpu().MilliValue()
-		cpuFree += node.Status.Allocatable.Cpu().MilliValue()
-		memoryLimit += node.Status.Capacity.Memory().Value()
-		memoryFree += node.Status.Allocatable.Memory().Value()
+	var podCount int64 = 0
+	var totalPods int64 = 0
+	nodeName := ``
 
-		//if node.Status.Conditions[0].Status == v1.ConditionTrue {
-		//	healthyNodeCount++
-		//}
+	for _, node := range nodes.Items {
+		nodeName = node.Name
+		pods, _ := resource.GetNodePodsDetails(client, node)
+		allocatedResources, _ := resource.GetNodeAllocatedResources(node, pods)
+
+		cpuLimit += allocatedResources.CPUCapacity
+		cpuUsed += allocatedResources.CPULimitsFraction
+
+		memoryLimit += allocatedResources.MemoryCapacity
+		memoryUsed += allocatedResources.MemoryLimitsFraction
+
+		totalPods = node.Status.Capacity.Pods().Value()
+		podCount += int64(allocatedResources.AllocatedPods)
+
 		for _, condition := range node.Status.Conditions {
 			if condition.Type == v1.NodeConditionType("Ready") && condition.Status == v1.ConditionTrue {
 				healthyNodeCount++
@@ -118,14 +180,18 @@ func GetTenantPartitionDetail(client client.Interface, clusterName string) (*Ten
 	if err != nil {
 		return nil, err
 	}
-	var cpuUsed int64 = int64((cpuLimit - cpuFree) * 100 / cpuLimit)
-	var memoryUsed int64 = int64((memoryLimit - memoryFree) * 100 / memoryLimit)
+
 	partitionDetail := new(TenantPartitionDetail)
 	partitionDetail.ObjectMeta.TenantCount = len(tenants.Items)
-	partitionDetail.ObjectMeta.CPULimit = cpuUsed
-	partitionDetail.ObjectMeta.MemoryLimit = memoryUsed
+	partitionDetail.ObjectMeta.CPUUsed = cpuUsed
+	partitionDetail.ObjectMeta.CPULimit = cpuLimit
+	partitionDetail.ObjectMeta.MemoryUsed = memoryUsed
+	partitionDetail.ObjectMeta.MemoryLimit = memoryLimit
 	partitionDetail.ObjectMeta.HealthyNodeCount = healthyNodeCount
+	partitionDetail.ObjectMeta.PodCount = podCount
+	partitionDetail.ObjectMeta.TotalPods = totalPods
 	partitionDetail.ObjectMeta.Name = clusterName
+	partitionDetail.ObjectMeta.NodeName = nodeName
 	partitionDetail.TypeMeta.Kind = "TenantPartition"
 
 	return partitionDetail, nil

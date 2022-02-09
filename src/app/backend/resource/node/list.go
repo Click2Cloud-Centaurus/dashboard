@@ -72,7 +72,7 @@ func toNodeList(client client.Interface, nodes []v1.Node, nonCriticalErrors []er
 	nodeList.ListMeta = api.ListMeta{TotalItems: filteredTotal}
 
 	for _, node := range nodes {
-		pods, err := getNodePods(client, node)
+		pods, err := GetNodePodsDetails(client, node)
 		if err != nil {
 			log.Printf("Couldn't get pods of %s node: %s\n", node.Name, err)
 		}
@@ -91,7 +91,7 @@ func toNodeList(client client.Interface, nodes []v1.Node, nonCriticalErrors []er
 }
 
 func toNode(node v1.Node, pods *v1.PodList) Node {
-	allocatedResources, err := getNodeAllocatedResources(node, pods)
+	allocatedResources, err := GetNodeAllocatedResources(node, pods)
 	if err != nil {
 		log.Printf("Couldn't get allocated resources of %s node: %s\n", node.Name, err)
 	}

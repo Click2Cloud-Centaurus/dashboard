@@ -67,13 +67,12 @@ limitations under the License.
               {{resourcePartition.objectMeta.nodeCount}}
             </mat-cell>
           </ng-container>
+
           <ng-container [matColumnDef]="getColumns()[3]">
             <mat-header-cell *matHeaderCellDef
-                             mat-sort-header
-                             disableClear="true"
-                             i18n>CPU limits (cores)</mat-header-cell>
+                             i18n>CPU used (cores)</mat-header-cell>
             <mat-cell *matCellDef="let resourcePartition">
-              {{resourcePartition.objectMeta.cpuLimit | number:"1.2-2"}}%
+              {{resourcePartition.objectMeta.cpuUsed | number:"1.2-2"}}%
             </mat-cell>
           </ng-container>
 
@@ -81,13 +80,31 @@ limitations under the License.
             <mat-header-cell *matHeaderCellDef
                              mat-sort-header
                              disableClear="true"
-                             i18n>Memory limits (bytes)</mat-header-cell>
+                             i18n>CPU limits (cores)</mat-header-cell>
             <mat-cell *matCellDef="let resourcePartition">
-              {{resourcePartition.objectMeta.memoryLimit | number:"1.2-2"}}%
+              {{resourcePartition.objectMeta.cpuLimit | kdCores }}
             </mat-cell>
           </ng-container>
 
           <ng-container [matColumnDef]="getColumns()[5]">
+            <mat-header-cell *matHeaderCellDef
+                             i18n>Memory available (bytes)</mat-header-cell>
+            <mat-cell *matCellDef="let resourcePartition">
+              {{resourcePartition.objectMeta.memoryUsed | number:"1.2-2"}}%
+            </mat-cell>
+          </ng-container>
+
+          <ng-container [matColumnDef]="getColumns()[6]">
+            <mat-header-cell *matHeaderCellDef
+                             mat-sort-header
+                             disableClear="true"
+                             i18n>Memory limits (bytes)</mat-header-cell>
+            <mat-cell *matCellDef="let resourcePartition">
+              {{resourcePartition.objectMeta.memoryLimit | kdMemory }}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container [matColumnDef]="getColumns()[7]">
             <mat-header-cell *matHeaderCellDef
                              mat-sort-header
                              disableClear="true"
@@ -97,7 +114,7 @@ limitations under the License.
             </mat-cell>
           </ng-container>
 
-          <ng-container [matColumnDef]="getColumns()[6]">
+          <ng-container [matColumnDef]="getColumns()[8]">
             <mat-header-cell *matHeaderCellDef
                              mat-sort-header
                              disableClear="true"
