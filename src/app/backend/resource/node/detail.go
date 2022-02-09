@@ -140,7 +140,7 @@ func GetNodeDetail(client k8sClient.Interface, metricClient metricapi.MetricClie
 		dsQuery,
 		metricapi.NoResourceCache, metricClient)
 
-	pods, err := getNodePods(client, *node)
+	pods, err := GetNodePodsDetails(client, *node)
 	nonCriticalErrors, criticalError := errors.HandleError(err)
 	if criticalError != nil {
 		return nil, criticalError
@@ -158,7 +158,7 @@ func GetNodeDetail(client k8sClient.Interface, metricClient metricapi.MetricClie
 		return nil, criticalError
 	}
 
-	allocatedResources, err := getNodeAllocatedResources(*node, pods)
+	allocatedResources, err := GetNodeAllocatedResources(*node, pods)
 	nonCriticalErrors, criticalError = errors.AppendError(err, nonCriticalErrors)
 	if criticalError != nil {
 		return nil, criticalError
@@ -169,7 +169,7 @@ func GetNodeDetail(client k8sClient.Interface, metricClient metricapi.MetricClie
 	return &nodeDetails, nil
 }
 
-func getNodeAllocatedResources(node v1.Node, podList *v1.PodList) (NodeAllocatedResources, error) {
+func GetNodeAllocatedResources(node v1.Node, podList *v1.PodList) (NodeAllocatedResources, error) {
 	reqs, limits := map[v1.ResourceName]resource.Quantity{}, map[v1.ResourceName]resource.Quantity{}
 
 	for _, pod := range podList.Items {
@@ -294,7 +294,7 @@ func GetNodePods(client k8sClient.Interface, metricClient metricapi.MetricClient
 		return &podList, err
 	}
 
-	pods, err := getNodePods(client, *node)
+	pods, err := GetNodePodsDetails(client, *node)
 	if err != nil {
 		return &podList, err
 	}
@@ -309,7 +309,7 @@ func GetNodePods(client k8sClient.Interface, metricClient metricapi.MetricClient
 	return &podList, nil
 }
 
-func getNodePods(client k8sClient.Interface, node v1.Node) (*v1.PodList, error) {
+func GetNodePodsDetails(client k8sClient.Interface, node v1.Node) (*v1.PodList, error) {
 	fieldSelector, err := fields.ParseSelector("spec.nodeName=" + node.Name +
 		",status.phase!=" + string(v1.PodSucceeded) +
 		",status.phase!=" + string(v1.PodFailed))
