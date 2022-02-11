@@ -16,7 +16,7 @@ type ResourceQuotaSpec struct {
 	// Name of the resource quota.
 	Name                     string `json:"name"`
 	Tenant                   string `json:"tenant"`
-	NameSpace                string `json:"name_space"`
+	NameSpace                string `json:"namespace"`
 	ResourceCPU              string `json:"cpu"`
 	ResourceMemory           string `json:"memory"`
 	ResourcePods             string `json:"pods"`
@@ -85,6 +85,9 @@ func AddResourceQuotas(client k8sClient.Interface, namespace string, tenant stri
 	}
 	if spec.ResourceConfigMaps != "" {
 		resList[v1.ResourceConfigMaps] = resource.MustParse(spec.ResourceConfigMaps)
+	}
+	if spec.ResourceMemory != "" {
+		resList[v1.ResourceMemory] = resource.MustParse(spec.ResourceMemory)
 	}
 	if spec.ResourcePVC != "" {
 		resList[v1.ResourcePersistentVolumeClaims] = resource.MustParse(spec.ResourcePVC)

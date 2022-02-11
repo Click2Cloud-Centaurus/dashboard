@@ -24,9 +24,9 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   objectMeta:any;
 
   constructor(
-    public readonly verber_: VerberService,
+    private readonly verber_: VerberService,
     private readonly resourcequota_: NamespacedResourceService<ResourceQuotaList>, notifications: NotificationsService,
-    private dialog: MatDialog //add the code
+    private dialog: MatDialog,//add the code
   ) {
 
     super('resourcequota', notifications);
@@ -59,8 +59,7 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
     return ['statusicon', 'name', 'namespace', 'age'];
   }
 
-  //added the code
   onClick(): void {
-    this.verber_.showResourceQuotaCreateDialog(this.displayName, this.typeMeta, this.objectMeta);  //changes needed
+    this.verber_.showResourceQuotaCreateDialog(this.displayName, this.typeMeta, this.objectMeta);
   }
 }
