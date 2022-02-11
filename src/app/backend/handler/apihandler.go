@@ -1009,7 +1009,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			To(apiHandler.handleGetRoles).
 			Writes(role.RoleList{}))
 	apiV1Ws.Route(
-		apiV1Ws.GET("/tenants/{tenant}/role/{namespace}/").
+		apiV1Ws.GET("/tenants/{tenant}/role/{namespace}").
 			To(apiHandler.handleGetRolesWithMultiTenancy).
 			Writes(role.RoleList{}))
 	apiV1Ws.Route(
@@ -5672,8 +5672,18 @@ func (apiHandler *APIHandler) handleDeleteUser(w *restful.Request, r *restful.Re
 			errors.HandleInternalError(r, err)
 			return
 		}
+	} else {
+		if userDetail.ObjectMeta.Type == `cluster-admin` {
+			if err := serviceaccount.DeleteServiceAccount(userDetail.ObjectMeta.NameSpace, userName, k8sClient); err != nil {
+				errors.HandleInternalError(r, err)
+				return
+			}
+		}
+		if err := clusterrolebinding.DeleteClusterRoleBindings(userName, k8sClient); err != nil {
+			errors.HandleInternalError(r, err)
+			return
+		}
 	}
-
 	id, err := strconv.Atoi(userid)
 	deletedRows := db.DeleteUser(int64(id))
 
