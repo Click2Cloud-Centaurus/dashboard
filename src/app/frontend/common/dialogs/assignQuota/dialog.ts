@@ -14,7 +14,7 @@ import Swal from "sweetalert2/dist/sweetalert2.js";
 export interface assignQuotaDialogMeta {
   quotaname: string[];
   tenants: string[];
-  namespaces: string[];
+  namespace: string[];
   service: string[];
   memory: string[];
   cpus: string[];
@@ -98,7 +98,6 @@ export class assignQuotaDialog implements OnInit {
   get service(): AbstractControl {
     return this.form1.get('service');
   }
-
   get memory(): AbstractControl {
     return this.form1.get('memory');
   }

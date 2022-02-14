@@ -69,11 +69,11 @@ export class ResourcePartitionListComponent extends ResourceListWithStatuses<Res
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'nodecount','cpuused','cpulimit','memoryused','memorylimit','health','etcd'];
+    return ['statusicon', 'name', 'nodecount','cpu','memory','health','etcd'];
   }
 
   getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'nodecount','cpuused','cpulimit','memoryused','memorylimit','health','etcd'];
+    return ['statusicon', 'name', 'nodecount','cpu','memory','health','etcd'];
   }
 
 }

@@ -79,9 +79,11 @@ func AddResourceQuotas(client k8sClient.Interface, namespace string, tenant stri
 	}
 
 	var resList = make(v1.ResourceList)
+	if spec.ResourceMemory != "" {
+		resList[v1.ResourceMemory] = resource.MustParse(spec.ResourceMemory)
+	}
 	if spec.ResourceCPU != "" {
 		resList[v1.ResourceCPU] = resource.MustParse(spec.ResourceCPU)
-
 	}
 	if spec.ResourceConfigMaps != "" {
 		resList[v1.ResourceConfigMaps] = resource.MustParse(spec.ResourceConfigMaps)
@@ -158,9 +160,9 @@ func DeleteResourceQuota(client k8sClient.Interface, namespace string, tenant st
 	return nil
 }
 
-func GetResourceQuotaList(client k8sClient.Interface, namespace *common.NamespaceQuery, dsQuery *dataselect.DataSelectQuery) (*ResourceQuotaDetailList, error) {
+func GetResourceQuotaList(client k8sClient.Interface, namespace *common.NamespaceQuery, tenant string, dsQuery *dataselect.DataSelectQuery) (*ResourceQuotaDetailList, error) {
 	log.Println("Getting list of Resource quotas")
-	rqlist, err := client.CoreV1().ResourceQuotas(namespace.ToRequestParam()).List(metaV1.ListOptions{})
+	rqlist, err := client.CoreV1().ResourceQuotasWithMultiTenancy(namespace.ToRequestParam(), tenant).List(metaV1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}

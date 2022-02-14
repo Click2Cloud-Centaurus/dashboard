@@ -661,7 +661,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Reads(resourcequota.ResourceQuotaSpec{}).
 			Writes(v1.ResourceQuota{}))
 	apiV1Ws.Route(
-		apiV1Ws.GET("/resourcequota").
+		apiV1Ws.GET("/tenants/{tenant}/resourcequota").
 			To(apiHandler.handleGetResourceQuotaList).
 			Writes(v1.ResourceQuotaList{}))
 	apiV1Ws.Route(
@@ -3632,12 +3632,13 @@ func (apiHandler *APIHandler) handleGetResourceQuotaList(request *restful.Reques
 		return
 	}
 
-	Namespace := request.PathParameter("namespace")
+	tenant := request.PathParameter("tenant")
+	//Namespace := request.PathParameter("namespace")
 	var namespaces []string
-	namespaces = append(namespaces, Namespace)
+	//namespaces = append(namespaces, Namespace)
 	namespace := common.NewNamespaceQuery(namespaces)
 	dataSelect := parseDataSelectPathParameter(request)
-	result, err := resourcequota.GetResourceQuotaList(k8sClient, namespace, dataSelect)
+	result, err := resourcequota.GetResourceQuotaList(k8sClient, namespace, tenant, dataSelect)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return

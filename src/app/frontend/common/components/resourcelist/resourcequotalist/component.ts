@@ -9,9 +9,9 @@ import {NamespacedResourceService} from '../../../services/resource/resource';
 import {NotificationsService} from '../../../services/global/notifications';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
-import {MatDialog} from '@angular/material/';
-
 import {VerberService} from '../../../services/global/verber';
+import {ActivatedRoute} from "@angular/router";
+import {TenantService} from "../../../services/global/tenant";
 
 @Component({
   selector: 'kd-resourcequota-list',
@@ -22,11 +22,14 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   displayName:any="";
   typeMeta:any="";
   objectMeta:any;
+  tenantName: string;
 
   constructor(
-    private readonly verber_: VerberService,
-    private readonly resourcequota_: NamespacedResourceService<ResourceQuotaList>, notifications: NotificationsService,
-    private dialog: MatDialog,//add the code
+    public readonly verber_: VerberService,
+    private readonly resourcequota_: NamespacedResourceService<ResourceQuotaList>,
+    notifications: NotificationsService,
+    private readonly tenant_: TenantService,
+    private readonly activatedRoute_: ActivatedRoute,
   ) {
 
     super('resourcequota', notifications);
@@ -37,6 +40,9 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
 
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
+    this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
+      this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
+    sessionStorage.setItem('tenantName',this.tenantName);
   }
 
   isInSuccessState(): boolean {
@@ -44,7 +50,14 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   }
 
   getResourceObservable(params?: HttpParams): Observable<ResourceQuotaList> {
-    return this.resourcequota_.get(this.endpoint, undefined, undefined, params);
+    let endpoint = ''
+    if (sessionStorage.getItem('userType') === 'cluster-admin') {
+      endpoint = `api/v1/tenants/${this.tenantName}/resourcequota`
+    } else {
+      endpoint = this.endpoint
+    }
+
+    return this.resourcequota_.get(endpoint, undefined, undefined, params, this.tenantName);
   }
 
   map(resourcequotaList: ResourceQuotaList): ResourceQuota[] {
