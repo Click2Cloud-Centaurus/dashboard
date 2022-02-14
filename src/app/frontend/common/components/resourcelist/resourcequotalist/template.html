@@ -1,7 +1,7 @@
 <div class="main_container">
   <div class="row">
     <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-      <div class="create_btn_sec" align="right">
+      <div class="create_btn_sec detail_sec" align="right">
         <button mat-raised-button matTooltip="Assign Quota" color="primary" (click)="onClick()">
           <img class="add_icon" src="assets/images/plus_icon_white.svg" alt="">
           Assign Quota</button>
@@ -45,7 +45,8 @@
                                i18n>Name</mat-header-cell>
               <mat-cell *matCellDef="let resourcequota">
                 <a [routerLink]="getDetailsHref(resourcequota.objectMeta.name)"
-                   queryParamsHandling="preserve">{{resourcequota.objectMeta.name}}</a>
+                   [state]="{namespace: resourcequota.objectMeta.namespace}"
+                   queryParamsHandling="preserve" >{{resourcequota.objectMeta.name}}</a>
 
               </mat-cell>
             </ng-container>

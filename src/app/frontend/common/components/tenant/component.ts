@@ -143,7 +143,7 @@ export class TenantSelectorComponent implements OnInit {
   }
 
   /**
-   * Focuses clustertenant input field after clicking on clustertenant selector menu.
+   * Focuses tenant input field after clicking on tenant selector menu.
    */
   private focusTenantInput_(): void {
     // Wrap in a timeout to make sure that element is rendered before looking for it.
@@ -170,7 +170,7 @@ export class TenantSelectorComponent implements OnInit {
 
   setDefaultQueryParams_(): void {
     this.router_.navigate([this._activeRoute.snapshot.url], {
-      queryParams: {[TENANT_STATE_PARAM]: 'system'},
+      queryParams: {[TENANT_STATE_PARAM]: this.getTenant_()},
       queryParamsHandling: 'merge',
     });
   }

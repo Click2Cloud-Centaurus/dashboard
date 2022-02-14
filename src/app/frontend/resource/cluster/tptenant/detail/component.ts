@@ -16,7 +16,7 @@ import {Observable} from 'rxjs/Observable';
 import {ComponentFactoryResolver} from '@angular/core'
 import {Component, OnDestroy, OnInit,Input} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {Deployment, DeploymentList, Event, Namespace, NamespaceList, Pod, PodList, ReplicaSet, ReplicaSetList, TenantDetail} from '@api/backendapi';
+import {Deployment, DeploymentList, Event, Namespace, NamespaceList, Pod, PodList, ReplicaSet, ReplicaSetList, ResourceQuota, ResourceQuotaList, TenantDetail,} from '@api/backendapi';
 import {ActionbarService, ResourceMeta} from '../../../../common/services/global/actionbar';
 import {NotificationsService} from '../../../../common/services/global/notifications';
 import {EndpointManager, Resource} from 'common/services/resource/endpoint';
@@ -26,6 +26,7 @@ import {ResourceListWithStatuses} from "../../../../common/resources/list";
 import {VerberService} from "../../../../common/services/global/verber";
 import {ListGroupIdentifier,ListIdentifier} from "../../../../common/components/resourcelist/groupids";
 import {MenuComponent} from "../../../../common/components/list/column/menu/component";
+import {TenantService} from "../../../../common/services/global/tenant";
 
 @Component({
   selector: 'kd-tptenant-detail',
@@ -179,7 +180,6 @@ export class DeploymentListComponent extends ResourceListWithStatuses<Deployment
     return this.namespaceService_.areMultipleNamespacesSelected();
   }
 }
-
 
 export class PodListComponent extends ResourceListWithStatuses<PodList, Pod> {
   @Input() endpoint = EndpointManager.resource(Resource.pod, true, true).list();
@@ -353,3 +353,63 @@ export class ReplicaSetListComponent extends ResourceListWithStatuses<ReplicaSet
   }
 }
 
+export class ResourceQuotasListComponent extends ResourceListWithStatuses<ResourceQuotaList, ResourceQuota> {
+  @Input() endpoint = EndpointManager.resource(Resource.resourcequota, true, true).list();
+  displayName:any="";
+  typeMeta:any="";
+  objectMeta:any;
+  tenantName: string;
+
+  constructor(
+    public readonly verber_: VerberService,
+    private readonly resourcequota_: NamespacedResourceService<ResourceQuotaList>,
+    notifications: NotificationsService,
+    private readonly tenant_: TenantService,
+    private readonly activatedRoute_: ActivatedRoute,
+  ) {
+
+    super('resourcequota', notifications);
+    this.id = ListIdentifier.resourcequota;
+    this.groupId = ListGroupIdentifier.cluster;
+
+    // Register action columns.
+    this.registerActionColumn<MenuComponent>('menu', MenuComponent);
+
+    this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
+    this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
+      this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
+    sessionStorage.setItem('tenantName',this.tenantName);
+  }
+
+  isInSuccessState(): boolean {
+    return true;
+  }
+
+  getResourceObservable(params?: HttpParams): Observable<ResourceQuotaList> {
+    let endpoint = ''
+    if (sessionStorage.getItem('userType') === 'cluster-admin') {
+      endpoint = `api/v1/tenants/${this.tenantName}/resourcequota`
+    } else {
+      endpoint = this.endpoint
+    }
+
+    return this.resourcequota_.get(endpoint, undefined, undefined, params, this.tenantName);
+  }
+
+  map(resourcequotaList: ResourceQuotaList): ResourceQuota[] {
+    return resourcequotaList.items;
+  }
+
+  getDisplayColumns(): string[] {
+    return ['statusicon', 'name', 'namespace', 'age'];
+  }
+
+  getDisplayColumns2(): string[] {
+    return ['statusicon', 'name', 'namespace', 'age'];
+  }
+
+  //added the code
+  onClick(): void {
+    this.verber_.showResourceQuotaCreateDialog(this.displayName, this.typeMeta, this.objectMeta);  //changes needed
+  }
+}

@@ -9,6 +9,7 @@ import {NotificationsService} from '../../../../common/services/global/notificat
 import {EndpointManager, Resource} from '../../../../common/services/resource/endpoint';
 import {NamespacedResourceService} from '../../../../common/services/resource/resource';
 import {MatTableDataSource} from "@angular/material";
+import {TenantService} from "../../../../common/services/global/tenant";
 
 @Component({
   selector: 'kd-resourcequota-detail',
@@ -27,17 +28,28 @@ export class ResourceQuotaDetailComponent implements OnInit, OnDestroy {
     private readonly resourceQuota_: NamespacedResourceService<ResourceQuotaDetail>,
     private readonly actionbar_: ActionbarService,
     private readonly route_: ActivatedRoute,
+    private readonly tenant_: TenantService,
     private readonly notifications_: NotificationsService,
   ) {}
 
 
   ngOnInit(): void {
     const resourceName = this.route_.snapshot.params.resourceName;
-    const resourceNamespace = this.route_.snapshot.params.resourceNamespace;
+    const resourceNamespace = this.route_.snapshot.params.resourceNamespace === undefined ?
+      window.history.state.namespace : this.route_.snapshot.params.resourceNamespace;
+    const resourceTenant:any = this.tenant_.current() === 'system' ?
+      sessionStorage.getItem('tenantName') : this.tenant_.current()
+
     this.allocationData = [];
+    let endpoint = ''
+    if (sessionStorage.getItem('userType') === 'cluster-admin') {
+      endpoint = `api/v1/tenants/${resourceTenant}/resourcequota/${resourceNamespace}/${resourceName}`
+    } else {
+      endpoint = this.endpoint_.detail()
+    }
 
     this.resourceQuota_
-      .get(this.endpoint_.detail(), resourceName, resourceNamespace)
+      .get(endpoint, resourceName, resourceNamespace, resourceTenant)
       .pipe(first())
       .subscribe((d: ResourceQuotaDetail) => {
         this.resourceQuota = d;
