@@ -14,7 +14,7 @@
 
 import {HttpParams} from '@angular/common/http';
 import {Component, Input} from '@angular/core';
-import {Tenant, TenantList} from '@api/backendapi';
+import {ObjectMeta, Tenant, TenantList, TypeMeta} from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 
 import {ResourceListWithStatuses} from '../../../resources/list';
@@ -35,13 +35,14 @@ import {CookieService} from "ngx-cookie-service";
 //@ts-ignore
 export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, Tenant> {
   @Input() endpoint = EndpointManager.resource(Resource.tenant).list();
-  displayName:any;
-  typeMeta:any;
-  objectMeta:any;
-  nodeName: any
-  clusterName: any
-  tenantList: Tenant[]
-  tenantCount: number
+
+  displayName: string;
+  typeMeta: TypeMeta;
+  objectMeta: ObjectMeta;
+  nodeName: string;
+  clusterName: string;
+  tenantList: Tenant[];
+  tenantCount: number;
 
   constructor(
     readonly verber_: VerberService,
@@ -109,6 +110,6 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
 
   //added the code
   onClick(): void {
-    this.verber_.showTenantCreateDialog(this.displayName, this.typeMeta, this.objectMeta);  //changes needed
+    this.verber_.showTenantCreateDialog(this.displayName, this.typeMeta, this.objectMeta);
   }
 }

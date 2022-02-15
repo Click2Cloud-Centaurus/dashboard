@@ -1,6 +1,6 @@
 import {HttpParams} from '@angular/common/http';
 import {Component, Input} from '@angular/core';
-import {ResourceQuota, ResourceQuotaList} from '@api/backendapi';
+import {ObjectMeta, ResourceQuota, ResourceQuotaList, TypeMeta} from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 
 import {ResourceListWithStatuses} from '../../../resources/list';
@@ -19,9 +19,10 @@ import {TenantService} from "../../../services/global/tenant";
 })
 export class ResourceQuotasListComponent extends ResourceListWithStatuses<ResourceQuotaList, ResourceQuota> {
   @Input() endpoint = EndpointManager.resource(Resource.resourcequota, true, true).list();
-  displayName:any="";
-  typeMeta:any="";
-  objectMeta:any;
+
+  displayName: string;
+  typeMeta: TypeMeta;
+  objectMeta: ObjectMeta;
   tenantName: string;
 
   constructor(
