@@ -153,9 +153,11 @@ export class CreateUserDialog implements OnInit {
       },
     );
       this.namespace.valueChanges.subscribe((namespace: string) => {
-        this.name.clearAsyncValidators();
-        this.name.setAsyncValidators(validateUniqueName(this.http_, namespace));
-        this.name.updateValueAndValidity();
+        if (this.name !== null) {
+          this.name.clearAsyncValidators();
+          this.name.setAsyncValidators(validateUniqueName(this.http_, namespace));
+          this.name.updateValueAndValidity();
+        }
       });
       this.http_.get(`api/v1/tenants/${this.currentTenant}/namespace`).subscribe((result: NamespaceList) => {
         this.namespaces = result.namespaces.map((namespace: Namespace) => namespace.objectMeta.name);
