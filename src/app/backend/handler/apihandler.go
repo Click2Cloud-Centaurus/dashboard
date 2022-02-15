@@ -5663,7 +5663,7 @@ func (apiHandler *APIHandler) handleDeleteUser(w *restful.Request, r *restful.Re
 	userDetail, err := db.GetUser(userName)
 
 	if tenantName == userDetail.ObjectMeta.Username {
-		errors.HandleInternalError(r, er.New("unable to delete itself"))
+		errors.HandleInternalError(r, er.New("cannot delete its parent user"))
 		return
 	}
 
