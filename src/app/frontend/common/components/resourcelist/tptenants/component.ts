@@ -70,8 +70,8 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
   }
 
-  getResourceObservable(params?: HttpParams): Observable<TenantList> {
-    return this.tenant_.get(this.endpoint, undefined, params);
+  getResourceObservable(): Observable<TenantList> {
+    return this.tenant_.get(this.endpoint, undefined);
   }
 
   map(tenantList: TenantList): Tenant[] {
@@ -87,7 +87,7 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
         }
       })
       this.tenantList = tenantsList
-      this.tenantCount = this.tenantList.length
+      this.totalItems = this.tenantList.length
     }
     return this.tenantList;
   }
