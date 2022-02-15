@@ -88,6 +88,9 @@ func AddResourceQuotas(client k8sClient.Interface, namespace string, tenant stri
 	if spec.ResourceConfigMaps != "" {
 		resList[v1.ResourceConfigMaps] = resource.MustParse(spec.ResourceConfigMaps)
 	}
+	if spec.ResourceMemory != "" {
+		resList[v1.ResourceMemory] = resource.MustParse(spec.ResourceMemory)
+	}
 	if spec.ResourcePVC != "" {
 		resList[v1.ResourcePersistentVolumeClaims] = resource.MustParse(spec.ResourcePVC)
 	}

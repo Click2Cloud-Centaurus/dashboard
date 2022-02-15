@@ -7,7 +7,9 @@ import {AbstractControl, Validators,FormBuilder} from '@angular/forms';
 import { FormGroup } from '@angular/forms';
 import {CONFIG} from "../../../index.config";
 import {CsrfTokenService} from "../../services/global/csrftoken";
-import {AlertDialog, AlertDialogConfig} from "../alert/dialog";
+
+// @ts-ignore
+import Swal from "sweetalert2/dist/sweetalert2.js";
 
 export interface assignQuotaDialogMeta {
   quotaname: string[];
@@ -133,6 +135,7 @@ export class assignQuotaDialog implements OnInit {
       secrets: this.secrets.value,
       ephemeral_storage: this.ephemeral_storage.value,
     };
+
     const tokenPromise = this.csrfToken_.getTokenForAction('resourcequota');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
@@ -145,16 +148,23 @@ export class assignQuotaDialog implements OnInit {
         )
         .subscribe(
           () => {
+            Swal.fire({
+              type: 'success',
+              title: this.quotaname.value,
+              text: 'quota successfully created!',
+              imageUrl: '/assets/images/tick-circle.svg',
+            })
             this.dialogRef.close(this.quotaname.value);
           },
-          error => {
-            this.dialogRef.close();
-            const configData: AlertDialogConfig = {
-              title: 'Error creating Quota',
-              message: error.data,
-              confirmLabel: 'OK',
-            };
-            this.matDialog_.open(AlertDialog, {data: configData});
+          (error:any) => {
+            if (error) {
+              Swal.fire({
+                type:'error',
+                title: this.quotaname.value,
+                text: 'quota already exists!',
+                imageUrl: '/assets/images/close-circle.svg',
+              })
+            }
           },
         );
     });
@@ -166,5 +176,4 @@ export class assignQuotaDialog implements OnInit {
   cancel(): void {
     this.dialogRef.close();
   }
-
 }

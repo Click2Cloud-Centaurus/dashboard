@@ -7,12 +7,15 @@ import {AbstractControl, Validators,FormBuilder} from '@angular/forms';
 import { FormGroup } from '@angular/forms';
 import {CONFIG} from "../../../index.config";
 import {CsrfTokenService} from "../../services/global/csrftoken";
-import {AlertDialogConfig} from "../alert/dialog";
+
+// @ts-ignore
+import Swal from "sweetalert2/dist/sweetalert2.js";
 
 export interface CreateTenantDialogMeta {
   tenants: string[];
   StorageClusterId: string []
 }
+
 @Component({
   selector: 'kd-create-tenant-dialog',
   templateUrl: 'template.html',
@@ -38,6 +41,7 @@ export class CreateTenantDialog implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
     this.form1 = this.fb_.group({
         tenant: [
           '',
@@ -55,20 +59,22 @@ export class CreateTenantDialog implements OnInit {
             Validators.pattern(this.storageidPattern),
           ]),
         ],
-      }
+      },
     );
   }
+
+
   get tenant(): AbstractControl {
     return this.form1.get('tenant');
   }
   get StorageClusterId(): AbstractControl {
     return this.form1.get('StorageClusterId')
   }
-  /**
-   * Creates new tenant based on the state of the controller.
-   */
+
+
   createTenant(): void {
     if (!this.form1.valid) return;
+
     const tenantSpec= {name: this.tenant.value,StorageClusterId: this.StorageClusterId.value};
     const tokenPromise = this.csrfToken_.getTokenForAction('tenant');
     tokenPromise.subscribe(csrfToken => {
@@ -82,16 +88,23 @@ export class CreateTenantDialog implements OnInit {
         )
         .subscribe(
           () => {
+            Swal.fire({
+              type: 'success',
+              title: this.tenant.value,
+              text: 'tenant successfully created!',
+              imageUrl: '/assets/images/tick-circle.svg',
+            })
             this.dialogRef.close(this.tenant.value);
           },
-          error => {
-            this.dialogRef.close();
-            const configData: AlertDialogConfig = {
-              title: 'Error creating tenant',
-              message: error.data,
-              confirmLabel: 'OK',
-            };
-            //this.matDialog_.open(AlertDialog, {data: configData});
+          (error:any) => {
+            if (error) {
+              Swal.fire({
+                type:'error',
+                title: this.tenant.value,
+                text: 'tenant already exists!',
+                imageUrl: '/assets/images/close-circle.svg',
+              })
+            }
           },
         );
     });
@@ -104,4 +117,6 @@ export class CreateTenantDialog implements OnInit {
   cancel(): void {
     this.dialogRef.close();
   }
+
 }
+

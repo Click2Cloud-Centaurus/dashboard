@@ -7,7 +7,10 @@ import {AbstractControl, Validators,FormBuilder} from '@angular/forms';
 import { FormGroup, FormControl } from '@angular/forms';
 import {CONFIG} from "../../../index.config";
 import {CsrfTokenService} from "../../services/global/csrftoken";
-import {AlertDialog, AlertDialogConfig} from "../alert/dialog";
+
+// @ts-ignore
+import Swal from "sweetalert2/dist/sweetalert2.js";
+
 
 export interface CreateClusterroleDialogMeta {
   name: string;
@@ -23,7 +26,6 @@ export interface CreateClusterroleDialogMeta {
 
 export class CreateClusterroleDialog implements OnInit {
   form1: FormGroup;
-
   private readonly config_ = CONFIG;
 
   ClusterroleMaxLength = 24;
@@ -104,6 +106,7 @@ export class CreateClusterroleDialog implements OnInit {
     this.apigroup = this.apigroups.value.split(',')
     this.resource = this.resources.value.split(',')
     this.verb = this.verbs.value.split(',')
+
     const clusterroleSpec= {name: this.clusterrole.value,apiGroups: this.apigroup,verbs: this.verb,resources: this.resource};
     const tokenPromise = this.csrfToken_.getTokenForAction('clusterrole');
     tokenPromise.subscribe(csrfToken => {
@@ -117,16 +120,24 @@ export class CreateClusterroleDialog implements OnInit {
         )
         .subscribe(
           () => {
+            Swal.fire({
+              type: 'success',
+              title: this.clusterrole.value,
+              text: 'clusterrole successfully created!',
+              imageUrl: '/assets/images/tick-circle.svg',
+            })
             this.dialogRef.close(this.clusterrole.value);
+
           },
-          error => {
-            this.dialogRef.close();
-            const configData: AlertDialogConfig = {
-              title: 'Error creating Clusterrole',
-              message: error.data,
-              confirmLabel: 'OK',
-            };
-            this.matDialog_.open(AlertDialog, {data: configData});
+          (error:any) => {
+            if (error) {
+              Swal.fire({
+                type:'error',
+                title: this.clusterrole.value,
+                text: 'clusterrole already exists!',
+                imageUrl: '/assets/images/close-circle.svg',
+              })
+            }
           },
         );
     });
@@ -138,4 +149,5 @@ export class CreateClusterroleDialog implements OnInit {
   cancel(): void {
     this.dialogRef.close();
   }
+
 }

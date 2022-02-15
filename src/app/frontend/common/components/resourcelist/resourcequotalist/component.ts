@@ -72,8 +72,7 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
     return ['statusicon', 'name', 'namespace', 'age'];
   }
 
-  //added the code
   onClick(): void {
-    this.verber_.showResourceQuotaCreateDialog(this.displayName, this.typeMeta, this.objectMeta);  //changes needed
+    this.verber_.showResourceQuotaCreateDialog(this.displayName, this.typeMeta, this.objectMeta);
   }
 }

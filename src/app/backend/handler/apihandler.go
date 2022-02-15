@@ -17,6 +17,7 @@ package handler
 
 import (
 	"encoding/base64"
+	er "errors"
 	"fmt"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/partition"
 	"k8s.io/client-go/kubernetes"
@@ -124,6 +125,11 @@ func ResourceAllocator(tenant string, clients []clientapi.ClientManager) clienta
 		}
 	}
 	return clients[0]
+}
+
+//struct for already exists
+type ErrorMsg struct {
+	Msg string `json:"msg"`
 }
 
 // CreateHTTPAPIHandler creates a new HTTP handler that handles all requests to the API of the backend.
@@ -1283,6 +1289,13 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 //	response.WriteHeaderAndEntity(http.StatusCreated, tenantSpec)
 //}
 
+//error struct for already exists
+type Error struct {
+	// Name of the tenant.
+	Msg        string `json:"msg"`
+	StatusCode int    `json:"statusCode"`
+}
+
 //for tenant handlerCreateTenant method
 func (apiHandler *APIHandlerV2) handleCreateTenant(request *restful.Request, response *restful.Response) {
 	tenantSpec := new(tenant.TenantSpec)
@@ -1301,7 +1314,8 @@ func (apiHandler *APIHandlerV2) handleCreateTenant(request *restful.Request, res
 	//	return
 	//}
 	if err := tenant.CreateTenant(tenantSpec, k8sClient, client.GetClusterName()); err != nil {
-		errors.HandleInternalError(response, err)
+		errorMsg := Error{Msg: err.Error(), StatusCode: http.StatusConflict}
+		response.WriteHeaderAndEntity(http.StatusConflict, errorMsg)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, tenantSpec)
@@ -3264,7 +3278,12 @@ func (apiHandler *APIHandler) handleCreateCreateClusterRole(request *restful.Req
 	}
 
 	if err := clusterrole.CreateClusterRole(clusterRoleSpec, k8sClient); err != nil {
-		errors.HandleInternalError(response, err)
+		if strings.Contains(err.Error(), "already exists") {
+			msg := "clusterroles '" + clusterRoleSpec.Name + "' already exists"
+			err = er.New(msg)
+		}
+		errorMsg := Error{Msg: err.Error(), StatusCode: http.StatusConflict}
+		response.WriteHeaderAndEntity(http.StatusConflict, errorMsg)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, clusterRoleSpec)
@@ -3553,7 +3572,12 @@ func (apiHandler *APIHandler) handleCreateRolesWithMultiTenancy(request *restful
 	}
 
 	if err := role.CreateRolesWithMultiTenancy(roleSpec, k8sClient); err != nil {
-		errors.HandleInternalError(response, err)
+		if strings.Contains(err.Error(), "already exists") {
+			msg := "roles '" + roleSpec.Name + "' already exists"
+			err = er.New(msg)
+		}
+		errorMsg := Error{Msg: err.Error(), StatusCode: http.StatusConflict}
+		response.WriteHeaderAndEntity(http.StatusConflict, errorMsg)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, roleSpec)
@@ -3594,7 +3618,8 @@ func (apiHandler *APIHandler) handleAddResourceQuota(request *restful.Request, r
 	//namespace := request.PathParameter("namespace")
 	result, err := resourcequota.AddResourceQuotas(k8sClient, resourceQuotaSpec.NameSpace, resourceQuotaSpec.Tenant, resourceQuotaSpec)
 	if err != nil {
-		errors.HandleInternalError(response, err)
+		errorMsg := Error{Msg: err.Error(), StatusCode: http.StatusConflict}
+		response.WriteHeaderAndEntity(http.StatusConflict, errorMsg)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -3723,7 +3748,8 @@ func (apiHandler *APIHandlerV2) handleCreateNamespace(request *restful.Request, 
 	//}
 
 	if err := ns.CreateNamespace(namespaceSpec, namespaceSpec.Tenant, k8sClient); err != nil {
-		errors.HandleInternalError(response, err)
+		errorMsg := Error{Msg: err.Error(), StatusCode: http.StatusConflict}
+		response.WriteHeaderAndEntity(http.StatusConflict, errorMsg)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, namespaceSpec)
@@ -5499,6 +5525,7 @@ func parseNamespacePathParameter(request *restful.Request) *common.NamespaceQuer
 		n = strings.Trim(n, " ")
 		if len(n) > 0 {
 			nonEmptyNamespaces = append(nonEmptyNamespaces, n)
+			nonEmptyNamespaces = append(nonEmptyNamespaces, n)
 		}
 	}
 	return common.NewNamespaceQuery(nonEmptyNamespaces)
@@ -5627,10 +5654,6 @@ func (apiHandler *APIHandler) handleGetUserDetail(w *restful.Request, r *restful
 	user.ObjectMeta.Token = "***********"
 
 	r.WriteHeaderAndEntity(http.StatusOK, user)
-}
-
-type ErrorMsg struct {
-	Msg string `json:"msg"`
 }
 
 func (apiHandler *APIHandler) handleGetAllUser(w *restful.Request, r *restful.Response) {
