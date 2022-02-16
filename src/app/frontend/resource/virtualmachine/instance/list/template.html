@@ -48,7 +48,7 @@ limitations under the License.
         <mat-expansion-panel [expanded]="true">
             <mat-expansion-panel-header>
                 <mat-panel-title>
-                    Instances
+                    Virtual machines
                 </mat-panel-title>
                 <mat-panel-description>
                     <div class="panel_description">
@@ -90,18 +90,6 @@ limitations under the License.
                     <mat-cell *matCellDef="let element"> {{element.image}} </mat-cell>
                 </ng-container>
 
-                <!-- IP Address Column -->
-                <ng-container matColumnDef="ip">
-                    <mat-header-cell *matHeaderCellDef> IP Address </mat-header-cell>
-                    <mat-cell *matCellDef="let element"> {{element.ip}} </mat-cell>
-                </ng-container>
-
-                <!-- Flavor Column -->
-                <ng-container matColumnDef="flavor">
-                    <mat-header-cell *matHeaderCellDef> Flavor </mat-header-cell>
-                    <mat-cell *matCellDef="let element"><a href="#">{{element.flavor}}</a></mat-cell>
-                </ng-container>
-
                 <!-- Key Pair Column -->
                 <ng-container matColumnDef="keypair">
                     <mat-header-cell *matHeaderCellDef style="flex: 0 0 130px !important;"> Key Pair </mat-header-cell>
@@ -115,27 +103,15 @@ limitations under the License.
                     <mat-cell *matCellDef="let element"> {{element.status}} </mat-cell>
                 </ng-container>
 
-                <!-- Availability Zone Column -->
-                <ng-container matColumnDef="zone">
-                    <mat-header-cell *matHeaderCellDef> Availability Zone </mat-header-cell>
-                    <mat-cell *matCellDef="let element"> {{element.zone}} </mat-cell>
-                </ng-container>
-
-                <!-- Task Column -->
-                <ng-container matColumnDef="task">
-                    <mat-header-cell *matHeaderCellDef> Task </mat-header-cell>
-                    <mat-cell *matCellDef="let element"> {{element.task}} </mat-cell>
-                </ng-container>
-
-                <!-- Power State Column -->
+                <!-- State Column -->
                 <ng-container matColumnDef="state">
-                    <mat-header-cell *matHeaderCellDef> Power State </mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef> State </mat-header-cell>
                     <mat-cell *matCellDef="let element"> {{element.state}} </mat-cell>
                 </ng-container>
 
                 <!-- Time since created Column -->
                 <ng-container matColumnDef="time">
-                    <mat-header-cell *matHeaderCellDef style="flex: 0 0 120px !important;"> Time since created
+                    <mat-header-cell *matHeaderCellDef style="flex: 0 0 120px !important;"> Age
                     </mat-header-cell>
                     <mat-cell *matCellDef="let element" style="flex: 0 0 120px !important;"> {{element.time}}
                     </mat-cell>
@@ -160,7 +136,7 @@ limitations under the License.
                 <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
                 <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
             </mat-table>
-            <mat-paginator [pageSizeOptions]="[5, 10]" [pageSize]="5" showFirstLastButtons
+            <mat-paginator [pageSizeOptions]="[10, 10]" [pageSize]="10" showFirstLastButtons
                 aria-label="Select page of periodic elements">
             </mat-paginator>
         </mat-expansion-panel>
