@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/partition"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/cache"
 	"log"
 	"net/http"
 	"strconv"
@@ -103,6 +104,7 @@ type APIHandlerV2 struct {
 	cManager             []clientapi.ClientManager
 	rpManager            []clientapi.ClientManager
 	sManager             settingsApi.SettingsManager
+	podInformerManager   []cache.SharedIndexInformer
 }
 
 // TerminalResponse is sent by handleExecShell. The Id is a random session id that binds the original REST request and the SockJS connection.
@@ -135,12 +137,12 @@ type ErrorMsg struct {
 // CreateHTTPAPIHandler creates a new HTTP handler that handles all requests to the API of the backend.
 func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clientapi.ClientManager, cManagers []clientapi.ClientManager, rpManagers []clientapi.ClientManager,
 	authManager authApi.AuthManager, sManager settingsApi.SettingsManager,
-	sbManager systembanner.SystemBannerManager) (
+	sbManager systembanner.SystemBannerManager, podinformers []cache.SharedIndexInformer) (
 
 	http.Handler, error) {
 
 	apiHandler := APIHandler{iManager: iManager, cManager: cManager, sManager: sManager}
-	apiHandler1 := APIHandlerV2{iManager: iManager, defaultClientmanager: cManager, cManager: cManagers, rpManager: rpManagers, sManager: sManager}
+	apiHandler1 := APIHandlerV2{iManager: iManager, defaultClientmanager: cManager, cManager: cManagers, rpManager: rpManagers, sManager: sManager, podInformerManager: podinformers}
 	wsContainer := restful.NewContainer()
 	wsContainer.EnableContentEncoding(true)
 
@@ -1983,19 +1985,19 @@ func (apiHandler *APIHandlerV2) handleGetTenantPartitionDetail(request *restful.
 	if len(apiHandler.cManager) == 0 {
 		apiHandler.cManager = append(apiHandler.cManager, apiHandler.defaultClientmanager)
 	}
-	for _, cManager := range apiHandler.cManager {
+	for i, cManager := range apiHandler.cManager {
 		k8sClient := cManager.InsecureClient()
-		//if err != nil {
-		//	errors.HandleInternalError(response, err)
-		//	return
-		//}
 		dataSelect := parseDataSelectPathParameter(request)
 		dataSelect.MetricQuery = dataselect.StandardMetrics
+		PodInformer := apiHandler.podInformerManager[i]
+		PodList := PodInformer.GetStore().List()
+		fmt.Printf("Checking nodes length: %v %v", len(PodList), PodList)
 		partitionDetail, err := partition.GetTenantPartitionDetail(k8sClient, cManager.GetClusterName())
 		if err != nil {
 			errors.HandleInternalError(response, err)
 			return
 		}
+		partitionDetail.ObjectMeta.PodCount = int64(len(PodList))
 		result.Partitions = append(result.Partitions, partitionDetail)
 	}
 	result.ListMeta.TotalItems = len(result.Partitions)
