@@ -48,7 +48,6 @@ export class NamespaceListComponent extends ResourceListWithStatuses<NamespaceLi
     this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
       this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
     sessionStorage.setItem('tenantName',this.tenantName);
-
   }
 
   getResourceObservable(params?: HttpParams): Observable<NamespaceList> {

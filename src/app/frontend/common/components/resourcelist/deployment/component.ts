@@ -59,8 +59,7 @@ export class DeploymentListComponent extends ResourceListWithStatuses<Deployment
 
     this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
       this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
-    sessionStorage.setItem('tenantName',this.tenantName);
-
+    sessionStorage.setItem('tenant', this.tenantName);
   }
 
   getResourceObservable(params?: HttpParams): Observable<DeploymentList> {
