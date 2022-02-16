@@ -23,6 +23,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/kubernetes/dashboard/src/app/backend/iam"
+	"k8s.io/client-go/informers"
+	"k8s.io/client-go/tools/cache"
 	"log"
 	"net"
 	"net/http"
@@ -120,14 +122,15 @@ func main() {
 	}
 	var clients []clientapi.ClientManager
 	var rpclients []clientapi.ClientManager
+	var tppodinformer []cache.SharedIndexInformer
 	clientManager := client.NewClientManager(args.Holder.GetKubeConfigFile(), args.Holder.GetApiServerHost())
 	versionInfo, err := clientManager.InsecureClient().Discovery().ServerVersion()
 	if err != nil {
 		log.Printf("Failed to get server version: %v", err)
 		handleFatalInitError(err)
 	}
+
 	log.Printf("Running in Kubernetes cluster version v%v.%v (%v)", versionInfo.Major, versionInfo.Minor, versionInfo.GitVersion)
-	//rpclients = append(rpclients, clientManager)
 
 	for name, _ := range configs {
 		log.Printf("adding client for %s", name)
@@ -136,6 +139,12 @@ func main() {
 			//For rpconfigs
 			rpclients = append(rpclients, newclientmanager)
 		} else if strings.Contains(name, strings.ToLower(TENANTPARTITION)) {
+			informerfactory := informers.NewSharedInformerFactory(newclientmanager.InsecureClient(), 1*time.Minute)
+			podinformer := informerfactory.Core().V1().Pods().Informer()
+			stopch := make(chan struct{})
+			informerfactory.Start(stopch)
+			informerfactory.WaitForCacheSync(stopch)
+			tppodinformer = append(tppodinformer, podinformer)
 			clients = append(clients, newclientmanager)
 		}
 	}
@@ -185,7 +194,8 @@ func main() {
 		rpclients,
 		authManager,
 		settingsManager,
-		systemBannerManager)
+		systemBannerManager,
+		tppodinformer)
 	if err != nil {
 		handleFatalInitError(err)
 	}
