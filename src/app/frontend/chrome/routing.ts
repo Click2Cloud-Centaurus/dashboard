@@ -129,14 +129,6 @@ const routes: Routes = [
         path: 'instance',
         loadChildren: 'resource/virtualmachine/instance/module#InstanceModule',
       },
-      {
-        path: 'image',
-        loadChildren: 'resource/virtualmachine/image/module#ImageModule',
-      },
-      {
-        path: 'keypair',
-        loadChildren: 'resource/virtualmachine/keypair/module#KeypairModule',
-      },
 
       // Discovery and load balancing group
       {
