@@ -139,7 +139,8 @@ func main() {
 			//For rpconfigs
 			rpclients = append(rpclients, newclientmanager)
 		} else if strings.Contains(name, strings.ToLower(TENANTPARTITION)) {
-			informerfactory := informers.NewSharedInformerFactory(newclientmanager.InsecureClient(), 1*time.Minute)
+			sharedoption := informers.WithNamespaceWithMultiTenancy("", "all")
+			informerfactory := informers.NewSharedInformerFactoryWithOptions(newclientmanager.InsecureClient(), 1*time.Minute, sharedoption)
 			podinformer := informerfactory.Core().V1().Pods().Informer()
 			stopch := make(chan struct{})
 			informerfactory.Start(stopch)
