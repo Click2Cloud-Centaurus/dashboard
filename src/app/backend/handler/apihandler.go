@@ -20,6 +20,7 @@ import (
 	er "errors"
 	"fmt"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/partition"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/vm"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"log"
@@ -385,6 +386,10 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/pod").
 			To(apiHandler.handleGetPodsWithMultiTenancy).
+			Writes(pod.PodList{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/tenants/{tenant}/virtualmachine").
+			To(apiHandler.handleGetVMsWithMultiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/pod/{namespace}").
@@ -2908,6 +2913,24 @@ func (apiHandler *APIHandler) handleGetPodsWithMultiTenancy(request *restful.Req
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics // download standard metrics - cpu, and memory - by default
 	result, err := pod.GetPodListWithMultiTenancy(k8sClient, apiHandler.iManager.Metric().Client(), tenant, namespace, dataSelect)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleGetVMsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	tenant := request.PathParameter("tenant")
+	namespace := parseNamespacePathParameter(request)
+	dataSelect := parseDataSelectPathParameter(request)
+	dataSelect.MetricQuery = dataselect.StandardMetrics // download standard metrics - cpu, and memory - by default
+	result, err := vm.GetVMListWithMultiTenancy(k8sClient, apiHandler.iManager.Metric().Client(), tenant, namespace, dataSelect)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
