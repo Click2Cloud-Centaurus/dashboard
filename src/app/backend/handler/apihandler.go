@@ -1985,19 +1985,25 @@ func (apiHandler *APIHandlerV2) handleGetTenantPartitionDetail(request *restful.
 	if len(apiHandler.cManager) == 0 {
 		apiHandler.cManager = append(apiHandler.cManager, apiHandler.defaultClientmanager)
 	}
+
+	var PodList []interface{}
 	for i, cManager := range apiHandler.cManager {
 		k8sClient := cManager.InsecureClient()
 		dataSelect := parseDataSelectPathParameter(request)
 		dataSelect.MetricQuery = dataselect.StandardMetrics
-		PodInformer := apiHandler.podInformerManager[i]
-		PodList := PodInformer.GetStore().List()
-		fmt.Printf("Checking nodes length: %v %v", len(PodList), PodList)
+		if len(apiHandler.podInformerManager) != 0 {
+			PodInformer := apiHandler.podInformerManager[i]
+			PodList = PodInformer.GetStore().List()
+			fmt.Printf("Checking nodes length: %v %v", len(PodList), PodList)
+		}
 		partitionDetail, err := partition.GetTenantPartitionDetail(k8sClient, cManager.GetClusterName())
 		if err != nil {
 			errors.HandleInternalError(response, err)
 			return
 		}
-		partitionDetail.ObjectMeta.PodCount = int64(len(PodList))
+		if len(PodList) != 0 {
+			partitionDetail.ObjectMeta.PodCount = int64(len(PodList))
+		}
 		result.Partitions = append(result.Partitions, partitionDetail)
 	}
 	result.ListMeta.TotalItems = len(result.Partitions)
@@ -2005,6 +2011,7 @@ func (apiHandler *APIHandlerV2) handleGetTenantPartitionDetail(request *restful.
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 
 }
+
 func (apiHandler *APIHandlerV2) handleGetNodeDetail(request *restful.Request, response *restful.Response) {
 	//k8sClient, err := apiHandler.cManager.Client(request)
 	//if err != nil {

@@ -116,10 +116,10 @@ func GetResourcePartitionDetail(client client.Interface, clusterName string) (*R
 		allocatedResources, _ := resource.GetNodeAllocatedResources(node, pods)
 
 		cpuLimit += allocatedResources.CPUCapacity
-		cpuUsed += allocatedResources.CPULimitsFraction
+		cpuUsed += allocatedResources.CPURequestsFraction
 
 		memoryLimit += allocatedResources.MemoryCapacity
-		memoryUsed += allocatedResources.MemoryLimitsFraction
+		memoryUsed += allocatedResources.MemoryRequestsFraction
 
 		for _, condition := range node.Status.Conditions {
 			if condition.Type == v1.NodeConditionType("Ready") && condition.Status == v1.ConditionTrue {
@@ -151,7 +151,7 @@ func GetTenantPartitionDetail(client client.Interface, clusterName string) (*Ten
 	var memoryLimit int64 = 0
 	var memoryUsed float64 = 0
 	var healthyNodeCount int64 = 0
-	//var podCount int64 = 0
+	var podCount int64 = 0
 	var totalPods int64 = 0
 	nodeName := ``
 
@@ -161,13 +161,13 @@ func GetTenantPartitionDetail(client client.Interface, clusterName string) (*Ten
 		allocatedResources, _ := resource.GetNodeAllocatedResources(node, pods)
 
 		cpuLimit += allocatedResources.CPUCapacity
-		cpuUsed += allocatedResources.CPULimitsFraction
+		cpuUsed += allocatedResources.CPURequestsFraction
 
 		memoryLimit += allocatedResources.MemoryCapacity
-		memoryUsed += allocatedResources.MemoryLimitsFraction
+		memoryUsed += allocatedResources.MemoryRequestsFraction
 
 		totalPods = node.Status.Capacity.Pods().Value()
-		//podCount += int64(allocatedResources.AllocatedPods)
+		podCount += int64(allocatedResources.AllocatedPods)
 
 		for _, condition := range node.Status.Conditions {
 			if condition.Type == v1.NodeConditionType("Ready") && condition.Status == v1.ConditionTrue {
@@ -188,7 +188,7 @@ func GetTenantPartitionDetail(client client.Interface, clusterName string) (*Ten
 	partitionDetail.ObjectMeta.MemoryUsed = memoryUsed
 	partitionDetail.ObjectMeta.MemoryLimit = memoryLimit
 	partitionDetail.ObjectMeta.HealthyNodeCount = healthyNodeCount
-	//partitionDetail.ObjectMeta.PodCount = podCount
+	partitionDetail.ObjectMeta.PodCount = podCount
 	partitionDetail.ObjectMeta.TotalPods = totalPods
 	partitionDetail.ObjectMeta.Name = clusterName
 	partitionDetail.ObjectMeta.NodeName = nodeName

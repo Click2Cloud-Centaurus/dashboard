@@ -120,7 +120,7 @@ func main() {
 		log.Printf("No RPs & TPs config files found")
 		//TODO chceck
 	}
-	var clients []clientapi.ClientManager
+	var tpclients []clientapi.ClientManager
 	var rpclients []clientapi.ClientManager
 	var tppodinformer []cache.SharedIndexInformer
 	clientManager := client.NewClientManager(args.Holder.GetKubeConfigFile(), args.Holder.GetApiServerHost())
@@ -146,7 +146,7 @@ func main() {
 			informerfactory.Start(stopch)
 			informerfactory.WaitForCacheSync(stopch)
 			tppodinformer = append(tppodinformer, podinformer)
-			clients = append(clients, newclientmanager)
+			tpclients = append(tpclients, newclientmanager)
 		}
 	}
 
@@ -191,7 +191,7 @@ func main() {
 	apiHandler, err := handler.CreateHTTPAPIHandler(
 		integrationManager,
 		clientManager,
-		clients,
+		tpclients,
 		rpclients,
 		authManager,
 		settingsManager,
