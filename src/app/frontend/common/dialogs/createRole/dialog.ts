@@ -7,9 +7,11 @@ import {AbstractControl, Validators,FormBuilder} from '@angular/forms';
 import {FormGroup} from '@angular/forms';
 import {CONFIG} from "../../../index.config";
 import {CsrfTokenService} from "../../services/global/csrftoken";
-import {AlertDialog, AlertDialogConfig} from "../alert/dialog";
 import {NamespacedResourceService} from "../../services/resource/resource";
 import {TenantDetail} from "@api/backendapi";
+
+// @ts-ignore
+import Swal from "sweetalert2/dist/sweetalert2.js";
 
 export interface CreateRoleDialogMeta {
   name: string;
@@ -123,33 +125,6 @@ export class CreateRoleDialog implements OnInit {
     this.resources1 = this.resources.value.split(',')
     this.verbs1 = this.verbs.value.split(',')
 
-    const tenantRoleSpec = {name: this.role.value, namespace: this.namespace.value, apiGroups: this.apiGroups1,verbs: this.verbs1,resources: this.resources1};
-    const tenantTokenPromise = this.csrfToken_.getTokenForAction('role');
-    tenantTokenPromise.subscribe(csrfToken => {
-      return this.http_
-        .post<{valid: boolean}>(
-          'api/v1/role',
-          {...tenantRoleSpec},
-          {
-            headers: new HttpHeaders().set(this.config_.csrfHeaderName, csrfToken.token),
-          },
-        )
-        .subscribe(
-          () => {
-            this.dialogRef.close(this.role.value);
-          },
-          error => {
-            this.dialogRef.close();
-            const configData: AlertDialogConfig = {
-              title: 'Error creating Role',
-              message: error.data,
-              confirmLabel: 'OK',
-            };
-            this.matDialog_.open(AlertDialog, {data: configData});
-          },
-        );
-    });
-
     const roleSpec = {name: this.role.value, tenant: this.currentTenant, namespace: this.namespace.value, apiGroups: this.apiGroups1,verbs: this.verbs1,resources: this.resources1};
     const tokenPromise = this.csrfToken_.getTokenForAction('roles');
     tokenPromise.subscribe(csrfToken => {
@@ -163,16 +138,23 @@ export class CreateRoleDialog implements OnInit {
         )
         .subscribe(
           () => {
+            Swal.fire({
+              type: 'success',
+              title: this.role.value,
+              text: 'role successfully created!',
+              imageUrl: '/assets/images/tick-circle.svg',
+            })
             this.dialogRef.close(this.role.value);
           },
-          error => {
-            this.dialogRef.close();
-            const configData: AlertDialogConfig = {
-              title: 'Error creating Role',
-              message: error.data,
-              confirmLabel: 'OK',
-            };
-            this.matDialog_.open(AlertDialog, {data: configData});
+          (error:any) => {
+            if (error) {
+              Swal.fire({
+                type:'error',
+                title: this.role.value,
+                text: 'role already exists!',
+                imageUrl: '/assets/images/close-circle.svg',
+              })
+            }
           },
         );
     });
@@ -184,4 +166,5 @@ export class CreateRoleDialog implements OnInit {
   cancel(): void {
     this.dialogRef.close();
   }
+
 }

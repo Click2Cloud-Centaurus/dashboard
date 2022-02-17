@@ -766,6 +766,12 @@ export interface ResourceQuotaStatus {
   hard: string;
 }
 
+export interface QuotaAllocationStatus {
+  name: string;
+  used: string;
+  hard: string;
+}
+
 export interface MetricResult {
   timestamp: string;
   value: number;

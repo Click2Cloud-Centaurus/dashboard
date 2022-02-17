@@ -3,11 +3,13 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Component, Inject, OnInit} from '@angular/core';
 import {AbstractControl, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material';
-import {AlertDialog, AlertDialogConfig} from '../../../common/dialogs/alert/dialog';
 import {CsrfTokenService} from '../../../common/services/global/csrftoken';
 import {CONFIG} from '../../../index.config';
 import {NamespacedResourceService} from "../../services/resource/resource";
 import {TenantDetail} from "@api/backendapi";
+
+// @ts-ignore
+import Swal from "sweetalert2/dist/sweetalert2.js";
 
 export interface CreateNamespaceDialogMeta {
   namespaces: string[];
@@ -19,7 +21,6 @@ export interface CreateNamespaceDialogMeta {
 })
 export class CreateNamespaceDialog implements OnInit {
   form1: FormGroup;
-
   private readonly config_ = CONFIG;
   private currentTenant:string
 
@@ -69,16 +70,23 @@ export class CreateNamespaceDialog implements OnInit {
         )
         .subscribe(
           () => {
+            Swal.fire({
+              type: 'success',
+              title: this.namespace.value,
+              text: 'namespace successfully created!',
+              imageUrl: '/assets/images/tick-circle.svg',
+            })
             this.dialogRef.close(this.namespace.value);
           },
-          error => {
-            this.dialogRef.close();
-            const configData: AlertDialogConfig = {
-              title: 'Error creating namespace',
-              message: error.data,
-              confirmLabel: 'OK',
-            };
-            this.matDialog_.open(AlertDialog, {data: configData});
+          (error:any) => {
+            if (error) {
+              Swal.fire({
+                type:'error',
+                title: this.namespace.value,
+                text: 'namespace already exists!',
+                imageUrl: '/assets/images/close-circle.svg',
+              })
+            }
           },
         );
     });
@@ -91,4 +99,5 @@ export class CreateNamespaceDialog implements OnInit {
   cancel(): void {
     this.dialogRef.close();
   }
+
 }

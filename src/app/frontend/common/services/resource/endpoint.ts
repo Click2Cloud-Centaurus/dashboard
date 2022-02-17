@@ -78,14 +78,21 @@ class ResourceEndpoint {
     }/:name`;
   }
 
-  child(resourceName: string, relatedResource: Resource, resourceNamespace?: string): string {
+  child(resourceName: string, relatedResource: Resource, resourceNamespace?: string, tenant?: string): string {
     if (!resourceNamespace) {
       resourceNamespace = ':namespace';
     }
-
-    return `${baseHref}${this.tenanted_ ? '/tenants/:tenant' : ''}/${this.resource_}${
-      this.namespaced_ ? `/${resourceNamespace}` : ''
-    }/${resourceName}/${relatedResource}`;
+    let url = ''
+    if (tenant) {
+      url = `${baseHref}${this.tenanted_ ? `/tenants/${tenant}` : ''}/${this.resource_}${
+        this.namespaced_ ? `/${resourceNamespace}` : ''
+      }/${resourceName}/${relatedResource}`
+    } else {
+      url = `${baseHref}${this.tenanted_ ? '/tenants/:tenant' : ''}/${this.resource_}${
+        this.namespaced_ ? `/${resourceNamespace}` : ''
+      }/${resourceName}/${relatedResource}`
+    }
+    return url;
   }
 }
 

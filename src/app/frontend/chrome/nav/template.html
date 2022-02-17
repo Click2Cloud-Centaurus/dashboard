@@ -15,9 +15,9 @@
         <mat-expansion-panel [expanded]="true" >
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <kd-nav-item class="kd-nav-group-item" state="/cluster" i18n>
-                <img class="menu_icon" src="assets/images/cluster_management_icon.svg" alt="">
-                Cluster Management
+              <kd-nav-item class="kd-nav-group-item" state="/partition" i18n>
+                <img class="menu_icon" src="assets/images/cluster_management_icon.svg" alt="" style="height: 18px; width: 18px">
+                <strong>Cluster Management</strong>
               </kd-nav-item>
             </mat-panel-title>
           </mat-expansion-panel-header>
@@ -39,14 +39,15 @@
       </mat-accordion>
       <mat-divider></mat-divider>
     </div>
+
     <div *ngIf=showTenant>
       <mat-accordion>
         <mat-expansion-panel [expanded]="true" i18n>
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <kd-nav-item class="kd-nav-group-item" state="/tenantmanagement" i18n>
-                <img class="menu_icon" src="assets/images/cluster_management_icon.svg" alt="">
-                Tenant Management
+              <kd-nav-item class="kd-nav-group-item" state="/overview" i18n>
+                <img class="menu_icon" src="assets/images/cluster_management_icon.svg" alt="" style="height: 15px; width: 15px" >
+                <strong>Tenant Management</strong>
               </kd-nav-item>
             </mat-panel-title>
           </mat-expansion-panel-header>
@@ -59,34 +60,31 @@
               <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
               Roles
             </kd-nav-item>
-
-            <kd-nav-item class="kd-nav-item" state="/resourcequota" i18n>
-              <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-              Quota
-            </kd-nav-item>
           </div>
         </mat-expansion-panel>
       </mat-accordion>
       <mat-divider></mat-divider>
     </div>
-    <div *ngIf=showUser>
-      <mat-accordion>
-        <mat-expansion-panel [expanded]="true">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <kd-nav-item class="kd-nav-group-item" state="/cluster" i18n>
-                <img class="menu_icon" src="assets/images/tenant_management_icon.svg" alt="">
-                User Management
-              </kd-nav-item>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
 
-          <kd-nav-item class="kd-nav-item" state="/user" i18n>
-            <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-            Users
-          </kd-nav-item>
-        </mat-expansion-panel>
-      </mat-accordion>
+    <div class="kd-nav-group" *ngIf=showUser >
+      <mat-panel-title>
+        <kd-nav-item class="kd-nav-group-item" state="/user" [exact]="true" i18n>
+          <img class="menu_icon" src="assets/images/user_management.svg" alt="" style="height: 20px; width: 20px">
+          <strong>User Management</strong>
+        </kd-nav-item>
+      </mat-panel-title>
+      <kd-pinner-nav kind="resourcequota"></kd-pinner-nav>
+      <mat-divider></mat-divider>
+    </div>
+
+    <div class="kd-nav-group" *ngIf=showTenant >
+      <mat-panel-title>
+        <kd-nav-item class="kd-nav-group-item" state="/resourcequota" [exact]="true" i18n>
+          <img class="menu_icon" src="assets/images/resource_quota.svg" alt="" style="height: 18px; width: 18px">
+          <strong>Quota Management</strong>
+        </kd-nav-item>
+      </mat-panel-title>
+      <kd-pinner-nav kind="resourcequota"></kd-pinner-nav>
       <mat-divider></mat-divider>
     </div>
 
@@ -95,9 +93,9 @@
         <mat-expansion-panel [expanded]="true">
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <kd-nav-item class="kd-nav-group-item" state="/cluster" i18n>
-                <img class="menu_icon" src="assets/images/workloads_icon.svg" alt="">
-                Workloads
+              <kd-nav-item class="kd-nav-group-item" state="/workloadoverview" i18n>
+                <img class="menu_icon" src="assets/images/workloads_icon.svg" alt="" style="height: 18px; width: 18px">
+                <strong>Workloads</strong>
               </kd-nav-item>
             </mat-panel-title>
           </mat-expansion-panel-header>
@@ -135,30 +133,10 @@
               <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
               Stateful Sets
             </kd-nav-item>
-
-            <mat-expansion-panel [expanded]="true">
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  <kd-nav-item class="kd-nav-item" state="/virtualmachine" i18n>
-                    <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-                    Virtual Machine
-                  </kd-nav-item>
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-
-            <kd-nav-item class="kd-nav-sub-item" state="/image" i18n>
+            <kd-nav-item class="kd-nav-item" state="/instance" i18n>
               <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-              Images
+              Virtual Machines
             </kd-nav-item>
-            <kd-nav-item class="kd-nav-sub-item" state="/instance" i18n>
-              <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-              Instances
-            </kd-nav-item>
-            <kd-nav-item class="kd-nav-sub-item" state="/keypair" i18n>
-              <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-              Key Pairs
-            </kd-nav-item>
-            </mat-expansion-panel>
           </div>
         </mat-expansion-panel>
       </mat-accordion>
@@ -168,9 +146,9 @@
         <mat-expansion-panel [expanded]="true">
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <kd-nav-item class="kd-nav-group-item" state="/cluster" i18n>
-                <img class="menu_icon" src="assets/images/discovery_load_balancing_icon.svg" alt="">
-                Discovery and Load Balancing
+              <kd-nav-item class="kd-nav-group-item" state="/ingress" i18n>
+                <img class="menu_icon" src="assets/images/discovery_load_balancing_icon.svg" alt="" style="height: 18px; width: 18px">
+                <strong>Discovery and Load Balancing</strong>
               </kd-nav-item>
             </mat-panel-title>
           </mat-expansion-panel-header>
@@ -192,9 +170,9 @@
         <mat-expansion-panel [expanded]="true">
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <kd-nav-item class="kd-nav-group-item" state="/cluster" i18n>
-                <img class="menu_icon" src="assets/images/config_storage_icon.svg" alt="">
-                Config and Storage
+              <kd-nav-item class="kd-nav-group-item" state="/configmap" i18n>
+                <img class="menu_icon" src="assets/images/config_storage_icon.svg" alt="" style="height: 16px; width: 16px">
+                <strong>Config and Storage</strong>
               </kd-nav-item>
             </mat-panel-title>
           </mat-expansion-panel-header>
@@ -228,8 +206,8 @@
     <div class="kd-nav-group">
       <mat-panel-title>
         <kd-nav-item class="kd-nav-group-item" state="/customresourcedefinition" [exact]="true" i18n>
-          <img class="menu_icon" src="assets/images/custom_resource_definitions_icon.svg" alt="">
-          Custom Resource Definitions
+          <img class="menu_icon" src="assets/images/custom_resource_definitions.svg" alt="" style="height: 22px; width: 22px">
+          <strong>Custom Resource Definitions</strong>
         </kd-nav-item>
       </mat-panel-title>
       <kd-pinner-nav kind="customresourcedefinition"></kd-pinner-nav>

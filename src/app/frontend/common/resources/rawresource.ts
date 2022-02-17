@@ -1,4 +1,3 @@
-
 import {ObjectMeta, TypeMeta} from '@api/backendapi';
 
 export class RawResource {
@@ -7,8 +6,8 @@ export class RawResource {
 
     if (objectMeta.namespace !== undefined && !resourceUrl.includes('/User')) {
       resourceUrl += `/namespace/${objectMeta.namespace}`;
-
     }
+    
     if(!resourceUrl.includes('/User')) {
       resourceUrl += `/name/${objectMeta.name}`;
     }
@@ -18,7 +17,7 @@ export class RawResource {
     }
 
     else if (resourceUrl.includes('role/')) {
-      resourceUrl = `api/v1/tenants/${tenant}/namespaces/${objectMeta.namespace}/${typeMeta.kind}/${objectMeta.name}`;
+         resourceUrl = `api/v1/tenants/${tenant}/namespaces/${objectMeta.namespace}/${typeMeta.kind}/${objectMeta.name}`;
     }
 
     else if (resourceUrl.includes('/User')) {

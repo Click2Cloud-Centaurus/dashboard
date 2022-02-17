@@ -62,28 +62,25 @@ limitations under the License.
             <mat-header-cell *matHeaderCellDef
                              mat-sort-header
                              disableClear="true"
-                             i18n>Node Count</mat-header-cell>
+                             i18n>Node count</mat-header-cell>
             <mat-cell *matCellDef="let resourcePartition">
               {{resourcePartition.objectMeta.nodeCount}}
             </mat-cell>
           </ng-container>
+
           <ng-container [matColumnDef]="getColumns()[3]">
             <mat-header-cell *matHeaderCellDef
-                             mat-sort-header
-                             disableClear="true"
-                             i18n>CPU limits (cores)</mat-header-cell>
+                             i18n>CPU (cores)</mat-header-cell>
             <mat-cell *matCellDef="let resourcePartition">
-              {{resourcePartition.objectMeta.cpuLimit | number:"1.2-2"}}%
+              {{resourcePartition.objectMeta.cpuUsed | number:"1.2-2"}}%/{{resourcePartition.objectMeta.cpuLimit | kdCores }}
             </mat-cell>
           </ng-container>
 
           <ng-container [matColumnDef]="getColumns()[4]">
             <mat-header-cell *matHeaderCellDef
-                             mat-sort-header
-                             disableClear="true"
-                             i18n>Memory limits (bytes)</mat-header-cell>
+                             i18n>Memory (bytes)</mat-header-cell>
             <mat-cell *matCellDef="let resourcePartition">
-              {{resourcePartition.objectMeta.memoryLimit | number:"1.2-2"}}%
+              {{resourcePartition.objectMeta.memoryUsed | number:"1.2-2"}}%/{{resourcePartition.objectMeta.memoryLimit | kdMemory }}
             </mat-cell>
           </ng-container>
 
@@ -91,7 +88,7 @@ limitations under the License.
             <mat-header-cell *matHeaderCellDef
                              mat-sort-header
                              disableClear="true"
-                             i18n>Health Status</mat-header-cell>
+                             i18n>Health status</mat-header-cell>
             <mat-cell *matCellDef="let resourcePartition">
               {{resourcePartition.objectMeta.healthyNodeCount}}/{{resourcePartition.objectMeta.nodeCount}}
             </mat-cell>
@@ -101,9 +98,9 @@ limitations under the License.
             <mat-header-cell *matHeaderCellDef
                              mat-sort-header
                              disableClear="true"
-                             i18n>Etcd size</mat-header-cell>
+                             i18n>etcd size</mat-header-cell>
             <mat-cell *matCellDef="let resourcePartition">
-              5GB/10GB
+              5Gi/10Gi
             </mat-cell>
           </ng-container>
 

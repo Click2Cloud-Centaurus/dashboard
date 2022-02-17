@@ -17,9 +17,11 @@ package handler
 
 import (
 	"encoding/base64"
+	er "errors"
 	"fmt"
 	"github.com/kubernetes/dashboard/src/app/backend/resource/partition"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/cache"
 	"log"
 	"net/http"
 	"strconv"
@@ -103,6 +105,7 @@ type APIHandlerV2 struct {
 	cManager             []clientapi.ClientManager
 	rpManager            []clientapi.ClientManager
 	sManager             settingsApi.SettingsManager
+	podInformerManager   []cache.SharedIndexInformer
 }
 
 // TerminalResponse is sent by handleExecShell. The Id is a random session id that binds the original REST request and the SockJS connection.
@@ -127,15 +130,20 @@ func ResourceAllocator(tenant string, clients []clientapi.ClientManager) clienta
 	return clients[0]
 }
 
+//struct for already exists
+type ErrorMsg struct {
+	Msg string `json:"msg"`
+}
+
 // CreateHTTPAPIHandler creates a new HTTP handler that handles all requests to the API of the backend.
 func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clientapi.ClientManager, cManagers []clientapi.ClientManager, rpManagers []clientapi.ClientManager,
 	authManager authApi.AuthManager, sManager settingsApi.SettingsManager,
-	sbManager systembanner.SystemBannerManager) (
+	sbManager systembanner.SystemBannerManager, podinformers []cache.SharedIndexInformer) (
 
 	http.Handler, error) {
 
 	apiHandler := APIHandler{iManager: iManager, cManager: cManager, sManager: sManager}
-	apiHandler1 := APIHandlerV2{iManager: iManager, defaultClientmanager: cManager, cManager: cManagers, rpManager: rpManagers, sManager: sManager}
+	apiHandler1 := APIHandlerV2{iManager: iManager, defaultClientmanager: cManager, cManager: cManagers, rpManager: rpManagers, sManager: sManager, podInformerManager: podinformers}
 	wsContainer := restful.NewContainer()
 	wsContainer.EnableContentEncoding(true)
 
@@ -656,7 +664,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Reads(resourcequota.ResourceQuotaSpec{}).
 			Writes(v1.ResourceQuota{}))
 	apiV1Ws.Route(
-		apiV1Ws.GET("/resourcequota").
+		apiV1Ws.GET("/tenants/{tenant}/resourcequota").
 			To(apiHandler.handleGetResourceQuotaList).
 			Writes(v1.ResourceQuotaList{}))
 	apiV1Ws.Route(
@@ -1284,6 +1292,13 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 //	response.WriteHeaderAndEntity(http.StatusCreated, tenantSpec)
 //}
 
+//error struct for already exists
+type Error struct {
+	// Name of the tenant.
+	Msg        string `json:"msg"`
+	StatusCode int    `json:"statusCode"`
+}
+
 //for tenant handlerCreateTenant method
 func (apiHandler *APIHandlerV2) handleCreateTenant(request *restful.Request, response *restful.Response) {
 	tenantSpec := new(tenant.TenantSpec)
@@ -1302,7 +1317,8 @@ func (apiHandler *APIHandlerV2) handleCreateTenant(request *restful.Request, res
 	//	return
 	//}
 	if err := tenant.CreateTenant(tenantSpec, k8sClient, client.GetClusterName()); err != nil {
-		errors.HandleInternalError(response, err)
+		errorMsg := Error{Msg: err.Error(), StatusCode: http.StatusConflict}
+		response.WriteHeaderAndEntity(http.StatusConflict, errorMsg)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, tenantSpec)
@@ -1970,19 +1986,19 @@ func (apiHandler *APIHandlerV2) handleGetTenantPartitionDetail(request *restful.
 	if len(apiHandler.cManager) == 0 {
 		apiHandler.cManager = append(apiHandler.cManager, apiHandler.defaultClientmanager)
 	}
-	for _, cManager := range apiHandler.cManager {
+	for i, cManager := range apiHandler.cManager {
 		k8sClient := cManager.InsecureClient()
-		//if err != nil {
-		//	errors.HandleInternalError(response, err)
-		//	return
-		//}
 		dataSelect := parseDataSelectPathParameter(request)
 		dataSelect.MetricQuery = dataselect.StandardMetrics
+		PodInformer := apiHandler.podInformerManager[i]
+		PodList := PodInformer.GetStore().List()
+		fmt.Printf("Checking nodes length: %v %v", len(PodList), PodList)
 		partitionDetail, err := partition.GetTenantPartitionDetail(k8sClient, cManager.GetClusterName())
 		if err != nil {
 			errors.HandleInternalError(response, err)
 			return
 		}
+		partitionDetail.ObjectMeta.PodCount = int64(len(PodList))
 		result.Partitions = append(result.Partitions, partitionDetail)
 	}
 	result.ListMeta.TotalItems = len(result.Partitions)
@@ -3265,7 +3281,12 @@ func (apiHandler *APIHandler) handleCreateCreateClusterRole(request *restful.Req
 	}
 
 	if err := clusterrole.CreateClusterRole(clusterRoleSpec, k8sClient); err != nil {
-		errors.HandleInternalError(response, err)
+		if strings.Contains(err.Error(), "already exists") {
+			msg := "clusterroles '" + clusterRoleSpec.Name + "' already exists"
+			err = er.New(msg)
+		}
+		errorMsg := Error{Msg: err.Error(), StatusCode: http.StatusConflict}
+		response.WriteHeaderAndEntity(http.StatusConflict, errorMsg)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, clusterRoleSpec)
@@ -3554,7 +3575,12 @@ func (apiHandler *APIHandler) handleCreateRolesWithMultiTenancy(request *restful
 	}
 
 	if err := role.CreateRolesWithMultiTenancy(roleSpec, k8sClient); err != nil {
-		errors.HandleInternalError(response, err)
+		if strings.Contains(err.Error(), "already exists") {
+			msg := "roles '" + roleSpec.Name + "' already exists"
+			err = er.New(msg)
+		}
+		errorMsg := Error{Msg: err.Error(), StatusCode: http.StatusConflict}
+		response.WriteHeaderAndEntity(http.StatusConflict, errorMsg)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, roleSpec)
@@ -3595,7 +3621,8 @@ func (apiHandler *APIHandler) handleAddResourceQuota(request *restful.Request, r
 	//namespace := request.PathParameter("namespace")
 	result, err := resourcequota.AddResourceQuotas(k8sClient, resourceQuotaSpec.NameSpace, resourceQuotaSpec.Tenant, resourceQuotaSpec)
 	if err != nil {
-		errors.HandleInternalError(response, err)
+		errorMsg := Error{Msg: err.Error(), StatusCode: http.StatusConflict}
+		response.WriteHeaderAndEntity(http.StatusConflict, errorMsg)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -3608,12 +3635,13 @@ func (apiHandler *APIHandler) handleGetResourceQuotaList(request *restful.Reques
 		return
 	}
 
-	Namespace := request.PathParameter("namespace")
+	tenant := request.PathParameter("tenant")
+	//Namespace := request.PathParameter("namespace")
 	var namespaces []string
-	namespaces = append(namespaces, Namespace)
+	//namespaces = append(namespaces, Namespace)
 	namespace := common.NewNamespaceQuery(namespaces)
 	dataSelect := parseDataSelectPathParameter(request)
-	result, err := resourcequota.GetResourceQuotaList(k8sClient, namespace, dataSelect)
+	result, err := resourcequota.GetResourceQuotaList(k8sClient, namespace, tenant, dataSelect)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -3723,7 +3751,8 @@ func (apiHandler *APIHandlerV2) handleCreateNamespace(request *restful.Request, 
 	//}
 
 	if err := ns.CreateNamespace(namespaceSpec, namespaceSpec.Tenant, k8sClient); err != nil {
-		errors.HandleInternalError(response, err)
+		errorMsg := Error{Msg: err.Error(), StatusCode: http.StatusConflict}
+		response.WriteHeaderAndEntity(http.StatusConflict, errorMsg)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, namespaceSpec)
@@ -5499,6 +5528,7 @@ func parseNamespacePathParameter(request *restful.Request) *common.NamespaceQuer
 		n = strings.Trim(n, " ")
 		if len(n) > 0 {
 			nonEmptyNamespaces = append(nonEmptyNamespaces, n)
+			nonEmptyNamespaces = append(nonEmptyNamespaces, n)
 		}
 	}
 	return common.NewNamespaceQuery(nonEmptyNamespaces)
@@ -5627,10 +5657,6 @@ func (apiHandler *APIHandler) handleGetUserDetail(w *restful.Request, r *restful
 	user.ObjectMeta.Token = "***********"
 
 	r.WriteHeaderAndEntity(http.StatusOK, user)
-}
-
-type ErrorMsg struct {
-	Msg string `json:"msg"`
 }
 
 func (apiHandler *APIHandler) handleGetAllUser(w *restful.Request, r *restful.Response) {

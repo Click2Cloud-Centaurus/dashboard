@@ -50,16 +50,6 @@ export class VerberService {
   onTrigger = new EventEmitter<boolean>();
   onCreateQuota = new EventEmitter<boolean>();
 
-  //variable for success msg
-  public success_node: boolean = false;
-  public success_tenant: boolean = false;
-  public success_namespace: boolean = false;
-  public success_role: boolean = false;
-  public success_clusterrole: boolean = false;
-  public success_quota: boolean = false;
-  public success_user: boolean = false;
-  public success_result: any;
-
   constructor(
     private readonly dialog_: MatDialog,
     private readonly http_: HttpClient,
@@ -75,16 +65,6 @@ export class VerberService {
       .afterClosed()
       .subscribe(result => {
         if (result) {
-          this.success_tenant = true;
-          this.success_result = result
-          setTimeout(()=>{
-            this.success_tenant = false;
-          }, 6000);
-        }
-        else{
-          this.success_result = result
-          setTimeout(()=>{
-          }, 6000);
         }
       });
   }
@@ -96,11 +76,6 @@ export class VerberService {
       .afterClosed()
       .subscribe(result => {
         if (result) {
-          this.success_user = true;
-          this.success_result = result
-          setTimeout(()=>{
-            this.success_user = false;
-          }, 6000);
         }
       });
   }
@@ -113,11 +88,6 @@ export class VerberService {
       .afterClosed()
       .subscribe(result => {
         if (result) {
-          this.success_namespace = true;
-          this.success_result = result
-          setTimeout(()=>{
-            this.success_namespace = false;
-          }, 6000);
         }
       });
 
@@ -131,11 +101,6 @@ export class VerberService {
       .afterClosed()
       .subscribe(result => {
         if (result) {
-          this.success_quota = true;
-          this.success_result = result
-          setTimeout(()=>{
-            this.success_quota = false;
-          }, 6000);
         }
       });
   }
@@ -148,11 +113,6 @@ export class VerberService {
       .afterClosed()
       .subscribe(result => {
         if (result) {
-          this.success_role = true;
-          this.success_result = result
-          setTimeout(()=>{
-            this.success_role = false;
-          }, 6000);
         }
       });
   }
@@ -164,11 +124,6 @@ export class VerberService {
       .afterClosed()
       .subscribe(result => {
         if (result) {
-          this.success_clusterrole = true;
-          this.success_result = result
-          setTimeout(()=>{
-            this.success_clusterrole = false;
-          }, 6000);
         }
       });
   }
@@ -181,11 +136,6 @@ export class VerberService {
       .afterClosed()
       .subscribe(result => {
         if (result) {
-          this.success_node = true;
-          this.success_result = result
-          setTimeout(()=>{
-            this.success_node = false;
-          }, 6000);
         }
       });
   }

@@ -62,38 +62,35 @@ limitations under the License.
             <mat-header-cell *matHeaderCellDef
                              mat-sort-header
                              disableClear="true"
-                             i18n>Tenant Count</mat-header-cell>
+                             i18n>Tenant count</mat-header-cell>
             <mat-cell *matCellDef="let tenantPartition">
               {{tenantPartition.objectMeta.tenantCount}}
             </mat-cell>
           </ng-container>
+
           <ng-container [matColumnDef]="getColumns()[3]">
             <mat-header-cell *matHeaderCellDef
                              mat-sort-header
                              disableClear="true"
-                             i18n>CPU limits (cores)</mat-header-cell>
+                             i18n>Pods</mat-header-cell>
             <mat-cell *matCellDef="let tenantPartition">
-              {{tenantPartition.objectMeta.cpuLimit | number:"1.2-2"}}%
+              {{tenantPartition.objectMeta.podCount}}/{{tenantPartition.objectMeta.totalPods}}
             </mat-cell>
           </ng-container>
 
           <ng-container [matColumnDef]="getColumns()[4]">
             <mat-header-cell *matHeaderCellDef
-                             mat-sort-header
-                             disableClear="true"
-                             i18n>Memory limits (bytes)</mat-header-cell>
+                             i18n>CPU (cores)</mat-header-cell>
             <mat-cell *matCellDef="let tenantPartition">
-              {{tenantPartition.objectMeta.memoryLimit | number:"1.2-2"}}%
+              {{tenantPartition.objectMeta.cpuUsed  | number:"1.2-2"}}%/{{tenantPartition.objectMeta.cpuLimit | kdCores }}
             </mat-cell>
           </ng-container>
 
           <ng-container [matColumnDef]="getColumns()[5]">
             <mat-header-cell *matHeaderCellDef
-                             mat-sort-header
-                             disableClear="true"
-                             i18n>Health Status</mat-header-cell>
+                             i18n>Memory (bytes)</mat-header-cell>
             <mat-cell *matCellDef="let tenantPartition">
-              {{tenantPartition.objectMeta.healthyNodeCount}}/1
+              {{tenantPartition.objectMeta.memoryUsed | number:"1.2-2"}}%/{{tenantPartition.objectMeta.memoryLimit | kdMemory }}
             </mat-cell>
           </ng-container>
 
@@ -101,9 +98,19 @@ limitations under the License.
             <mat-header-cell *matHeaderCellDef
                              mat-sort-header
                              disableClear="true"
-                             i18n>Etcd size</mat-header-cell>
+                             i18n>Health status</mat-header-cell>
             <mat-cell *matCellDef="let tenantPartition">
-              5GB/10GB
+              {{tenantPartition.objectMeta.healthyNodeCount}}/1
+            </mat-cell>
+          </ng-container>
+
+          <ng-container [matColumnDef]="getColumns()[7]">
+            <mat-header-cell *matHeaderCellDef
+                             mat-sort-header
+                             disableClear="true"
+                             i18n>etcd size</mat-header-cell>
+            <mat-cell *matCellDef="let tenantPartition">
+              5Gi/10Gi
             </mat-cell>
           </ng-container>
 
