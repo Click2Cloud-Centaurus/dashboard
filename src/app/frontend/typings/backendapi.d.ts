@@ -159,6 +159,13 @@ export interface PodList extends ResourceList {
   cumulativeMetrics: Metric[] | null;
 }
 
+export interface VirtualMachineList extends ResourceList {
+  virtualMachines: VirtualMachine[];
+  status: Status;
+  virtualMachineInfo?: VirtualMachineInfo;
+  cumulativeMetrics: Metric[] | null;
+}
+
 export interface ReplicaSetList extends ResourceList {
   replicaSets: ReplicaSet[];
   status: Status;
@@ -351,6 +358,16 @@ export interface Pod extends Resource {
   restartCount: number;
   qosClass?: string;
   metrics: PodMetrics;
+  warnings: Event[];
+  nodeName: string;
+}
+
+export interface VirtualMachine extends Resource {
+  podStatus: VirtualMachineStatus;
+  VirtualMachineIP?: string;
+  restartCount: number;
+  qosClass?: string;
+  metrics: VirtualMachineMetrics;
   warnings: Event[];
   nodeName: string;
 }
@@ -566,6 +583,21 @@ export interface PodDetail extends ResourceDetail {
   restartCount: number;
   qosClass: string;
   metrics: PodMetrics;
+  conditions: Condition[];
+  controller: Resource;
+  eventList: EventList;
+  persistentVolumeClaimList: PersistentVolumeClaimList;
+}
+
+export interface VirtualMachineDetail extends ResourceDetail {
+  initContainers: Container[];
+  containers: Container[];
+  podPhase: string;
+  podIP: string;
+  nodeName: string;
+  restartCount: number;
+  qosClass: string;
+  metrics: VirtualMachineMetrics;
   conditions: Condition[];
   controller: Resource;
   eventList: EventList;
@@ -838,6 +870,13 @@ export interface PodMetrics {
   memoryUsageHistory: MetricResult[];
 }
 
+export interface VirtualMachineMetrics {
+  cpuUsage: number;
+  memoryUsage: number;
+  cpuUsageHistory: MetricResult[];
+  memoryUsageHistory: MetricResult[];
+}
+
 export interface Status {
   running: number;
   failed: number;
@@ -846,6 +885,12 @@ export interface Status {
 }
 
 export interface PodStatus {
+  podPhase: string;
+  status: string;
+  containerStates: ContainerState[];
+}
+
+export interface VirtualMachineStatus {
   podPhase: string;
   status: string;
   containerStates: ContainerState[];
@@ -860,6 +905,17 @@ export interface PodInfo {
   succeeded: number;
   warnings: Event[];
 }
+
+export interface VirtualMachineInfo {
+  current: number;
+  desired: number;
+  running: number;
+  pending: number;
+  failed: number;
+  succeeded: number;
+  warnings: Event[];
+}
+
 
 export interface NodeAllocatedResources {
   cpuRequests: number;

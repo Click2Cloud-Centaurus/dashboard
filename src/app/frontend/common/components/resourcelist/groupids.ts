@@ -26,6 +26,7 @@ export enum ListIdentifier {
   deployment = 'deploymentList',
   daemonSet = 'daemonSetList',
   pod = 'podList',
+  virtualMachine = 'virtualMachineList',
   replicaSet = 'replicaSetList',
   ingress = 'ingressList',
   service = 'serviceList',
