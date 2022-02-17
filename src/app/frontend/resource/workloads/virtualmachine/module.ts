@@ -13,20 +13,15 @@
 // limitations under the License.
 
 import {NgModule} from '@angular/core';
-import {Route, RouterModule} from '@angular/router';
-import {VirtualmachineComponent} from './component';
 
-export const WORKLOADS_ROUTE: Route = {
-  path: '',
-  component: VirtualmachineComponent,
-  data: {
-    breadcrumb: 'Virtual Machine',
-    link: ['', 'virtualmachine'],
-  },
-};
+import {ComponentsModule} from '../../../common/components/module';
+import {SharedModule} from '../../../shared.module';
+import {VirtualMachineDetailComponent} from './detail/component';
+import {VirtualMachineListComponent} from './list/component';
+import {VirtualMachineRoutingModule} from './routing';
 
 @NgModule({
-  imports: [RouterModule.forChild([WORKLOADS_ROUTE])],
-  exports: [RouterModule],
+  imports: [SharedModule, ComponentsModule, VirtualMachineRoutingModule],
+  declarations: [VirtualMachineListComponent, VirtualMachineDetailComponent],
 })
-export class VirtualmachineRoutingModule {}
+export class VirtualMachineModule {}

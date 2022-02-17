@@ -14,25 +14,33 @@
 
 import {NgModule} from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
-import {TRIGGER_DEFAULT_ACTIONBAR} from '../../../common/components/actionbars/routing';
+import {LOGS_EXEC_DEFAULT_ACTIONBAR} from '../../../common/components/actionbars/routing';
 
 import {WORKLOADS_ROUTE} from '../routing';
 
-import {InstanceListComponent} from './list/component';
+import {VirtualMachineDetailComponent} from './detail/component';
+import {VirtualMachineListComponent} from './list/component';
 
-const CRONJOB_LIST_ROUTE: Route = {
+const VIRTUAL_MACHINE_LIST_ROUTE: Route = {
   path: '',
-  component: InstanceListComponent,
+  component: VirtualMachineListComponent,
   data: {
-    breadcrumb: 'Instances',
+    breadcrumb: 'VirtualMachines',
     parent: WORKLOADS_ROUTE,
   },
 };
 
+export const VIRTUAL_MACHINE_DETAIL_ROUTE: Route = {
+  path: ':resourceNamespace/:resourceName',
+  component: VirtualMachineDetailComponent,
+  data: {
+    breadcrumb: '{{ resourceName }}',
+    parent: VIRTUAL_MACHINE_LIST_ROUTE,
+  },
+};
+
 @NgModule({
-  imports: [
-    RouterModule.forChild([CRONJOB_LIST_ROUTE, TRIGGER_DEFAULT_ACTIONBAR]),
-  ],
+  imports: [RouterModule.forChild([VIRTUAL_MACHINE_LIST_ROUTE, VIRTUAL_MACHINE_DETAIL_ROUTE, LOGS_EXEC_DEFAULT_ACTIONBAR])],
   exports: [RouterModule],
 })
-export class InstanceRoutingModule {}
+export class VirtualMachineRoutingModule {}

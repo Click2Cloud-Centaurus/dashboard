@@ -12,18 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {NgModule} from '@angular/core';
+import {Component} from '@angular/core';
 
-import {ComponentsModule} from '../../common/components/module';
-import {SharedModule} from '../../shared.module';
-
-import {VirtualmachineComponent} from './component';
-import {VirtualmachineRoutingModule} from './routing';
-
-
-@NgModule({
-  imports: [SharedModule, ComponentsModule,VirtualmachineRoutingModule],
-  declarations: [VirtualmachineComponent],
+@Component({
+  selector: 'kd-virtual-machine-list-state',
+  template: '<kd-virtual-machine-list></kd-virtual-machine-list>',
 })
-export class VirtualmachineModule {}
-
+export class VirtualMachineListComponent {}
+//
