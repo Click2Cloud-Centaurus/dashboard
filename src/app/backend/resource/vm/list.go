@@ -52,7 +52,7 @@ type VMList struct {
 	Status common.ResourceStatus `json:"status"`
 
 	// Unordered list of Pods.
-	Pods []VM `json:"pods"`
+	Pods []VM `json:"virtualMachines"`
 
 	// List of non-critical errors, that occurred during resource retrieval.
 	Errors []error `json:"errors"`

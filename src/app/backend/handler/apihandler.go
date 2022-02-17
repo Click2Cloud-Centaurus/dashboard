@@ -388,7 +388,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			To(apiHandler.handleGetPodsWithMultiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
-		apiV1Ws.GET("/tenants/{tenant}/vm").
+		apiV1Ws.GET("/tenants/{tenant}/virtualmachine").
 			To(apiHandler.handleGetVMsWithMultiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
