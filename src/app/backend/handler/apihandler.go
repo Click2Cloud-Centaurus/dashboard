@@ -403,6 +403,10 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 		apiV1Ws.GET("/tenants/{tenant}/pod/{namespace}/{pod}").
 			To(apiHandler.handleGetPodDetailWithMultiTenancy).
 			Writes(pod.PodDetail{}))
+  apiV1Ws.Route(
+    apiV1Ws.GET("/tenants/{tenant}/virtualmachine/{namespace}/{virtualmachine}").
+      To(apiHandler.handleGetVMDetailWithMultiTenancy).
+      Writes(vm.VirtualMachineDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/pod/{namespace}/{pod}/container").
 			To(apiHandler.handleGetPodContainersWithMultiTenancy).
@@ -2974,6 +2978,23 @@ func (apiHandler *APIHandler) handleGetPodDetailWithMultiTenancy(request *restfu
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (apiHandler *APIHandler) handleGetVMDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+  k8sClient, err := apiHandler.cManager.Client(request)
+  if err != nil {
+    errors.HandleInternalError(response, err)
+    return
+  }
+  tenant := request.PathParameter("tenant")
+  namespace := request.PathParameter("namespace")
+  name := request.PathParameter("virtualmachine")
+  result, err := vm.GetVirtualMachineDetailWithMultiTenancy(k8sClient, apiHandler.iManager.Metric().Client(), tenant, namespace, name)
+  if err != nil {
+    errors.HandleInternalError(response, err)
+    return
+  }
+  response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
 func (apiHandler *APIHandler) handleGetReplicationControllerDetail(request *restful.Request, response *restful.Response) {
