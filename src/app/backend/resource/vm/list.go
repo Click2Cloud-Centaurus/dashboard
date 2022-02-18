@@ -223,7 +223,7 @@ func ToVMList(pods []v1.Pod, events []v1.Event, nonCriticalErrors []error, dsQue
 func toVM(pod *v1.Pod, warnings []common.Event) VM {
 	podDetail := VM{
 		ObjectMeta:   NewObjectMeta(pod.ObjectMeta, pod.Spec),
-		TypeMeta:     api.NewTypeMeta(api.ResourceKindPod),
+		TypeMeta:     api.NewTypeMeta(api.ResourceKindVirtualMachine),
 		Warnings:     warnings,
 		PodStatus:    getPodStatus(*pod, warnings),
 		RestartCount: getRestartCount(*pod),

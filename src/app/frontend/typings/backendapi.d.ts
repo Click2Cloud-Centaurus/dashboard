@@ -597,6 +597,9 @@ export interface VirtualMachineDetail extends ResourceDetail {
   nodeName: string;
   restartCount: number;
   qosClass: string;
+  keyPair: string;
+  imagePullPolicy: string;
+  shutdownBehavior: string;
   metrics: VirtualMachineMetrics;
   conditions: Condition[];
   controller: Resource;

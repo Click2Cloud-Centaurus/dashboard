@@ -29,7 +29,7 @@ import {TenantService} from "../../../services/global/tenant";
 
 @Component({selector: 'kd-virtual-machine-list', templateUrl: './template.html'})
 export class VirtualMachineListComponent extends ResourceListWithStatuses<VirtualMachineList, VirtualMachine> {
-  @Input() endpoint = EndpointManager.resource(Resource.virtualMachine, false, true).list();
+  @Input() endpoint = EndpointManager.resource(Resource.virtualMachine, true, true).list();
 
   tenantName: string;
 
@@ -40,7 +40,7 @@ export class VirtualMachineListComponent extends ResourceListWithStatuses<Virtua
     resolver: ComponentFactoryResolver,
     notifications: NotificationsService,
   ) {
-    super('virtualMachine', notifications, resolver);
+    super('virtualmachine', notifications, resolver);
     this.id = ListIdentifier.virtualMachine;
     this.groupId = ListGroupIdentifier.workloads;
 

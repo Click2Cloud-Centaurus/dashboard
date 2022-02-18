@@ -60,6 +60,25 @@ limitations under the License.
       <div value>{{virtualMachine.virtualMachineIP}}</div>
     </kd-property>
 
+    <kd-property *ngIf="virtualMachine?.objectMeta.keyPair">
+      <div key
+           i18n>Shutdown behavior</div>
+      <div value>{{virtualMachine.objectMeta.keyPair}}</div>
+    </kd-property>
+
+    <kd-property *ngIf="virtualMachine?.objectMeta.imagePullPolicy">
+      <div key
+           i18n>Image pull policy</div>
+      <div value>{{virtualMachine.objectMeta.imagePullPolicy}}</div>
+    </kd-property>
+
+
+    <kd-property *ngIf="virtualMachine?.objectMeta.shutdownBehavior">
+      <div key
+           i18n>Shutdown behavior</div>
+      <div value>{{virtualMachine.objectMeta.shutdownBehavior}}</div>
+    </kd-property>
+
     <kd-property *ngIf="virtualMachine?.qosClass">
       <div key
            i18n>QoS Class</div>

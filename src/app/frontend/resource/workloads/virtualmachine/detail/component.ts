@@ -31,6 +31,7 @@ import {NamespacedResourceService} from '../../../../common/services/resource/re
 export class VirtualMachineDetailComponent implements OnInit, OnDestroy {
   private virtualMachineSubscription_: Subscription;
   private readonly endpoint_ = EndpointManager.resource(Resource.virtualMachine, true, true);
+  private readonly endpoint = EndpointManager.resource(Resource.pod, true, true);
   virtualMachine: VirtualMachineDetail;
   isInitialized = false;
   eventListEndpoint: string;
@@ -47,7 +48,7 @@ export class VirtualMachineDetailComponent implements OnInit, OnDestroy {
     const resourceName = this.activatedRoute_.snapshot.params.resourceName;
     const resourceNamespace = this.activatedRoute_.snapshot.params.resourceNamespace;
 
-    this.eventListEndpoint = this.endpoint_.child(resourceName, Resource.event, resourceNamespace);
+    this.eventListEndpoint = this.endpoint.child(resourceName, Resource.event, resourceNamespace);
 
     this.virtualMachineSubscription_ = this.virtualMachine_
       .get(this.endpoint_.detail(), resourceName, resourceNamespace)

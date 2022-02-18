@@ -126,6 +126,7 @@ const (
 	ResourceKindPersistentVolume         = "persistentvolume"
 	ResourceKindCustomResourceDefinition = "customresourcedefinition"
 	ResourceKindPod                      = "pod"
+	ResourceKindVirtualMachine           = "virtualmachine"
 	ResourceKindReplicaSet               = "replicaset"
 	ResourceKindReplicationController    = "replicationcontroller"
 	ResourceKindResourceQuota            = "resourcequota"

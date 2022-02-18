@@ -58,7 +58,7 @@ limitations under the License.
                          i18n>Name</mat-header-cell>
         <mat-cell *matCellDef="let virtualMachine">
           <a (click)="$event.stopPropagation()"
-             [routerLink]="getDetailsHref(virtualMachine.objectMeta.name)"
+             [routerLink]="getDetailsHref(virtualMachine.objectMeta.name, virtualMachine.objectMeta.namespace)"
              queryParamsHandling="preserve">
             {{virtualMachine.objectMeta.name}}
           </a>
