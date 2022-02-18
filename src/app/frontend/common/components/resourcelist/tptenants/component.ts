@@ -25,7 +25,6 @@ import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
 import {VerberService} from '../../../services/global/verber';
 import {ActivatedRoute, Router} from "@angular/router";
-import {isNil} from "lodash";
 import {CookieService} from "ngx-cookie-service";
 
 @Component({

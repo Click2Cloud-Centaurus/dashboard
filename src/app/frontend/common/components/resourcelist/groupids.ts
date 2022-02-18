@@ -40,12 +40,13 @@ export enum ListIdentifier {
   tenant = 'tenant',
   resourcequota = 'resourcequota',
   role = 'roleList',
-  tenantpartition = 'tenantpartition',
   user = 'users',
   serviceaccount= 'serviceaccount',
   resourcePartition = 'resourcepartition',
   tenantPartition = 'tenantpartition',
   tpTenant = 'tptenant',
+  network = 'crdList',
+  networkObject = 'crdObjectList',
 }
 
 export enum ListGroupIdentifier {

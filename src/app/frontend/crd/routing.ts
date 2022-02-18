@@ -33,7 +33,7 @@ const CRD_DETAIL_ROUTE: Route = {
 };
 
 const CRD_NAMESPACED_OBJECT_DETAIL_ROUTE: Route = {
-  path: ':crdName/:namespace/:objectName',
+  path: ':crdName/:objectName',
   component: CRDObjectDetailComponent,
   data: {breadcrumb: '{{ objectName }}', routeParamsCount: 2, parent: CRD_DETAIL_ROUTE},
 };

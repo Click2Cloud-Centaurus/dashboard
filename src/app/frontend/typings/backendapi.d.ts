@@ -74,9 +74,18 @@ export interface CRDList extends ResourceList {
   items: CRD[];
 }
 
+export interface NetworkList extends ResourceList {
+  items: Network[];
+}
+
 export interface CRDObjectList extends ResourceList {
   typeMeta: TypeMeta;
   items: CRDObject[];
+}
+
+export interface NetworkObjectList extends ResourceList {
+  typeMeta: TypeMeta;
+  items: NetworkObject[];
 }
 
 export interface DaemonSetList extends ResourceList {
@@ -224,9 +233,28 @@ export interface CRD extends Resource {
   scope: string;
   nameKind: string;
   established: string;
+  names: Names;
+}
+
+export interface Network extends Resource {
+  group: string;
+  scope: string;
+  nameKind: string;
+  established: string;
+  names: Names;
+}
+
+export interface Names {
+  plural: string;
+  singular: string;
+  shortNames: string[];
+  kind: string;
+  listKind: string;
 }
 
 export interface CRDObject extends Resource {}
+
+export interface NetworkObject extends Resource {}
 
 export interface DaemonSet extends Resource {
   podInfo: PodInfo;
@@ -533,7 +561,19 @@ export interface CRDDetail extends ResourceDetail {
   conditions: Condition[];
 }
 
+export interface NetworkDetail extends ResourceDetail {
+  version?: string;
+  group: string;
+  scope: string;
+  names: CRDNames;
+  versions: CRDVersion[];
+  objects: CRDObjectList;
+  conditions: Condition[];
+}
+
 export interface CRDObjectDetail extends ResourceDetail {}
+
+export interface NetworkObjectDetail extends ResourceDetail {}
 
 export interface JobDetail extends ResourceDetail {
   podInfo: PodInfo;
@@ -860,7 +900,23 @@ export interface CRDNames {
   categories?: string[];
 }
 
+export interface NetworkNames {
+  plural: string;
+  singular?: string;
+  shortNames?: string[];
+  kind: string;
+  listKind?: string;
+  categories?: string[];
+}
+
+
 export interface CRDVersion {
+  name: string;
+  served: boolean;
+  storage: boolean;
+}
+
+export interface NetworkVersion {
   name: string;
   served: boolean;
   storage: boolean;

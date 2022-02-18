@@ -75,7 +75,6 @@ import {UploadFileComponent} from './uploadfile/component';
 import {WorkloadStatusComponent} from './workloadstatus/component';
 import {ZeroStateComponent} from './zerostate/component';
 import {ServiceAccountListComponent} from "./resourcelist/serviceaccount/component";
-//module added
 import {TenantSelectorComponent} from './tenant/component';
 import {TenantListComponent} from './resourcelist/tenantlist/component';
 import {UserListComponent} from "./resourcelist/user/component";
@@ -86,6 +85,9 @@ import {TenantPartitionListComponent} from "./resourcelist/tenantpartition/compo
 import {RoleListComponent} from "./resourcelist/role/component";
 import {ResourceQuotaListComponent} from "./quotas/component";
 import {TpTenantListComponent} from "./resourcelist/tptenants/component";
+import {NetworkListComponent} from './resourcelist/network/component';
+import {NetworkObjectListComponent} from './resourcelist/networkobject/component';
+import {NetworkVersionListComponent} from './resourcelist/networkversion/component';
 
 const components = [
   ActionbarDetailActionsComponent,
@@ -190,6 +192,10 @@ const components = [
 
   ServiceAccountListComponent,
   UserListComponent,
+
+  NetworkListComponent,
+  NetworkObjectListComponent,
+  NetworkVersionListComponent,
 ];
 
 @NgModule({

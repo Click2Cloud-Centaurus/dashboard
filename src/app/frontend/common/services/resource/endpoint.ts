@@ -53,6 +53,9 @@ export enum Resource {
   imagePullSecret= 'imagePullSecret',
   resourcePartition = 'resourcepartition',
   tenantPartition = 'tenantpartition',
+  network = 'crd',
+  networkFull = 'network',
+  networkObject = 'object',
 }
 
 export enum Utility {
