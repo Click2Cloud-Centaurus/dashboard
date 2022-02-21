@@ -15,7 +15,9 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/emicklei/go-restful"
 
@@ -27,6 +29,62 @@ import (
 // AuthHandler manages all endpoints related to dashboard auth, such as login.
 type AuthHandler struct {
 	manager authApi.AuthManager
+}
+type AuthHandler2 struct {
+	manager []authApi.AuthManager
+}
+
+func AuthAllocator(tenantname string, auths []authApi.AuthManager) authApi.AuthManager {
+	if authlen := len(auths); authlen > 1 {
+		start := 65
+		quo, rem := func(dvdnd, dvsr int) (quo, rem int) {
+			quo = dvdnd / dvsr
+			rem = dvdnd % dvsr
+			return quo, rem
+		}(26, authlen)
+		tenantpref := []rune(strings.ToUpper(tenantname))
+		temp := start + quo + rem
+		for i := 0; i < len(auths); i++ {
+			if tenantpref[0] <= rune(temp) {
+				fmt.Println("match", i)
+				fmt.Println(auths[i])
+				return auths[i]
+			} else {
+				temp = temp + quo
+			}
+		}
+	}
+	return auths[0]
+}
+
+func (auth AuthHandler2) Install(ws *restful.WebService) {
+	ws.Route(
+		ws.POST("/login2").
+			To(auth.handleLogin).
+			Reads(authApi.LoginSpec{}).
+			Writes(authApi.AuthResponse{}))
+}
+func (auth AuthHandler2) handleLogin(request *restful.Request, response *restful.Response) {
+	loginSpec := new(authApi.LoginSpec)
+	fmt.Println("Enter Login2")
+	if err := request.ReadEntity(loginSpec); err != nil {
+		response.AddHeader("Content-Type", "text/plain")
+		response.WriteErrorString(errors.HandleHTTPError(err), err.Error()+"\n")
+		return
+	}
+	if loginSpec.NameSpace == "" {
+		loginSpec.NameSpace = "default"
+	}
+	authmanager := AuthAllocator(loginSpec.Tenant, auth.manager)
+	loginResponse, err := authmanager.Login(loginSpec)
+	if err != nil {
+		response.AddHeader("Content-Type", "text/plain")
+		response.WriteErrorString(errors.HandleHTTPError(err), err.Error()+"\n")
+		return
+	}
+	loginResponse.NameSpace = loginSpec.NameSpace
+
+	response.WriteHeaderAndEntity(http.StatusOK, loginResponse)
 }
 
 // Install creates new endpoints for dashboard auth, such as login. It allows user to log in to dashboard using
@@ -114,4 +172,7 @@ func (self *AuthHandler) handleLoginSkippable(request *restful.Request, response
 // NewAuthHandler created AuthHandler instance.
 func NewAuthHandler(manager authApi.AuthManager) AuthHandler {
 	return AuthHandler{manager: manager}
+}
+func NewAuthHandler2(manager []authApi.AuthManager) AuthHandler2 {
+	return AuthHandler2{manager: manager}
 }

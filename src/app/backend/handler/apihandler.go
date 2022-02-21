@@ -104,6 +104,8 @@ type APIHandlerV2 struct {
 	cManager             []clientapi.ClientManager
 	rpManager            []clientapi.ClientManager
 	sManager             settingsApi.SettingsManager
+	tpclientmanagers     map[string]clientapi.ClientManager
+	tpauthmanagers       []authApi.AuthManager
 	podInformerManager   []cache.SharedIndexInformer
 }
 
@@ -113,17 +115,24 @@ type TerminalResponse struct {
 	Id string `json:"id"`
 }
 
-func ResourceAllocator(tenant string, clients []clientapi.ClientManager) clientapi.ClientManager {
+func ResourceAllocator(tenantname string, clients []clientapi.ClientManager) clientapi.ClientManager {
 	if clienlen := len(clients); clienlen > 1 {
-
-		pref := []rune(strings.ToUpper(tenant))
-		log.Printf("prefix:%v", pref[0])
-		if pref[0] <= rune(77) {
-			log.Printf("client[0]")
-			return clients[0]
-		} else {
-			log.Printf("client[1]")
-			return clients[1]
+		start := 65
+		quo, rem := func(dvdnd, dvsr int) (quo, rem int) {
+			quo = dvdnd / dvsr
+			rem = dvdnd % dvsr
+			return quo, rem
+		}(26, clienlen)
+		tenantpref := []rune(strings.ToUpper(tenantname))
+		temp := start + quo + rem
+		for i := 0; i < len(clients); i++ {
+			if tenantpref[0] <= rune(temp) {
+				fmt.Println("match", i)
+				fmt.Println(clients[i])
+				return clients[i]
+			} else {
+				temp = temp + quo
+			}
 		}
 	}
 	return clients[0]
@@ -136,18 +145,18 @@ type ErrorMsg struct {
 
 // CreateHTTPAPIHandler creates a new HTTP handler that handles all requests to the API of the backend.
 func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clientapi.ClientManager, cManagers []clientapi.ClientManager, rpManagers []clientapi.ClientManager,
-	authManager authApi.AuthManager, sManager settingsApi.SettingsManager,
+	authManager authApi.AuthManager, sManager settingsApi.SettingsManager, tpclientmaps map[string]clientapi.ClientManager, tpauthManagers []authApi.AuthManager,
 	sbManager systembanner.SystemBannerManager, podinformers []cache.SharedIndexInformer) (
 
 	http.Handler, error) {
 
 	apiHandler := APIHandler{iManager: iManager, cManager: cManager, sManager: sManager}
-	apiHandler1 := APIHandlerV2{iManager: iManager, defaultClientmanager: cManager, cManager: cManagers, rpManager: rpManagers, sManager: sManager, podInformerManager: podinformers}
+	apiHandler1 := APIHandlerV2{iManager: iManager, defaultClientmanager: cManager, cManager: cManagers, rpManager: rpManagers, sManager: sManager, podInformerManager: podinformers, tpclientmanagers: tpclientmaps, tpauthmanagers: tpauthManagers}
 	wsContainer := restful.NewContainer()
 	wsContainer.EnableContentEncoding(true)
 
 	apiV1Ws := new(restful.WebService)
-	InstallFilters(apiV1Ws, cManager)
+	//InstallFilters(apiV1Ws, cManager)
 
 	apiV1Ws.Path("/api/v1").
 		Consumes(restful.MIME_JSON).
@@ -162,6 +171,8 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	authHandler := auth.NewAuthHandler(authManager)
 	authHandler.Install(apiV1Ws)
+	authHandler2 := auth.NewAuthHandler2(tpauthManagers)
+	authHandler2.Install(apiV1Ws)
 
 	settingsHandler := settings.NewSettingsHandler(sManager, cManager)
 	settingsHandler.Install(apiV1Ws)
@@ -276,31 +287,31 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicationcontroller").
-			To(apiHandler.handleGetReplicationControllerListWithMultiTenancy).
+			To(apiHandler1.handleGetReplicationControllerListWithMultiTenancy).
 			Writes(replicationcontroller.ReplicationControllerList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicationcontroller/{namespace}").
-			To(apiHandler.handleGetReplicationControllerListWithMultiTenancy).
+			To(apiHandler1.handleGetReplicationControllerListWithMultiTenancy).
 			Writes(replicationcontroller.ReplicationControllerList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicationcontroller/{namespace}/{replicationController}").
-			To(apiHandler.handleGetReplicationControllerDetailWithMultiTenancy).
+			To(apiHandler1.handleGetReplicationControllerDetailWithMultiTenancy).
 			Writes(replicationcontroller.ReplicationControllerDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.POST("/tenants/{tenant}/replicationcontroller/{namespace}/{replicationController}/update/pod").
-			To(apiHandler.handleUpdateReplicasCountWithMultiTenancy).
+			To(apiHandler1.handleUpdateReplicasCountWithMultiTenancy).
 			Reads(replicationcontroller.ReplicationControllerSpec{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicationcontroller/{namespace}/{replicationController}/pod").
-			To(apiHandler.handleGetReplicationControllerPodsWithMultiTenancy).
+			To(apiHandler1.handleGetReplicationControllerPodsWithMultiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicationcontroller/{namespace}/{replicationController}/event").
-			To(apiHandler.handleGetReplicationControllerEventsWithMultiTenancy).
+			To(apiHandler1.handleGetReplicationControllerEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicationcontroller/{namespace}/{replicationController}/service").
-			To(apiHandler.handleGetReplicationControllerServicesWithMultiTenancy).
+			To(apiHandler1.handleGetReplicationControllerServicesWithMultiTenancy).
 			Writes(resourceService.ServiceList{}))
 
 	apiV1Ws.Route(
@@ -330,27 +341,27 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicaset").
-			To(apiHandler.handleGetReplicaSetsWithMultiTenancy).
+			To(apiHandler1.handleGetReplicaSetsWithMultiTenancy).
 			Writes(replicaset.ReplicaSetList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicaset/{namespace}").
-			To(apiHandler.handleGetReplicaSetsWithMultiTenancy).
+			To(apiHandler1.handleGetReplicaSetsWithMultiTenancy).
 			Writes(replicaset.ReplicaSetList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicaset/{namespace}/{replicaSet}").
-			To(apiHandler.handleGetReplicaSetDetailWithMultiTenancy).
+			To(apiHandler1.handleGetReplicaSetDetailWithMultiTenancy).
 			Writes(replicaset.ReplicaSetDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicaset/{namespace}/{replicaSet}/pod").
-			To(apiHandler.handleGetReplicaSetPodsWithMutiTenancy).
+			To(apiHandler1.handleGetReplicaSetPodsWithMutiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicaset/{namespace}/{replicaSet}/service").
-			To(apiHandler.handleGetReplicaSetServicesWithMultiTenancy).
+			To(apiHandler1.handleGetReplicaSetServicesWithMultiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicaset/{namespace}/{replicaSet}/event").
-			To(apiHandler.handleGetReplicaSetEventsWithMultiTenancy).
+			To(apiHandler1.handleGetReplicaSetEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 
 	apiV1Ws.Route(
@@ -384,27 +395,27 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/pod").
-			To(apiHandler.handleGetPodsWithMultiTenancy).
+			To(apiHandler1.handleGetPodsWithMultiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/pod/{namespace}").
-			To(apiHandler.handleGetPodsWithMultiTenancy).
+			To(apiHandler1.handleGetPodsWithMultiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/pod/{namespace}/{pod}").
-			To(apiHandler.handleGetPodDetailWithMultiTenancy).
+			To(apiHandler1.handleGetPodDetailWithMultiTenancy).
 			Writes(pod.PodDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/pod/{namespace}/{pod}/container").
-			To(apiHandler.handleGetPodContainersWithMultiTenancy).
+			To(apiHandler1.handleGetPodContainersWithMultiTenancy).
 			Writes(pod.PodDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/pod/{namespace}/{pod}/event").
-			To(apiHandler.handleGetPodEventsWithMultiTenancy).
+			To(apiHandler1.handleGetPodEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/pod/{namespace}/{pod}/shell/{container}").
-			To(apiHandler.handleExecShellWithMultiTenancy).
+			To(apiHandler1.handleExecShellWithMultiTenancy).
 			Writes(TerminalResponse{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/pod/{namespace}/{pod}/persistentvolumeclaim").
@@ -438,27 +449,27 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/deployment").
-			To(apiHandler.handleGetDeploymentsWithMultiTenancy).
+			To(apiHandler1.handleGetDeploymentsWithMultiTenancy).
 			Writes(deployment.DeploymentList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/deployment/{namespace}").
-			To(apiHandler.handleGetDeploymentsWithMultiTenancy).
+			To(apiHandler1.handleGetDeploymentsWithMultiTenancy).
 			Writes(deployment.DeploymentList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/deployment/{namespace}/{deployment}").
-			To(apiHandler.handleGetDeploymentDetailWithMultiTenancy).
+			To(apiHandler1.handleGetDeploymentDetailWithMultiTenancy).
 			Writes(deployment.DeploymentDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/deployment/{namespace}/{deployment}/event").
-			To(apiHandler.handleGetDeploymentEventsWithMultiTenancy).
+			To(apiHandler1.handleGetDeploymentEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/deployment/{namespace}/{deployment}/oldreplicaset").
-			To(apiHandler.handleGetDeploymentOldReplicaSetsWithMultiTenancy).
+			To(apiHandler1.handleGetDeploymentOldReplicaSetsWithMultiTenancy).
 			Writes(replicaset.ReplicaSetList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/deployment/{namespace}/{deployment}/newreplicaset").
-			To(apiHandler.handleGetDeploymentNewReplicaSetWithMultiTenancy).
+			To(apiHandler1.handleGetDeploymentNewReplicaSetWithMultiTenancy).
 			Writes(replicaset.ReplicaSet{}))
 
 	apiV1Ws.Route(
@@ -471,11 +482,11 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(scaling.ReplicaCounts{}))
 	apiV1Ws.Route(
 		apiV1Ws.PUT("/tenants/{tenant}/scale/{kind}/{namespace}/{name}/").
-			To(apiHandler.handleScaleResourceWithMultiTenancy).
+			To(apiHandler1.handleScaleResourceWithMultiTenancy).
 			Writes(scaling.ReplicaCounts{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/scale/{kind}/{namespace}/{name}").
-			To(apiHandler.handleGetReplicaCountWithMultiTenancy).
+			To(apiHandler1.handleGetReplicaCountWithMultiTenancy).
 			Writes(scaling.ReplicaCounts{}))
 
 	apiV1Ws.Route(
@@ -505,27 +516,27 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/daemonset").
-			To(apiHandler.handleGetDaemonSetListWithMultiTenancy).
+			To(apiHandler1.handleGetDaemonSetListWithMultiTenancy).
 			Writes(daemonset.DaemonSetList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/daemonset/{namespace}").
-			To(apiHandler.handleGetDaemonSetListWithMultiTenancy).
+			To(apiHandler1.handleGetDaemonSetListWithMultiTenancy).
 			Writes(daemonset.DaemonSetList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/daemonset/{namespace}/{daemonSet}").
-			To(apiHandler.handleGetDaemonSetDetailWithMultiTenancy).
+			To(apiHandler1.handleGetDaemonSetDetailWithMultiTenancy).
 			Writes(daemonset.DaemonSetDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/daemonset/{namespace}/{daemonSet}/pod").
-			To(apiHandler.handleGetDaemonSetPodsWithMultiTenancy).
+			To(apiHandler1.handleGetDaemonSetPodsWithMultiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/daemonset/{namespace}/{daemonSet}/service").
-			To(apiHandler.handleGetDaemonSetServicesWithMultiTenancy).
+			To(apiHandler1.handleGetDaemonSetServicesWithMultiTenancy).
 			Writes(resourceService.ServiceList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/daemonset/{namespace}/{daemonSet}/event").
-			To(apiHandler.handleGetDaemonSetEventsWithMultiTenancy).
+			To(apiHandler1.handleGetDaemonSetEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 
 	apiV1Ws.Route(
@@ -564,23 +575,23 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/job").
-			To(apiHandler.handleGetJobListWithMultiTenancy).
+			To(apiHandler1.handleGetJobListWithMultiTenancy).
 			Writes(job.JobList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/job/{namespace}").
-			To(apiHandler.handleGetJobListWithMultiTenancy).
+			To(apiHandler1.handleGetJobListWithMultiTenancy).
 			Writes(job.JobList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/job/{namespace}/{name}").
-			To(apiHandler.handleGetJobDetailWithMultitenancy).
+			To(apiHandler1.handleGetJobDetailWithMultitenancy).
 			Writes(job.JobDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/job/{namespace}/{name}/pod").
-			To(apiHandler.handleGetJobPodsWithMultiTenancy).
+			To(apiHandler1.handleGetJobPodsWithMultiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/job/{namespace}/{name}/event").
-			To(apiHandler.handleGetJobEventsWithMultiTenancy).
+			To(apiHandler1.handleGetJobEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 
 	apiV1Ws.Route(
@@ -609,27 +620,27 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/cronjob").
-			To(apiHandler.handleGetCronJobListWithMultiTenancy).
+			To(apiHandler1.handleGetCronJobListWithMultiTenancy).
 			Writes(cronjob.CronJobList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/cronjob/{namespace}").
-			To(apiHandler.handleGetCronJobListWithMultiTenancy).
+			To(apiHandler1.handleGetCronJobListWithMultiTenancy).
 			Writes(cronjob.CronJobList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/cronjob/{namespace}/{name}").
-			To(apiHandler.handleGetCronJobDetailWithMultiTenancy).
+			To(apiHandler1.handleGetCronJobDetailWithMultiTenancy).
 			Writes(cronjob.CronJobDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/cronjob/{namespace}/{name}/job").
-			To(apiHandler.handleGetCronJobJobsWithMultiTenancy).
+			To(apiHandler1.handleGetCronJobJobsWithMultiTenancy).
 			Writes(job.JobList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/cronjob/{namespace}/{name}/event").
-			To(apiHandler.handleGetCronJobEventsWithMultiTenancy).
+			To(apiHandler1.handleGetCronJobEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 	apiV1Ws.Route(
 		apiV1Ws.PUT("/tenants/{tenant}/cronjob/{namespace}/{name}/trigger").
-			To(apiHandler.handleTriggerCronJobWithMultiTenancy))
+			To(apiHandler1.handleTriggerCronJobWithMultiTenancy))
 
 	//apiV1Ws.Route(
 	//	apiV1Ws.POST("/namespace").
@@ -668,7 +679,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(v1.ResourceQuotaList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/resourcequota/{namespace}").
-			To(apiHandler.handleGetResourceQuotaListWithMultiTenancy).
+			To(apiHandler1.handleGetResourceQuotaListWithMultiTenancy).
 			Writes(v1.ResourceQuotaList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/resourcequota/{namespace}/{name}"). // TODO
@@ -685,7 +696,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/namespace").
-			To(apiHandler.handleGetNamespacesWithMultiTenancy).
+			To(apiHandler1.handleGetNamespacesWithMultiTenancy).
 			Writes(ns.NamespaceList{}))
 	//apiV1Ws.Route(
 	//  apiV1Ws.GET("/tenants/{tenant}/namespace/{name}").
@@ -697,7 +708,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(ns.NamespaceDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/namespace/{name}/event").
-			To(apiHandler.handleGetNamespaceEventsWithMultiTenancy).
+			To(apiHandler1.handleGetNamespaceEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 
 	apiV1Ws.Route(
@@ -722,19 +733,19 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/secret").
-			To(apiHandler.handleGetSecretListWithMultiTenancy).
+			To(apiHandler1.handleGetSecretListWithMultiTenancy).
 			Writes(secret.SecretList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/secret/{namespace}").
-			To(apiHandler.handleGetSecretListWithMultiTenancy).
+			To(apiHandler1.handleGetSecretListWithMultiTenancy).
 			Writes(secret.SecretList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/secret/{namespace}/{name}").
-			To(apiHandler.handleGetSecretDetailWithMultiTenancy).
+			To(apiHandler1.handleGetSecretDetailWithMultiTenancy).
 			Writes(secret.SecretDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.POST("/tenants/{tenant}/secret").
-			To(apiHandler.handleCreateImagePullSecretWithMultiTenancy).
+			To(apiHandler1.handleCreateImagePullSecretWithMultiTenancy).
 			Reads(secret.ImagePullSecretSpec{}).
 			Writes(secret.Secret{}))
 
@@ -787,11 +798,11 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/service").
-			To(apiHandler.handleGetServiceListWithMultiTenancy).
+			To(apiHandler1.handleGetServiceListWithMultiTenancy).
 			Writes(resourceService.ServiceList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/service/{namespace}").
-			To(apiHandler.handleGetServiceListWithMultiTenancy).
+			To(apiHandler1.handleGetServiceListWithMultiTenancy).
 			Writes(resourceService.ServiceList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/service/{namespace}/{service}").
@@ -799,11 +810,11 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(resourceService.ServiceDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/service/{namespace}/{service}/event").
-			To(apiHandler.handleGetServiceEventWithMultiTenancy).
+			To(apiHandler1.handleGetServiceEventWithMultiTenancy).
 			Writes(common.EventList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/service/{namespace}/{service}/pod").
-			To(apiHandler.handleGetServicePodsWithMultiTenancy).
+			To(apiHandler1.handleGetServicePodsWithMultiTenancy).
 			Writes(pod.PodList{}))
 
 	apiV1Ws.Route(
@@ -821,15 +832,15 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/ingress").
-			To(apiHandler.handleGetIngressListWithMultiTenancy).
+			To(apiHandler1.handleGetIngressListWithMultiTenancy).
 			Writes(ingress.IngressList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/ingress/{namespace}").
-			To(apiHandler.handleGetIngressListWithMultiTenancy).
+			To(apiHandler1.handleGetIngressListWithMultiTenancy).
 			Writes(ingress.IngressList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/ingress/{namespace}/{name}").
-			To(apiHandler.handleGetIngressDetailWithMultiTenancy).
+			To(apiHandler1.handleGetIngressDetailWithMultiTenancy).
 			Writes(ingress.IngressDetail{}))
 
 	apiV1Ws.Route(
@@ -855,15 +866,15 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/statefulset").
-			To(apiHandler.handleGetStatefulSetListWithMultitenancy).
+			To(apiHandler1.handleGetStatefulSetListWithMultitenancy).
 			Writes(statefulset.StatefulSetList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/statefulset/{namespace}").
-			To(apiHandler.handleGetStatefulSetListWithMultitenancy).
+			To(apiHandler1.handleGetStatefulSetListWithMultitenancy).
 			Writes(statefulset.StatefulSetList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/statefulset/{namespace}/{statefulset}").
-			To(apiHandler.handleGetStatefulSetDetailWithMultiTenancy).
+			To(apiHandler1.handleGetStatefulSetDetailWithMultiTenancy).
 			Writes(statefulset.StatefulSetDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/statefulset/{namespace}/{statefulset}/pod").
@@ -871,7 +882,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/statefulset/{namespace}/{statefulset}/event").
-			To(apiHandler.handleGetStatefulSetEventsWithMultiTenancy).
+			To(apiHandler1.handleGetStatefulSetEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 
 	//apiV1Ws.Route(
@@ -908,13 +919,13 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.DELETE("/tenants/{tenant}/_raw/{kind}/namespace/{namespace}/name/{name}").
-			To(apiHandler.handleDeleteResourceWithMultiTenancy))
+			To(apiHandler1.handleDeleteResourceWithMultiTenancy))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/_raw/{kind}/namespace/{namespace}/name/{name}").
-			To(apiHandler.handleGetResourceWithMultiTenancy))
+			To(apiHandler1.handleGetResourceWithMultiTenancy))
 	apiV1Ws.Route(
 		apiV1Ws.PUT("/tenants/{tenant}/_raw/{kind}/namespace/{namespace}/name/{name}").
-			To(apiHandler.handlePutResourceWithMultiTenancy))
+			To(apiHandler1.handlePutResourceWithMultiTenancy))
 
 	apiV1Ws.Route(
 		apiV1Ws.DELETE("/_raw/{kind}/name/{name}").
@@ -928,13 +939,13 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.DELETE("/tenants/{tenant}/_raw/{kind}/name/{name}").
-			To(apiHandler.handleDeleteResourceWithMultiTenancy))
+			To(apiHandler1.handleDeleteResourceWithMultiTenancy))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/_raw/{kind}/name/{name}").
-			To(apiHandler.handleGetResourceWithMultiTenancy))
+			To(apiHandler1.handleGetResourceWithMultiTenancy))
 	apiV1Ws.Route(
 		apiV1Ws.PUT("/tenants/{tenant}/_raw/{kind}/name/{name}").
-			To(apiHandler.handlePutResourceWithMultiTenancy))
+			To(apiHandler1.handlePutResourceWithMultiTenancy))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/role/{namespace}").
@@ -970,7 +981,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 	// ClusterRole with Multi Tenancy.
 	apiV1Ws.Route(
 		apiV1Ws.POST("/clusterroles").
-			To(apiHandler.handleCreateCreateClusterRolesWithMultiTenancy).
+			To(apiHandler1.handleCreateCreateClusterRolesWithMultiTenancy).
 			Reads(clusterrole.ClusterRoleSpec{}).
 			Writes(clusterrole.ClusterRoleSpec{}))
 
@@ -985,12 +996,12 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.POST("/rolebindings").
-			To(apiHandler.handleCreateRoleBindingsWithMultiTenancy).
+			To(apiHandler1.handleCreateRoleBindingsWithMultiTenancy).
 			Reads(rolebinding.RoleBinding{}).
 			Writes(rolebinding.RoleBinding{}))
 	apiV1Ws.Route(
 		apiV1Ws.DELETE("tenants/{tenant}/namespaces/{namespace}/rolebindings/{rolebinding}").
-			To(apiHandler.handleDeleteRoleBindingsWithMultiTenancy))
+			To(apiHandler1.handleDeleteRoleBindingsWithMultiTenancy))
 
 	apiV1Ws.Route(
 		apiV1Ws.POST("/clusterrolebinding").
@@ -1004,12 +1015,12 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 	// ClusterRoleBinding with Multi Tenancy
 	apiV1Ws.Route(
 		apiV1Ws.POST("/clusterrolebindings").
-			To(apiHandler.handleCreateClusterRoleBindingsWithMultiTenancy).
+			To(apiHandler1.handleCreateClusterRoleBindingsWithMultiTenancy).
 			Reads(clusterrolebinding.ClusterRoleBinding{}).
 			Writes(clusterrolebinding.ClusterRoleBinding{}))
 	apiV1Ws.Route(
 		apiV1Ws.DELETE("tenants/{tenant}/clusterrolebindings/{clusterrolebinding}").
-			To(apiHandler.handleDeleteClusterRoleBindingsWithMultiTenancy))
+			To(apiHandler1.handleDeleteClusterRoleBindingsWithMultiTenancy))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/role").
@@ -1017,24 +1028,24 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 			Writes(role.RoleList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/role/{namespace}").
-			To(apiHandler.handleGetRolesWithMultiTenancy).
+			To(apiHandler1.handleGetRolesWithMultiTenancy).
 			Writes(role.RoleList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenant/{tenant}/namespace/{namespace}/roles").
-			To(apiHandler.handleGetRolesWithMultiTenancy).
+			To(apiHandler1.handleGetRolesWithMultiTenancy).
 			Writes(role.RoleList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/role/{namespace}/{name}").
-			To(apiHandler.handleGetRoleDetailWithMultiTenancy).
+			To(apiHandler1.handleGetRoleDetailWithMultiTenancy).
 			Writes(role.RoleDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.POST("/roles").
-			To(apiHandler.handleCreateRolesWithMultiTenancy).
+			To(apiHandler1.handleCreateRolesWithMultiTenancy).
 			Reads(role.Role{}).
 			Writes(role.Role{}))
 	apiV1Ws.Route(
 		apiV1Ws.DELETE("/tenants/{tenant}/namespaces/{namespace}/role/{role}").
-			To(apiHandler.handleDeleteRolesWithMultiTenancy))
+			To(apiHandler1.handleDeleteRolesWithMultiTenancy))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/serviceaccount").
@@ -1056,28 +1067,28 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 	// Service Account with Multi Tenancy
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/namespaces/{namespace}/serviceaccount").
-			To(apiHandler.handleGetServiceAccountListWithMultiTenancy).
+			To(apiHandler1.handleGetServiceAccountListWithMultiTenancy).
 			Writes(serviceaccount.ServiceAccountList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/namespaces/{namespace}/serviceaccounts/{name}").
-			To(apiHandler.handleGetServiceAccountDetailWithMultiTenancy).
+			To(apiHandler1.handleGetServiceAccountDetailWithMultiTenancy).
 			Writes(serviceaccount.ServiceAccountDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.POST("/serviceaccounts").
-			To(apiHandler.handleCreateServiceAccountsWithMultiTenancy).
+			To(apiHandler1.handleCreateServiceAccountsWithMultiTenancy).
 			Reads(serviceaccount.ServiceAccount{}).
 			Writes(serviceaccount.ServiceAccount{}))
 	apiV1Ws.Route(
 		apiV1Ws.DELETE("/tenants/{tenant}/namespaces/{namespace}/serviceaccounts/{serviceaccount}").
-			To(apiHandler.handleDeleteServiceAccountsWithMultiTenancy))
+			To(apiHandler1.handleDeleteServiceAccountsWithMultiTenancy))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/clusterrole").
-			To(apiHandler.handleGetClusterRoleListWithMultiTenancy).
+			To(apiHandler1.handleGetClusterRoleListWithMultiTenancy).
 			Writes(clusterrole.ClusterRoleList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/clusterrole/{name}").
-			To(apiHandler.handleGetClusterRoleDetailWithMultiTenancy).
+			To(apiHandler1.handleGetClusterRoleDetailWithMultiTenancy).
 			Writes(clusterrole.ClusterRoleDetail{}))
 
 	apiV1Ws.Route(
@@ -1095,15 +1106,15 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/persistentvolume").
-			To(apiHandler.handleGetPersistentVolumeListWithMultiTenancy).
+			To(apiHandler1.handleGetPersistentVolumeListWithMultiTenancy).
 			Writes(persistentvolume.PersistentVolumeList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/persistentvolume/{persistentvolume}").
-			To(apiHandler.handleGetPersistentVolumeDetailWithMultiTenancy).
+			To(apiHandler1.handleGetPersistentVolumeDetailWithMultiTenancy).
 			Writes(persistentvolume.PersistentVolumeDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/persistentvolume/namespace/{namespace}/name/{persistentvolume}").
-			To(apiHandler.handleGetPersistentVolumeDetailWithMultiTenancy).
+			To(apiHandler1.handleGetPersistentVolumeDetailWithMultiTenancy).
 			Writes(persistentvolume.PersistentVolumeDetail{}))
 
 	apiV1Ws.Route(
@@ -1164,22 +1175,22 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/crd/{crd}").
-			To(apiHandler.handleGetCustomResourceDefinitionDetailWithMultiTenancy).
+			To(apiHandler1.handleGetCustomResourceDefinitionDetailWithMultiTenancy).
 			Writes(customresourcedefinition.CustomResourceDefinitionDetail{}))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/crd/{namespace}/{crd}/object").
-			To(apiHandler.handleGetCustomResourceObjectListWithMultiTenancy).
+			To(apiHandler1.handleGetCustomResourceObjectListWithMultiTenancy).
 			Writes(customresourcedefinition.CustomResourceObjectList{}))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/crd/{namespace}/{crd}/{object}").
-			To(apiHandler.handleGetCustomResourceObjectDetailWithMultiTenancy).
+			To(apiHandler1.handleGetCustomResourceObjectDetailWithMultiTenancy).
 			Writes(customresourcedefinition.CustomResourceObject{}))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/crd/{namespace}/{crd}/{object}/event").
-			To(apiHandler.handleGetCustomResourceObjectEventsWithMultiTenancy).
+			To(apiHandler1.handleGetCustomResourceObjectEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 
 	apiV1Ws.Route(
@@ -1198,16 +1209,16 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/storageclass").
-			To(apiHandler.handleGetStorageClassListWithMultiTenancy).
+			To(apiHandler1.handleGetStorageClassListWithMultiTenancy).
 			Writes(storageclass.StorageClassList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/storageclass/{storageclass}").
-			To(apiHandler.handleGetStorageClassWithMultiTenancy).
+			To(apiHandler1.handleGetStorageClassWithMultiTenancy).
 			Writes(storageclass.StorageClass{}))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/storageclass/{storageclass}/persistentvolume").
-			To(apiHandler.handleGetStorageClassPersistentVolumesWithMultiTenancy).
+			To(apiHandler1.handleGetStorageClassPersistentVolumesWithMultiTenancy).
 			Writes(persistentvolume.PersistentVolumeList{}))
 
 	apiV1Ws.Route(
@@ -1229,19 +1240,19 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, cManager clie
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/log/source/{namespace}/{resourceName}/{resourceType}").
-			To(apiHandler.handleLogSourceWithMultiTenancy).
+			To(apiHandler1.handleLogSourceWithMultiTenancy).
 			Writes(controller.LogSources{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/log/{namespace}/{pod}").
-			To(apiHandler.handleLogsWithMultiTenancy).
+			To(apiHandler1.handleLogsWithMultiTenancy).
 			Writes(logs.LogDetails{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/log/{namespace}/{pod}/{container}").
-			To(apiHandler.handleLogsWithMultiTenancy).
+			To(apiHandler1.handleLogsWithMultiTenancy).
 			Writes(logs.LogDetails{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/log/file/{namespace}/{pod}/{container}").
-			To(apiHandler.handleLogFileWithMultiTenancy).
+			To(apiHandler1.handleLogFileWithMultiTenancy).
 			Writes(logs.LogDetails{}))
 
 	// IAM User related routes
@@ -1457,14 +1468,14 @@ func (apiHandler *APIHandler) handleGetClusterRoleList(request *restful.Request,
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetClusterRoleListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetClusterRoleListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	dataSelect := parseDataSelectPathParameter(request)
 	result, err := clusterrole.GetClusterRoleListWithMultiTenancy(k8sClient, tenant, dataSelect)
 	if err != nil {
@@ -1490,14 +1501,14 @@ func (apiHandler *APIHandler) handleGetClusterRoleDetail(request *restful.Reques
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetClusterRoleDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetClusterRoleDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	name := request.PathParameter("name")
 	result, err := clusterrole.GetClusterRoleDetailWithMultiTenancy(k8sClient, tenant, name)
 	if err != nil {
@@ -1532,14 +1543,14 @@ func (apiHandler *APIHandler) handleGetStatefulSetList(request *restful.Request,
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetStatefulSetListWithMultitenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetStatefulSetListWithMultitenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics
@@ -1570,14 +1581,14 @@ func (apiHandler *APIHandler) handleGetStatefulSetDetail(request *restful.Reques
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetStatefulSetDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetStatefulSetDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("statefulset")
 	result, err := statefulset.GetStatefulSetDetailWithMultiTenancy(k8sClient, apiHandler.iManager.Metric().Client(), tenant, namespace, name)
@@ -1645,14 +1656,14 @@ func (apiHandler *APIHandler) handleGetStatefulSetEvents(request *restful.Reques
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetStatefulSetEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetStatefulSetEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("statefulset")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -1681,14 +1692,14 @@ func (apiHandler *APIHandler) handleGetServiceList(request *restful.Request, res
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetServiceListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetServiceListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
 	result, err := resourceService.GetServiceListWithMultiTenancy(k8sClient, tenant, namespace, dataSelect)
@@ -1752,14 +1763,14 @@ func (apiHandler *APIHandler) handleGetServiceEvent(request *restful.Request, re
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetServiceEventWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetServiceEventWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("service")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -1789,14 +1800,14 @@ func (apiHandler *APIHandler) handleGetIngressDetail(request *restful.Request, r
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetIngressDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetIngressDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("name")
 	result, err := ingress.GetIngressDetailWithMultiTenancy(k8sClient, tenant, namespace, name)
@@ -1824,14 +1835,14 @@ func (apiHandler *APIHandler) handleGetIngressList(request *restful.Request, res
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetIngressListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetIngressListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	dataSelect := parseDataSelectPathParameter(request)
 	namespace := parseNamespacePathParameter(request)
 	result, err := ingress.GetIngressListWithMultiTenancy(k8sClient, tenant, namespace, dataSelect)
@@ -1861,14 +1872,14 @@ func (apiHandler *APIHandler) handleGetServicePods(request *restful.Request, res
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetServicePodsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetServicePodsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("service")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -2209,14 +2220,15 @@ func (apiHandler *APIHandler) handleScaleResource(request *restful.Request, resp
 	response.WriteHeaderAndEntity(http.StatusOK, replicaCountSpec)
 }
 
-func (apiHandler *APIHandler) handleScaleResourceWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	cfg, err := apiHandler.cManager.Config(request)
+func (apiHandler *APIHandlerV2) handleScaleResourceWithMultiTenancy(request *restful.Request, response *restful.Response) {
+
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	cfg, err := cManager.Config(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	kind := request.PathParameter("kind")
 	name := request.PathParameter("name")
@@ -2248,14 +2260,14 @@ func (apiHandler *APIHandler) handleGetReplicaCount(request *restful.Request, re
 	response.WriteHeaderAndEntity(http.StatusOK, scaleSpec)
 }
 
-func (apiHandler *APIHandler) handleGetReplicaCountWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	cfg, err := apiHandler.cManager.Config(request)
+func (apiHandler *APIHandlerV2) handleGetReplicaCountWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	cfg, err := cManager.Config(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	kind := request.PathParameter("kind")
 	name := request.PathParameter("name")
@@ -2366,14 +2378,14 @@ func (apiHandler *APIHandler) handleGetReplicationControllerList(request *restfu
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetReplicationControllerListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetReplicationControllerListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics
@@ -2403,14 +2415,14 @@ func (apiHandler *APIHandler) handleGetReplicaSets(request *restful.Request, res
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetReplicaSetsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetReplicaSetsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics
@@ -2441,14 +2453,14 @@ func (apiHandler *APIHandler) handleGetReplicaSetDetail(request *restful.Request
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetReplicaSetDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetReplicaSetDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	replicaSet := request.PathParameter("replicaSet")
 	result, err := replicaset.GetReplicaSetDetailWithMultiTenancy(k8sClient, apiHandler.iManager.Metric().Client(), tenant, namespace, replicaSet)
@@ -2481,14 +2493,14 @@ func (apiHandler *APIHandler) handleGetReplicaSetPods(request *restful.Request, 
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetReplicaSetPodsWithMutiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetReplicaSetPodsWithMutiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	replicaSet := request.PathParameter("replicaSet")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -2522,14 +2534,14 @@ func (apiHandler *APIHandler) handleGetReplicaSetServices(request *restful.Reque
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetReplicaSetServicesWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetReplicaSetServicesWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	replicaSet := request.PathParameter("replicaSet")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -2563,14 +2575,14 @@ func (apiHandler *APIHandler) handleGetReplicaSetEvents(request *restful.Request
 
 }
 
-func (apiHandler *APIHandler) handleGetReplicaSetEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetReplicaSetEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("replicaSet")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -2604,14 +2616,14 @@ func (apiHandler *APIHandler) handleGetPodEvents(request *restful.Request, respo
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetPodEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetPodEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	log.Println("Getting events related to a pod in namespace")
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("pod")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -2654,31 +2666,29 @@ func (apiHandler *APIHandler) handleExecShell(request *restful.Request, response
 }
 
 // Handles execute shell API call
-func (apiHandler *APIHandler) handleExecShellWithMultiTenancy(request *restful.Request, response *restful.Response) {
+func (apiHandler *APIHandlerV2) handleExecShellWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	sessionId, err := genTerminalSessionId()
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	k8sClient, err := apiHandler.cManager.Client(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
-	cfg, err := apiHandler.cManager.Config(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
 	terminalSessions.Set(sessionId, TerminalSession{
 		id:       sessionId,
 		bound:    make(chan error),
 		sizeChan: make(chan remotecommand.TerminalSize),
 	})
 	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	cfg, err := cManager.Config(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
 	go WaitForTerminalWithMultiTenancy(k8sClient, cfg, request, sessionId, tenant)
 	response.WriteHeaderAndEntity(http.StatusOK, TerminalResponse{Id: sessionId})
 }
@@ -2701,14 +2711,14 @@ func (apiHandler *APIHandler) handleGetDeployments(request *restful.Request, res
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetDeploymentsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetDeploymentsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics
@@ -2738,14 +2748,14 @@ func (apiHandler *APIHandler) handleGetDeploymentDetail(request *restful.Request
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetDeploymentDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetDeploymentDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("deployment")
 	result, err := deployment.GetDeploymentDetailWithMultiTenancy(k8sClient, tenant, namespace, name)
@@ -2775,14 +2785,14 @@ func (apiHandler *APIHandler) handleGetDeploymentEvents(request *restful.Request
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetDeploymentEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetDeploymentEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("deployment")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -2813,14 +2823,14 @@ func (apiHandler *APIHandler) handleGetDeploymentOldReplicaSets(request *restful
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetDeploymentOldReplicaSetsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetDeploymentOldReplicaSetsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("deployment")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -2852,14 +2862,14 @@ func (apiHandler *APIHandler) handleGetDeploymentNewReplicaSet(request *restful.
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetDeploymentNewReplicaSetWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetDeploymentNewReplicaSetWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("deployment")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -2890,13 +2900,14 @@ func (apiHandler *APIHandler) handleGetPods(request *restful.Request, response *
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetPodsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetPodsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	tenant := request.PathParameter("tenant")
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics // download standard metrics - cpu, and memory - by default
@@ -2925,13 +2936,14 @@ func (apiHandler *APIHandler) handleGetPodDetail(request *restful.Request, respo
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetPodDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetPodDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("pod")
 	result, err := pod.GetPodDetailWithMultiTenancy(k8sClient, apiHandler.iManager.Metric().Client(), tenant, namespace, name)
@@ -2959,14 +2971,14 @@ func (apiHandler *APIHandler) handleGetReplicationControllerDetail(request *rest
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetReplicationControllerDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetReplicationControllerDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("replicationController")
 	result, err := replicationcontroller.GetReplicationControllerDetailWithMultiTenancy(k8sClient, tenant, namespace, name)
@@ -3000,14 +3012,14 @@ func (apiHandler *APIHandler) handleUpdateReplicasCount(request *restful.Request
 	response.WriteHeader(http.StatusAccepted)
 }
 
-func (apiHandler *APIHandler) handleUpdateReplicasCountWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleUpdateReplicasCountWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("replicationController")
 	spec := new(replicationcontroller.ReplicationControllerSpec)
@@ -3049,20 +3061,20 @@ func (apiHandler *APIHandler) handleGetResource(request *restful.Request, respon
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetResourceWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	config, err := apiHandler.cManager.Config(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
-	verber, err := apiHandler.cManager.VerberClient(request, config)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
+func (apiHandler *APIHandlerV2) handleGetResourceWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	config, err := cManager.Config(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	verber, err := cManager.VerberClient(request, config)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
 	kind := request.PathParameter("kind")
 	namespace, ok := request.PathParameters()["namespace"]
 	name := request.PathParameter("name")
@@ -3106,21 +3118,21 @@ func (apiHandler *APIHandler) handlePutResource(
 	response.WriteHeader(http.StatusCreated)
 }
 
-func (apiHandler *APIHandler) handlePutResourceWithMultiTenancy(
+func (apiHandler *APIHandlerV2) handlePutResourceWithMultiTenancy(
 	request *restful.Request, response *restful.Response) {
-	config, err := apiHandler.cManager.Config(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
-	verber, err := apiHandler.cManager.VerberClient(request, config)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
 	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	config, err := cManager.Config(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	verber, err := cManager.VerberClient(request, config)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
 	kind := request.PathParameter("kind")
 	namespace, ok := request.PathParameters()["namespace"]
 	name := request.PathParameter("name")
@@ -3182,21 +3194,21 @@ func (apiHandler *APIHandler) handleDeleteResource(
 	response.WriteHeader(http.StatusOK)
 }
 
-func (apiHandler *APIHandler) handleDeleteResourceWithMultiTenancy(
+func (apiHandler *APIHandlerV2) handleDeleteResourceWithMultiTenancy(
 	request *restful.Request, response *restful.Response) {
-	config, err := apiHandler.cManager.Config(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
-	verber, err := apiHandler.cManager.VerberClient(request, config)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
 	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	config, err := cManager.Config(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	verber, err := cManager.VerberClient(request, config)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
 	kind := request.PathParameter("kind")
 	namespace, ok := request.PathParameters()["namespace"]
 	name := request.PathParameter("name")
@@ -3213,7 +3225,7 @@ func (apiHandler *APIHandler) handleDeleteResourceWithMultiTenancy(
 		Namespace: namespace,
 	}
 
-	k8sClient, err := apiHandler.cManager.Client(request)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -3246,14 +3258,14 @@ func (apiHandler *APIHandler) handleGetReplicationControllerPods(request *restfu
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetReplicationControllerPodsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetReplicationControllerPodsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	rc := request.PathParameter("replicationController")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -3291,19 +3303,19 @@ func (apiHandler *APIHandler) handleCreateCreateClusterRole(request *restful.Req
 	response.WriteHeaderAndEntity(http.StatusCreated, clusterRoleSpec)
 }
 
-func (apiHandler *APIHandler) handleCreateCreateClusterRolesWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
+func (apiHandler *APIHandlerV2) handleCreateCreateClusterRolesWithMultiTenancy(request *restful.Request, response *restful.Response) {
 
 	clusterRoleSpec := new(clusterrole.ClusterRoleSpec)
 	if err := request.ReadEntity(clusterRoleSpec); err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
+	cManager := ResourceAllocator(clusterRoleSpec.Tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
 	if err := clusterrole.CreateClusterRolesWithMultiTenancy(clusterRoleSpec, k8sClient); err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -3346,15 +3358,15 @@ func (apiHandler *APIHandler) handleDeleteRoleBindings(request *restful.Request,
 	response.WriteHeader(http.StatusOK)
 }
 
-func (apiHandler *APIHandler) handleCreateRoleBindingsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
-	if err != nil {
+func (apiHandler *APIHandlerV2) handleCreateRoleBindingsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	roleBindingSpec := new(rolebinding.RoleBindingSpec)
+	if err := request.ReadEntity(roleBindingSpec); err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	roleBindingSpec := new(rolebinding.RoleBindingSpec)
-	if err := request.ReadEntity(roleBindingSpec); err != nil {
+	cManager := ResourceAllocator(roleBindingSpec.Tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
+	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
@@ -3365,14 +3377,14 @@ func (apiHandler *APIHandler) handleCreateRoleBindingsWithMultiTenancy(request *
 	response.WriteHeaderAndEntity(http.StatusCreated, roleBindingSpec)
 }
 
-func (apiHandler *APIHandler) handleDeleteRoleBindingsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleDeleteRoleBindingsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenantName := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenantName, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenantName := request.PathParameter("tenant")
 	namespaceName := request.PathParameter("namespace")
 	rolebindingName := request.PathParameter("rolebinding")
 	if err := rolebinding.DeleteRoleBindingsWithMultiTenancy(tenantName, namespaceName, rolebindingName, k8sClient); err != nil {
@@ -3416,15 +3428,15 @@ func (apiHandler *APIHandler) handleDeleteClusterRoleBindings(request *restful.R
 	response.WriteHeader(http.StatusOK)
 }
 
-func (apiHandler *APIHandler) handleCreateClusterRoleBindingsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
-	if err != nil {
+func (apiHandler *APIHandlerV2) handleCreateClusterRoleBindingsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	clusterRoleBindingSpec := new(clusterrolebinding.ClusterRoleBindingSpec)
+	if err := request.ReadEntity(clusterRoleBindingSpec); err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	clusterRoleBindingSpec := new(clusterrolebinding.ClusterRoleBindingSpec)
-	if err := request.ReadEntity(clusterRoleBindingSpec); err != nil {
+	cManager := ResourceAllocator(clusterRoleBindingSpec.Tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
+	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
@@ -3435,14 +3447,14 @@ func (apiHandler *APIHandler) handleCreateClusterRoleBindingsWithMultiTenancy(re
 	response.WriteHeaderAndEntity(http.StatusCreated, clusterRoleBindingSpec)
 }
 
-func (apiHandler *APIHandler) handleDeleteClusterRoleBindingsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleDeleteClusterRoleBindingsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenantName := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenantName, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenantName := request.PathParameter("tenant")
 	clusterrolebindingName := request.PathParameter("clusterrolebinding")
 	if err := clusterrolebinding.DeleteClusterRoleBindingsWithMultiTenancy(tenantName, clusterrolebindingName, k8sClient); err != nil {
 		errors.HandleInternalError(response, err)
@@ -3525,14 +3537,14 @@ func (apiHandler *APIHandler) handleDeleteRole(request *restful.Request, respons
 	response.WriteHeader(http.StatusOK)
 }
 
-func (apiHandler *APIHandler) handleGetRolesWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetRolesWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	result, err := role.GetRolesWithMultiTenancy(k8sClient, tenant, namespace)
 	if err != nil {
@@ -3542,14 +3554,14 @@ func (apiHandler *APIHandler) handleGetRolesWithMultiTenancy(request *restful.Re
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetRoleDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetRoleDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("name")
 	result, err := role.GetRoleDetailWithMultiTenancy(k8sClient, tenant, namespace, name)
@@ -3560,19 +3572,18 @@ func (apiHandler *APIHandler) handleGetRoleDetailWithMultiTenancy(request *restf
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleCreateRolesWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
+func (apiHandler *APIHandlerV2) handleCreateRolesWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	roleSpec := new(role.RoleSpec)
 	if err := request.ReadEntity(roleSpec); err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
+	cManager := ResourceAllocator(roleSpec.Tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
 	if err := role.CreateRolesWithMultiTenancy(roleSpec, k8sClient); err != nil {
 		if strings.Contains(err.Error(), "already exists") {
 			msg := "roles '" + roleSpec.Name + "' already exists"
@@ -3585,14 +3596,14 @@ func (apiHandler *APIHandler) handleCreateRolesWithMultiTenancy(request *restful
 	response.WriteHeaderAndEntity(http.StatusCreated, roleSpec)
 }
 
-func (apiHandler *APIHandler) handleDeleteRolesWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleDeleteRolesWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	roleName := request.PathParameter("role")
 	if err := role.DeleteRolesWithMultiTenancy(tenant, namespace, roleName, k8sClient); err != nil {
@@ -3648,16 +3659,14 @@ func (apiHandler *APIHandler) handleGetResourceQuotaList(request *restful.Reques
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetResourceQuotaListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-
-	log.Printf("Get Quota List")
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetResourceQuotaListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	result, err := resourcequota.GetResourceQuotaListsWithMultiTenancy(k8sClient, namespace, tenant)
 	if err != nil {
@@ -3831,14 +3840,14 @@ func (apiHandler *APIHandler) handleDeleteServiceAccount(request *restful.Reques
 	response.WriteHeader(http.StatusOK)
 }
 
-func (apiHandler *APIHandler) handleGetServiceAccountListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetServiceAccountListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	Namespace := request.PathParameter("namespace")
 	var namespaces []string
 	namespaces = append(namespaces, Namespace)
@@ -3853,15 +3862,15 @@ func (apiHandler *APIHandler) handleGetServiceAccountListWithMultiTenancy(reques
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetServiceAccountDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetServiceAccountDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	name := request.PathParameter("name")
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	name := request.PathParameter("name")
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	result, err := serviceaccount.GetServiceAccountDetailWithMultiTenancy(k8sClient, tenant, namespace, name)
 	if err != nil {
@@ -3871,15 +3880,15 @@ func (apiHandler *APIHandler) handleGetServiceAccountDetailWithMultiTenancy(requ
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleCreateServiceAccountsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
-	if err != nil {
+func (apiHandler *APIHandlerV2) handleCreateServiceAccountsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	serviceaccountSpec := new(serviceaccount.ServiceAccountSpec)
+	if err := request.ReadEntity(serviceaccountSpec); err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	serviceaccountSpec := new(serviceaccount.ServiceAccountSpec)
-	if err := request.ReadEntity(serviceaccountSpec); err != nil {
+	cManager := ResourceAllocator(serviceaccountSpec.Tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
+	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
@@ -3891,15 +3900,15 @@ func (apiHandler *APIHandler) handleCreateServiceAccountsWithMultiTenancy(reques
 	response.WriteHeaderAndEntity(http.StatusCreated, serviceaccountSpec)
 }
 
-func (apiHandler *APIHandler) handleDeleteServiceAccountsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleDeleteServiceAccountsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	serviceaccountName := request.PathParameter("serviceaccount")
+	tenantName := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenantName, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	serviceaccountName := request.PathParameter("serviceaccount")
-	tenantName := request.PathParameter("tenant")
 	namespaceName := request.PathParameter("namespace")
 	if err := serviceaccount.DeleteServiceAccountsWithMultiTenancy(tenantName, namespaceName, serviceaccountName, k8sClient); err != nil {
 		errors.HandleInternalError(response, err)
@@ -3947,14 +3956,14 @@ func (apiHandler *APIHandlerV2) handleGetNamespaces(request *restful.Request, re
 	response.WriteHeaderAndEntity(http.StatusOK, namespacesList)
 }
 
-func (apiHandler *APIHandler) handleGetNamespacesWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetNamespacesWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	dataSelect := parseDataSelectPathParameter(request)
 	result, err := ns.GetNamespaceListWithMultiTenancy(k8sClient, tenant, dataSelect)
 	if err != nil {
@@ -4051,14 +4060,14 @@ func (apiHandler *APIHandler) handleGetNamespaceEvents(request *restful.Request,
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetNamespaceEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetNamespaceEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	name := request.PathParameter("name")
 	dataSelect := parseDataSelectPathParameter(request)
 	result, err := event.GetNamespaceEventsWithMultiTenancy(k8sClient, dataSelect, tenant, name)
@@ -4089,14 +4098,14 @@ func (apiHandler *APIHandler) handleCreateImagePullSecret(request *restful.Reque
 	response.WriteHeaderAndEntity(http.StatusCreated, result)
 }
 
-func (apiHandler *APIHandler) handleCreateImagePullSecretWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleCreateImagePullSecretWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	spec := new(secret.ImagePullSecretSpec)
 	if err := request.ReadEntity(spec); err != nil {
 		errors.HandleInternalError(response, err)
@@ -4127,14 +4136,14 @@ func (apiHandler *APIHandler) handleGetSecretDetail(request *restful.Request, re
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetSecretDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetSecretDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("name")
 	result, err := secret.GetSecretDetailWithMultiTenancy(k8sClient, tenant, namespace, name)
@@ -4162,14 +4171,14 @@ func (apiHandler *APIHandler) handleGetSecretList(request *restful.Request, resp
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetSecretListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetSecretListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	dataSelect := parseDataSelectPathParameter(request)
 	namespace := parseNamespacePathParameter(request)
 	result, err := secret.GetSecretListWithMultiTenancy(k8sClient, tenant, namespace, dataSelect)
@@ -4230,14 +4239,14 @@ func (apiHandler *APIHandler) handleGetPersistentVolumeList(request *restful.Req
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetPersistentVolumeListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetPersistentVolumeListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	dataSelect := parseDataSelectPathParameter(request)
 	result, err := persistentvolume.GetPersistentVolumeListWithMultiTenancy(k8sClient, dataSelect, tenant)
 	if err != nil {
@@ -4263,14 +4272,14 @@ func (apiHandler *APIHandler) handleGetPersistentVolumeDetail(request *restful.R
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetPersistentVolumeDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetPersistentVolumeDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	name := request.PathParameter("persistentvolume")
 	result, err := persistentvolume.GetPersistentVolumeDetailWithMultiTenancy(k8sClient, tenant, name)
 	if err != nil {
@@ -4331,14 +4340,14 @@ func (apiHandler *APIHandler) handleGetPodContainers(request *restful.Request, r
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetPodContainersWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetPodContainersWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("pod")
 	result, err := container.GetPodContainersWithMultiTenancy(k8sClient, tenant, namespace, name)
@@ -4367,14 +4376,14 @@ func (apiHandler *APIHandler) handleGetReplicationControllerEvents(request *rest
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetReplicationControllerEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetReplicationControllerEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("replicationController")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -4405,15 +4414,15 @@ func (apiHandler *APIHandler) handleGetReplicationControllerServices(request *re
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetReplicationControllerServicesWithMultiTenancy(request *restful.Request,
+func (apiHandler *APIHandlerV2) handleGetReplicationControllerServicesWithMultiTenancy(request *restful.Request,
 	response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("replicationController")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -4443,14 +4452,14 @@ func (apiHandler *APIHandler) handleGetDaemonSetList(request *restful.Request, r
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetDaemonSetListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetDaemonSetListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics
@@ -4480,15 +4489,15 @@ func (apiHandler *APIHandler) handleGetDaemonSetDetail(
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetDaemonSetDetailWithMultiTenancy(
+func (apiHandler *APIHandlerV2) handleGetDaemonSetDetailWithMultiTenancy(
 	request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("daemonSet")
 	result, err := daemonset.GetDaemonSetDetailWithMultiTenancy(k8sClient, apiHandler.iManager.Metric().Client(), tenant, namespace, name)
@@ -4518,14 +4527,14 @@ func (apiHandler *APIHandler) handleGetDaemonSetPods(request *restful.Request, r
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetDaemonSetPodsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetDaemonSetPodsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("daemonSet")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -4556,14 +4565,14 @@ func (apiHandler *APIHandler) handleGetDaemonSetServices(request *restful.Reques
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetDaemonSetServicesWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetDaemonSetServicesWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	daemonSet := request.PathParameter("daemonSet")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -4593,14 +4602,14 @@ func (apiHandler *APIHandler) handleGetDaemonSetEvents(request *restful.Request,
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetDaemonSetEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetDaemonSetEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("daemonSet")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -4665,14 +4674,14 @@ func (apiHandler *APIHandler) handleGetJobList(request *restful.Request, respons
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetJobListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetJobListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics
@@ -4703,14 +4712,14 @@ func (apiHandler *APIHandler) handleGetJobDetail(request *restful.Request, respo
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetJobDetailWithMultitenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetJobDetailWithMultitenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("name")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -4742,14 +4751,14 @@ func (apiHandler *APIHandler) handleGetJobPods(request *restful.Request, respons
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetJobPodsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetJobPodsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("name")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -4780,14 +4789,14 @@ func (apiHandler *APIHandler) handleGetJobEvents(request *restful.Request, respo
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetJobEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetJobEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("name")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -4817,14 +4826,14 @@ func (apiHandler *APIHandler) handleGetCronJobList(request *restful.Request, res
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetCronJobListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetCronJobListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics
@@ -4855,14 +4864,14 @@ func (apiHandler *APIHandler) handleGetCronJobDetail(request *restful.Request, r
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetCronJobDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetCronJobDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("name")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -4898,14 +4907,14 @@ func (apiHandler *APIHandler) handleGetCronJobJobs(request *restful.Request, res
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetCronJobJobsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetCronJobJobsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("name")
 	active := true
@@ -4940,14 +4949,14 @@ func (apiHandler *APIHandler) handleGetCronJobEvents(request *restful.Request, r
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetCronJobEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetCronJobEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("name")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -4976,14 +4985,14 @@ func (apiHandler *APIHandler) handleTriggerCronJob(request *restful.Request, res
 	response.WriteHeader(http.StatusOK)
 }
 
-func (apiHandler *APIHandler) handleTriggerCronJobWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleTriggerCronJobWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("name")
 	err = cronjob.TriggerCronJobWithMultiTenancy(k8sClient, tenant, namespace, name)
@@ -5010,14 +5019,14 @@ func (apiHandler *APIHandler) handleGetStorageClassList(request *restful.Request
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetStorageClassListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetStorageClassListWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	dataSelect := parseDataSelectPathParameter(request)
 	result, err := storageclass.GetStorageClassListWithMultiTenancy(k8sClient, dataSelect, tenant)
 	if err != nil {
@@ -5043,14 +5052,14 @@ func (apiHandler *APIHandler) handleGetStorageClass(request *restful.Request, re
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetStorageClassWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleGetStorageClassWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	name := request.PathParameter("storageclass")
 	result, err := storageclass.GetStorageClassWithMultiTenancy(k8sClient, tenant, name)
 	if err != nil {
@@ -5079,15 +5088,15 @@ func (apiHandler *APIHandler) handleGetStorageClassPersistentVolumes(request *re
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetStorageClassPersistentVolumesWithMultiTenancy(request *restful.Request,
+func (apiHandler *APIHandlerV2) handleGetStorageClassPersistentVolumesWithMultiTenancy(request *restful.Request,
 	response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	name := request.PathParameter("storageclass")
 	dataSelect := parseDataSelectPathParameter(request)
 	result, err := persistentvolume.GetStorageClassPersistentVolumesWithMultiTenancy(k8sClient, tenant,
@@ -5176,20 +5185,20 @@ func (apiHandler *APIHandler) handleGetCustomResourceDefinitionDetail(request *r
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetCustomResourceDefinitionDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	config, err := apiHandler.cManager.Config(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
-	apiextensionsclient, err := apiHandler.cManager.APIExtensionsClient(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
+func (apiHandler *APIHandlerV2) handleGetCustomResourceDefinitionDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	config, err := cManager.Config(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	apiextensionsclient, err := cManager.APIExtensionsClient(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
 	name := request.PathParameter("crd")
 	result, err := customresourcedefinition.GetCustomResourceDefinitionDetailWithMultiTenancy(apiextensionsclient, config, tenant, name)
 	if err != nil {
@@ -5225,20 +5234,20 @@ func (apiHandler *APIHandler) handleGetCustomResourceObjectList(request *restful
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetCustomResourceObjectListWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	config, err := apiHandler.cManager.Config(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
-	apiextensionsclient, err := apiHandler.cManager.APIExtensionsClient(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
+func (apiHandler *APIHandlerV2) handleGetCustomResourceObjectListWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	config, err := cManager.Config(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	apiextensionsclient, err := cManager.APIExtensionsClient(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
 	crdName := request.PathParameter("crd")
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
@@ -5276,20 +5285,20 @@ func (apiHandler *APIHandler) handleGetCustomResourceObjectDetail(request *restf
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetCustomResourceObjectDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	config, err := apiHandler.cManager.Config(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
-	apiextensionsclient, err := apiHandler.cManager.APIExtensionsClient(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-
+func (apiHandler *APIHandlerV2) handleGetCustomResourceObjectDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	config, err := cManager.Config(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	apiextensionsclient, err := cManager.APIExtensionsClient(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
 	name := request.PathParameter("object")
 	crdName := request.PathParameter("crd")
 	namespace := parseNamespacePathParameter(request)
@@ -5324,16 +5333,15 @@ func (apiHandler *APIHandler) handleGetCustomResourceObjectEvents(request *restf
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleGetCustomResourceObjectEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+func (apiHandler *APIHandlerV2) handleGetCustomResourceObjectEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	log.Println("Getting events related to a custom resource object in namespace")
-
-	k8sClient, err := apiHandler.cManager.Client(request)
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	name := request.PathParameter("object")
 	namespace := request.PathParameter("namespace")
 	dataSelect := parseDataSelectPathParameter(request)
@@ -5365,14 +5373,14 @@ func (apiHandler *APIHandler) handleLogSource(request *restful.Request, response
 	response.WriteHeaderAndEntity(http.StatusOK, logSources)
 }
 
-func (apiHandler *APIHandler) handleLogSourceWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleLogSourceWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	resourceName := request.PathParameter("resourceName")
 	resourceType := request.PathParameter("resourceType")
 	namespace := request.PathParameter("namespace")
@@ -5430,14 +5438,14 @@ func (apiHandler *APIHandler) handleLogs(request *restful.Request, response *res
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-func (apiHandler *APIHandler) handleLogsWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleLogsWithMultiTenancy(request *restful.Request, response *restful.Response) {
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	podID := request.PathParameter("pod")
 	containerID := request.PathParameter("container")
@@ -5496,13 +5504,15 @@ func (apiHandler *APIHandler) handleLogFile(request *restful.Request, response *
 	handleDownload(response, logStream)
 }
 
-func (apiHandler *APIHandler) handleLogFileWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	k8sClient, err := apiHandler.cManager.Client(request)
+func (apiHandler *APIHandlerV2) handleLogFileWithMultiTenancy(request *restful.Request, response *restful.Response) {
+
+	tenant := request.PathParameter("tenant")
+	cManager := ResourceAllocator(tenant, apiHandler.cManager)
+	k8sClient, err := cManager.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	tenant := request.PathParameter("tenant")
 	namespace := request.PathParameter("namespace")
 	podID := request.PathParameter("pod")
 	containerID := request.PathParameter("container")
