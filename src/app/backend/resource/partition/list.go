@@ -197,5 +197,11 @@ func GetTenantPartitionDetail(client client.Interface, clusterName string) (*Ten
 
 func GetWorkerCount(client client.Interface) int64 {
 	nodes, _ := client.CoreV1().Nodes().List(api.ListEverything)
-	return int64(len(nodes.Items) - 1)
+	var workerCount int64 = 0
+	if len(nodes.Items) == 1 {
+		workerCount = 1
+	} else {
+		workerCount = int64(len(nodes.Items) - 1)
+	}
+	return workerCount
 }
