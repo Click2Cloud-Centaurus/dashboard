@@ -178,6 +178,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 		apiV1Ws.GET("/tenantpartition").
 			To(apiHandler1.handleGetTenantPartitionDetail).
 			Writes(partition.TenantPartitionList{}))
+
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenant").
 			To(apiHandler1.handleGetTenantList).
@@ -194,18 +195,11 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 		apiV1Ws.GET("/tptenant/{name}").
 			To(apiHandler1.handleGetTenantDetail).
 			Writes(tenant.TenantDetail{}))
-	//apiV1Ws.Route(
-	//	apiV1Ws.POST("/tenant").
-	//		To(apiHandler.handleCreateTenant).
-	//		Reads(tenant.TenantSpec{}).
-	//		Writes(tenant.TenantSpec{}))
 	apiV1Ws.Route(
 		apiV1Ws.POST("/tenant").
 			To(apiHandler1.handleCreateTenant).
 			Reads(tenant.TenantSpec{}).
 			Writes(tenant.TenantSpec{}))
-
-	//added Delete method for tenant
 	apiV1Ws.Route(
 		apiV1Ws.DELETE("/tenants/{tenant}").
 			To(apiHandler.handleDeleteTenant))
@@ -644,20 +638,11 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 		apiV1Ws.PUT("/tenants/{tenant}/cronjob/{namespace}/{name}/trigger").
 			To(apiHandler.handleTriggerCronJobWithMultiTenancy))
 
-	//apiV1Ws.Route(
-	//	apiV1Ws.POST("/namespace").
-	//		To(apiHandler.handleCreateNamespace).
-	//		Reads(ns.NamespaceSpec{}).
-	//		Writes(ns.NamespaceSpec{}))
 	apiV1Ws.Route(
 		apiV1Ws.POST("/namespace").
 			To(apiHandler1.handleCreateNamespace).
 			Reads(ns.NamespaceSpec{}).
 			Writes(ns.NamespaceSpec{}))
-	//apiV1Ws.Route(
-	//	apiV1Ws.GET("/namespace").
-	//		To(apiHandler.handleGetNamespaces).
-	//		Writes(ns.NamespaceList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/namespace").
 			To(apiHandler1.handleGetNamespaces).
@@ -700,10 +685,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 		apiV1Ws.GET("/tenants/{tenant}/namespace").
 			To(apiHandler.handleGetNamespacesWithMultiTenancy).
 			Writes(ns.NamespaceList{}))
-	//apiV1Ws.Route(
-	//  apiV1Ws.GET("/tenants/{tenant}/namespace/{name}").
-	//    To(apiHandler.handleGetNamespaceDetailWithMultiTenancy).
-	//    Writes(ns.NamespaceDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/namespace/{name}").
 			To(apiHandler1.handleGetNamespaceDetailWithMultiTenancy).
@@ -887,11 +868,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 			To(apiHandler.handleGetStatefulSetEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 
-	//apiV1Ws.Route(
-	//	apiV1Ws.GET("/node").
-	//		To(apiHandler.handleGetNodeList).
-	//		Writes(node.NodeList{}))
-
 	apiV1Ws.Route(
 		apiV1Ws.GET("/node").
 			To(apiHandler1.handleGetNodeLists).
@@ -980,7 +956,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 			Reads(clusterrole.ClusterRoleSpec{}).
 			Writes(clusterrole.ClusterRoleSpec{}))
 
-	// ClusterRole with Multi Tenancy.
 	apiV1Ws.Route(
 		apiV1Ws.POST("/clusterroles").
 			To(apiHandler.handleCreateCreateClusterRolesWithMultiTenancy).
@@ -1014,7 +989,10 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 		apiV1Ws.DELETE("/clusterrolebindings/{clusterrolebinding}").
 			To(apiHandler.handleDeleteClusterRoleBindings))
 
-	// ClusterRoleBinding with Multi Tenancy
+	apiV1Ws.Route(
+		apiV1Ws.DELETE("/clusterrole/{clusterrole}").
+			To(apiHandler.handleDeleteClusterRole))
+
 	apiV1Ws.Route(
 		apiV1Ws.POST("/clusterrolebindings").
 			To(apiHandler.handleCreateClusterRoleBindingsWithMultiTenancy).
@@ -1066,7 +1044,6 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 		apiV1Ws.DELETE("/namespace/{namespace}/serviceaccount/{serviceaccount}").
 			To(apiHandler.handleDeleteServiceAccount))
 
-	// Service Account with Multi Tenancy
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/namespaces/{namespace}/serviceaccount").
 			To(apiHandler.handleGetServiceAccountListWithMultiTenancy).
@@ -1277,32 +1254,12 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 			To(apiHandler.handleGetUserDetail).
 			Writes(model.User{}))
 	apiV1Ws.Route(
-		apiV1Ws.DELETE("/users/{userid}").
+		apiV1Ws.DELETE("/tenants/{tenant}/users/{username}/{userid}").
 			To(apiHandler.handleDeleteUser).
 			Writes(model.User{}))
 
 	return wsContainer, nil
 }
-
-////for tenant handlerCreateTenant method
-//func (apiHandler *APIHandler) handleCreateTenant(request *restful.Request, response *restful.Response) {
-//	k8sClient, err := apiHandler.tpManager.Client(request)
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//
-//	tenantSpec := new(tenant.TenantSpec)
-//	if err := request.ReadEntity(tenantSpec); err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//	if err := tenant.CreateTenant(tenantSpec, k8sClient); err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//	response.WriteHeaderAndEntity(http.StatusCreated, tenantSpec)
-//}
 
 //error struct for already exists
 type Error struct {
@@ -1352,22 +1309,6 @@ func (apiHandler *APIHandler) handleDeleteTenant(request *restful.Request, respo
 	response.WriteHeader(http.StatusOK)
 }
 
-//func (apiHandler *APIHandler) handleGetTenantList(request *restful.Request, response *restful.Response) {
-//	k8sClient, err := apiHandler.tpManager.Client(request)
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//
-//	dataSelect := parseDataSelectPathParameter(request)
-//	result, err := tenant.GetTenantList(k8sClient, dataSelect)
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//	response.WriteHeaderAndEntity(http.StatusOK, result)
-//}
-
 func (apiHandler *APIHandlerV2) handleGetTenantList(request *restful.Request, response *restful.Response) {
 	var tenantsList tenant.TenantList
 	if len(apiHandler.tpManager) == 0 {
@@ -1397,23 +1338,6 @@ func (apiHandler *APIHandlerV2) handleGetTenantList(request *restful.Request, re
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, tenantsList)
 }
-
-//func (apiHandler *APIHandler) handleGetTenantDetail(request *restful.Request, response *restful.Response) {
-//	k8sClient, err := apiHandler.tpManager.Client(request)
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//
-//	name := request.PathParameter("name")
-//
-//	result, err := tenant.GetTenantDetail(k8sClient, name)
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//	response.WriteHeaderAndEntity(http.StatusOK, result)
-//}
 
 func (apiHandler *APIHandlerV2) handleGetTenantDetail(request *restful.Request, response *restful.Response) {
 	name := request.PathParameter("name")
@@ -1894,23 +1818,6 @@ func (apiHandler *APIHandler) handleGetServicePodsWithMultiTenancy(request *rest
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
-//func (apiHandler *APIHandler) handleGetNodeList(request *restful.Request, response *restful.Response) {
-//	k8sClient, err := apiHandler.tpManager.Client(request)
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//
-//	dataSelect := parseDataSelectPathParameter(request)
-//	dataSelect.MetricQuery = dataselect.StandardMetrics
-//	result, err := node.GetNodeList(k8sClient, dataSelect, apiHandler.iManager.Metric().Client())
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//	response.WriteHeaderAndEntity(http.StatusOK, result)
-//}
-
 func (apiHandler *APIHandlerV2) handleGetNodeLists(request *restful.Request, response *restful.Response) {
 	var nodeLists node.NodeList
 	//For tpclients
@@ -1964,7 +1871,6 @@ func (apiHandler *APIHandlerV2) handleGetNodeLists(request *restful.Request, res
 
 }
 func (apiHandler *APIHandlerV2) handleGetResourcePartitionDetail(request *restful.Request, response *restful.Response) {
-	//var nodeLists node.NodeList
 	//For rpclients
 	if len(apiHandler.rpManager) == 0 {
 		apiHandler.rpManager = append(apiHandler.rpManager, apiHandler.defaultClientmanager)
@@ -1992,7 +1898,6 @@ func (apiHandler *APIHandlerV2) handleGetResourcePartitionDetail(request *restfu
 }
 
 func (apiHandler *APIHandlerV2) handleGetTenantPartitionDetail(request *restful.Request, response *restful.Response) {
-	//var nodeLists node.NodeList
 	//For tpclients
 	result := new(partition.TenantPartitionList)
 	if len(apiHandler.tpManager) == 0 {
@@ -3481,6 +3386,21 @@ func (apiHandler *APIHandler) handleDeleteClusterRoleBindings(request *restful.R
 	response.WriteHeader(http.StatusOK)
 }
 
+func (apiHandler *APIHandler) handleDeleteClusterRole(request *restful.Request, response *restful.Response) {
+	k8sClient, err := apiHandler.tpManager.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	clusterroleName := request.PathParameter("clusterrole")
+	if err := clusterrole.DeleteClusterRole(clusterroleName, k8sClient); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	response.WriteHeader(http.StatusOK)
+}
+
 func (apiHandler *APIHandler) handleCreateClusterRoleBindingsWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	k8sClient, err := apiHandler.tpManager.Client(request)
 	if err != nil {
@@ -3778,25 +3698,6 @@ func (apiHandler *APIHandler) handleDeleteResourceQuota(request *restful.Request
 	response.WriteHeader(http.StatusOK)
 }
 
-//func (apiHandler *APIHandler) handleCreateNamespace(request *restful.Request, response *restful.Response) {
-//	log.Printf("old nsp")
-//	k8sClient, err := apiHandler.tpManager.Client(request)
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//
-//	namespaceSpec := new(ns.NamespaceSpec)
-//	if err := request.ReadEntity(namespaceSpec); err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//	if err := ns.CreateNamespace(namespaceSpec, namespaceSpec.Tenant, k8sClient); err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//	response.WriteHeaderAndEntity(http.StatusCreated, namespaceSpec)
-//}
 func (apiHandler *APIHandlerV2) handleCreateNamespace(request *restful.Request, response *restful.Response) {
 	namespaceSpec := new(ns.NamespaceSpec)
 	if err := request.ReadEntity(namespaceSpec); err != nil {
@@ -3973,21 +3874,6 @@ func (apiHandler *APIHandler) handleDeleteServiceAccountsWithMultiTenancy(reques
 	response.WriteHeader(http.StatusOK)
 }
 
-//func (apiHandler *APIHandler) handleGetNamespaces(request *restful.Request, response *restful.Response) {
-//	k8sClient, err := apiHandler.tpManager.Client(request)
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//
-//	dataSelect := parseDataSelectPathParameter(request)
-//	result, err := ns.GetNamespaceList(k8sClient, dataSelect)
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//	response.WriteHeaderAndEntity(http.StatusOK, result)
-//}
 func (apiHandler *APIHandlerV2) handleGetNamespaces(request *restful.Request, response *restful.Response) {
 	var namespacesList ns.NamespaceList
 	if len(apiHandler.tpManager) == 0 {
@@ -4044,23 +3930,6 @@ func (apiHandler *APIHandler) handleGetNamespaceDetail(request *restful.Request,
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
-
-//func (apiHandler *APIHandler) handleGetNamespaceDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-//	k8sClient, err := apiHandler.tpManager.Client(request)
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//
-//	tenant := request.PathParameter("tenant")
-//	name := request.PathParameter("name")
-//	result, err := ns.GetNamespaceDetailWithMultiTenancy(k8sClient, tenant, name)
-//	if err != nil {
-//		errors.HandleInternalError(response, err)
-//		return
-//	}
-//	response.WriteHeaderAndEntity(http.StatusOK, result)
-//}
 
 func (apiHandler *APIHandlerV2) handleGetNamespaceDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tnt := request.PathParameter("tenant")
@@ -5739,12 +5608,62 @@ func (apiHandler *APIHandler) handleGetAllUser(w *restful.Request, r *restful.Re
 }
 
 func (apiHandler *APIHandler) handleDeleteUser(w *restful.Request, r *restful.Response) {
-	_, err := apiHandler.tpManager.Client(w)
+	k8sClient, err := apiHandler.tpManager.Client(w)
+
+	tenantName := w.PathParameter("tenant")
+	userName := w.PathParameter("username")
+	userid := w.PathParameter("userid")
+
 	if err != nil {
 		errors.HandleInternalError(r, err)
 		return
 	}
-	userid := w.PathParameter("userid")
+
+	userDetail, err := db.GetUser(userName)
+
+	if tenantName == userDetail.ObjectMeta.Username {
+		errors.HandleInternalError(r, er.New("cannot delete its parent user"))
+		return
+	}
+
+	if userDetail.ObjectMeta.Type == `tenant-admin` {
+		if err := tenant.DeleteTenant(userName, k8sClient); err != nil {
+			errors.HandleInternalError(r, err)
+			return
+		}
+		if err := clusterrolebinding.DeleteClusterRoleBindings(userName, k8sClient); err != nil {
+			errors.HandleInternalError(r, err)
+			return
+		}
+		if err := serviceaccount.DeleteServiceAccount(userDetail.ObjectMeta.NameSpace, userName, k8sClient); err != nil {
+			errors.HandleInternalError(r, err)
+			return
+		}
+		if err := clusterrole.DeleteClusterRole(userName, k8sClient); err != nil {
+			errors.HandleInternalError(r, err)
+			return
+		}
+	} else if userDetail.ObjectMeta.Type == `cluster-admin` {
+		if err := serviceaccount.DeleteServiceAccount(userDetail.ObjectMeta.NameSpace, userName, k8sClient); err != nil {
+			errors.HandleInternalError(r, err)
+			return
+		}
+		if err := clusterrolebinding.DeleteClusterRoleBindings(userName, k8sClient); err != nil {
+			errors.HandleInternalError(r, err)
+			return
+		}
+	} else {
+		if userDetail.ObjectMeta.Type == `tenant-user` {
+			if err := serviceaccount.DeleteServiceAccountsWithMultiTenancy(userDetail.ObjectMeta.Tenant, userDetail.ObjectMeta.NameSpace, userName, k8sClient); err != nil {
+				errors.HandleInternalError(r, err)
+				return
+			}
+			if err := rolebinding.DeleteRoleBindingsWithMultiTenancy(userDetail.ObjectMeta.Tenant, userDetail.ObjectMeta.NameSpace, userName, k8sClient); err != nil {
+				errors.HandleInternalError(r, err)
+				return
+			}
+		}
+	}
 	id, err := strconv.Atoi(userid)
 	deletedRows := db.DeleteUser(int64(id))
 

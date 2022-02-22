@@ -18,21 +18,26 @@ import {Component, OnInit, Inject,NgZone} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {ActivatedRoute} from '@angular/router';
-
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 import {AbstractControl, Validators,FormBuilder} from '@angular/forms';
-
 import {FormGroup} from '@angular/forms';
 import {CONFIG} from "../../../index.config";
 import {CsrfTokenService} from "../../services/global/csrftoken";
-import {AlertDialog, AlertDialogConfig} from "../alert/dialog";
-
 import {NamespacedResourceService} from '../../services/resource/resource';
 import {TenantService} from "../../services/global/tenant";
-import {SecretDetail, Role, RoleList, NamespaceList, Namespace} from '../../../typings/backendapi';
+import {
+  SecretDetail,
+  Role,
+  RoleList,
+  NamespaceList,
+  Namespace,
+} from '../../../typings/backendapi';
 import {validateUniqueName} from "../../../create/from/form/validator/uniquename.validator";
 import {TenantDetail} from "@api/backendapi";
 import {NamespaceService} from "../../services/global/namespace";
+// @ts-ignore
+import Swal from "sweetalert2/dist/sweetalert2.js";
+
 
 export interface UserToken {
   token: string;
@@ -152,21 +157,21 @@ export class CreateUserDialog implements OnInit {
         ],
       },
     );
-      this.namespace.valueChanges.subscribe((namespace: string) => {
-        if (this.name !== null) {
-          this.name.clearAsyncValidators();
-          this.name.setAsyncValidators(validateUniqueName(this.http_, namespace));
-          this.name.updateValueAndValidity();
-        }
-      });
-      this.http_.get(`api/v1/tenants/${this.currentTenant}/namespace`).subscribe((result: NamespaceList) => {
-        this.namespaces = result.namespaces.map((namespace: Namespace) => namespace.objectMeta.name);
-        this.namespace.patchValue(
-          !this.namespace_.areMultipleNamespacesSelected()
-            ? this.route_.snapshot.params.namespace || this.namespaces
-            : this.namespaces,
-        );
-      });
+    this.namespace.valueChanges.subscribe((namespace: string) => {
+      if (this.name !== null) {
+        this.name.clearAsyncValidators();
+        this.name.setAsyncValidators(validateUniqueName(this.http_, namespace));
+        this.name.updateValueAndValidity();
+      }
+    });
+    this.http_.get(`api/v1/tenants/${this.currentTenant}/namespace`).subscribe((result: NamespaceList) => {
+      this.namespaces = result.namespaces.map((namespace: Namespace) => namespace.objectMeta.name);
+      this.namespace.patchValue(
+        !this.namespace_.areMultipleNamespacesSelected()
+          ? this.route_.snapshot.params.namespace || this.namespaces
+          : this.namespaces,
+      );
+    });
 
     this.ngZone_.run(() => {
       const usertype = sessionStorage.getItem('userType');
@@ -190,8 +195,9 @@ export class CreateUserDialog implements OnInit {
   selectNamespace(event:any)
   {
     this.selectednamespace=event;
-      this.getRole()
+    this.getRole()
   }
+
   getRole(){
     this.role.valueChanges.subscribe((role: string) => {
       if (this.name !== null) {
@@ -211,17 +217,16 @@ export class CreateUserDialog implements OnInit {
     });
   }
 
+
   get name(): AbstractControl {
     return this.form1.get('name');
   }
-
   get tenant(): any {
     return this.tenantService_.current()
   }
   get role(): any {
     return this.form1.get('role');
   }
-
   get username(): AbstractControl {
     return this.form1.get('username');
   }
@@ -266,6 +271,7 @@ export class CreateUserDialog implements OnInit {
     }
 
 
+
     this.getToken(async (token_:any)=>{
       const userSpec= {name: this.username.value, password:this.password.value, token:token_,namespace:this.namespaceUsed, type:this.usertype.value,tenant:this.tenant_,role:this.role.value};
       if (this.selected === "tenant-user") {
@@ -274,6 +280,8 @@ export class CreateUserDialog implements OnInit {
       else {
         userSpec.role = '';
       }
+
+
       const userTokenPromise = await this.csrfToken_.getTokenForAction('users');
       userTokenPromise.subscribe(csrfToken => {
         return this.http_
@@ -286,9 +294,8 @@ export class CreateUserDialog implements OnInit {
           )
           .subscribe(
             () => {
-              this.dialogRef.close(this.username.value);
             },
-
+            () => {},
           );
       });
     })
@@ -308,17 +315,8 @@ export class CreateUserDialog implements OnInit {
         )
         .subscribe(
           () => {
-            this.dialogRef.close(this.tenant.value);
           },
-          error => {
-            this.dialogRef.close();
-            const configData: AlertDialogConfig = {
-              title: 'Tenant Already Exists',
-              message: error.data,
-              confirmLabel: 'OK',
-            };
-            this.matDialog_.open(AlertDialog, {data: configData});
-          },
+          () => {},
         );
     });
   }
@@ -348,9 +346,23 @@ export class CreateUserDialog implements OnInit {
           },
         )
         .subscribe(
-          (data) => {
+          (data: any) => {
+            Swal.fire({
+              type: 'success',
+              title: this.username.value,
+              text: 'user successfully created!',
+              imageUrl: '/assets/images/tick-circle.svg',
+            });
             this.dialogRef.close(this.username.value);
             this.serviceAccountCreated.push(Object.entries(data))
+          },
+          () =>{
+            Swal.fire({
+              type: 'error',
+              title: this.username.value,
+              text: 'user already exists!',
+              imageUrl: '/assets/images/close-circle.svg',
+            });
           },
         );
     })
@@ -370,17 +382,8 @@ export class CreateUserDialog implements OnInit {
         )
         .subscribe(
           () => {
-            this.dialogRef.close(this.username.value);
           },
-          error => {
-            this.dialogRef.close();
-            const configData: AlertDialogConfig = {
-              title: 'Error creating Clusterrole',
-              message: error.data,
-              confirmLabel: 'OK',
-            };
-            this.matDialog_.open(AlertDialog, {data: configData});
-          },
+          () => {},
         );
     });
   }
@@ -403,11 +406,10 @@ export class CreateUserDialog implements OnInit {
         )
         .subscribe(
           () => {
-            this.dialogRef.close(this.username.value);
           },
+          () => {},
         );
     })
-
   }
 
   createRoleBinding(): void{
@@ -428,11 +430,10 @@ export class CreateUserDialog implements OnInit {
         )
         .subscribe(
           () => {
-            this.dialogRef.close(this.username.value);
           },
+          () => {},
         );
     })
-
   }
 
   getToken(callback: any): any {
@@ -464,7 +465,6 @@ export class CreateUserDialog implements OnInit {
     this.createServiceAccount()
     if(this.usertype.value === "tenant-user"){
       this.createRoleBinding()
-
     } else {
       if(this.usertype.value === "cluster-admin") {
         this.adminroleUsed = "admin-role"

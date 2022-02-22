@@ -101,6 +101,12 @@ func CreateClusterRolesWithMultiTenancy(spec *ClusterRoleSpec, client kubernetes
 	return err
 }
 
+func DeleteClusterRole(clusterroleName string, client kubernetes.Interface) error {
+	log.Printf("Deleting clusterrole %s", clusterroleName)
+	err := client.RbacV1().ClusterRoles().Delete(clusterroleName, &metaV1.DeleteOptions{})
+	return err
+}
+
 // The code below allows to perform complex data section on []ClusterRole
 
 type RoleCell ClusterRole

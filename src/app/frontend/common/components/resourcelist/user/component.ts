@@ -97,9 +97,4 @@ export class UserListComponent extends ResourceListWithStatuses<UserList, User> 
   onClick(): void {
     this.verber_.showUserCreateDialog(this.displayName, this.typeMeta, this.objectMeta);
   }
-
-  deleteUser(userID:string): void {
-    this.userAPI_.deleteUser(userID).subscribe();
-  }
-
 }
