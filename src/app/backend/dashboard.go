@@ -22,7 +22,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/kubernetes/dashboard/src/app/backend/iam"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/iam"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/tools/cache"
 	"log"
@@ -33,25 +33,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kubernetes/dashboard/src/app/backend/iam/db"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/iam/db"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/pflag"
 
-	"github.com/kubernetes/dashboard/src/app/backend/args"
-	"github.com/kubernetes/dashboard/src/app/backend/auth"
-	authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
-	"github.com/kubernetes/dashboard/src/app/backend/auth/jwe"
-	"github.com/kubernetes/dashboard/src/app/backend/cert"
-	"github.com/kubernetes/dashboard/src/app/backend/cert/ecdsa"
-	"github.com/kubernetes/dashboard/src/app/backend/client"
-	clientapi "github.com/kubernetes/dashboard/src/app/backend/client/api"
-	"github.com/kubernetes/dashboard/src/app/backend/handler"
-	"github.com/kubernetes/dashboard/src/app/backend/integration"
-	integrationapi "github.com/kubernetes/dashboard/src/app/backend/integration/api"
-	"github.com/kubernetes/dashboard/src/app/backend/settings"
-	"github.com/kubernetes/dashboard/src/app/backend/sync"
-	"github.com/kubernetes/dashboard/src/app/backend/systembanner"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/args"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/auth"
+	authApi "github.com/CentaurusInfra/dashboard/src/app/backend/auth/api"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/auth/jwe"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/cert"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/cert/ecdsa"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/client"
+	clientapi "github.com/CentaurusInfra/dashboard/src/app/backend/client/api"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/handler"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/integration"
+	integrationapi "github.com/CentaurusInfra/dashboard/src/app/backend/integration/api"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/settings"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/sync"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/systembanner"
 )
 
 var (
@@ -316,7 +316,7 @@ func handleFatalInitError(err error) {
 		"invalid apiserver certificates or service account's configuration) or the "+
 		"--apiserver-host param points to a server that does not exist. Reason: %s\n"+
 		"Refer to our FAQ and wiki pages for more information: "+
-		"https://github.com/kubernetes/dashboard/wiki/FAQ", err)
+		"https://github.com/CentaurusInfra/dashboard/wiki/FAQ", err)
 }
 
 /**

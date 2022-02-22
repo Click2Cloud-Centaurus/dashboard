@@ -19,12 +19,12 @@
 
 # golang is based on debian:jessie
 # Specify version to clarify which version we use.
-FROM golang:1.12
+FROM golang:1.15
 
 # Install Node.js. Go is already installed.
 # A small tweak, apt-get update is already run by the nodejs setup script,
 # so there's no need to run it again.
-RUN curl -sL https://deb.nodesource.com/setup_11.x | bash - \
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - \
   && apt-get install -y --no-install-recommends \
 	nodejs \
 	patch \
@@ -90,7 +90,7 @@ RUN mv ./kubectl /usr/local/bin/kubectl
 # `npm ci` installs golangci, but this installation is needed
 # for running `npm run check` singlely, like
 # `aio/develop/run-npm-on-container.sh run check`.
-RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.17.1
+RUN curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.15.1
 
 # Install delve for debuging go files.
 RUN go get github.com/go-delve/delve/cmd/dlv

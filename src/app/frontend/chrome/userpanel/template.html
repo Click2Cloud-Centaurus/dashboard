@@ -23,7 +23,6 @@ limitations under the License.
   </button>
   <button mat-menu-item
           *ngIf="isLoggedIn()"
-          i18n
           (click)="settings()">
     <span i18n>Settings</span>
   </button>
@@ -31,7 +30,6 @@ limitations under the License.
 
   <button mat-menu-item
           *ngIf="isLoggedIn()"
-          i18n
           (click)="about()">
     <span i18n>About</span>
   </button>
@@ -40,8 +38,7 @@ limitations under the License.
 
   <button mat-menu-item
           *ngIf="isLoggedIn()"
-          (click)="logout()"
-          i18n>
+          (click)="logout()">
     <span i18n>Sign out</span>
   </button>
 </mat-menu>

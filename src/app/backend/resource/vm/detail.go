@@ -16,27 +16,27 @@
 package vm
 
 import (
-  "encoding/base64"
-  "fmt"
-  "log"
-  "math"
-  "strconv"
+	"encoding/base64"
+	"fmt"
+	"log"
+	"math"
+	"strconv"
 
-  "k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
-  "github.com/kubernetes/dashboard/src/app/backend/api"
-  errorHandler "github.com/kubernetes/dashboard/src/app/backend/errors"
-  metricapi "github.com/kubernetes/dashboard/src/app/backend/integration/metric/api"
-  "github.com/kubernetes/dashboard/src/app/backend/resource/common"
-  "github.com/kubernetes/dashboard/src/app/backend/resource/controller"
-  "github.com/kubernetes/dashboard/src/app/backend/resource/dataselect"
-  "github.com/kubernetes/dashboard/src/app/backend/resource/persistentvolumeclaim"
-  p "github.com/kubernetes/dashboard/src/app/backend/resource/pod"
-  v1 "k8s.io/api/core/v1"
-  res "k8s.io/apimachinery/pkg/api/resource"
-  metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-  "k8s.io/apimachinery/pkg/runtime"
-  "k8s.io/client-go/kubernetes"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/api"
+	errorHandler "github.com/CentaurusInfra/dashboard/src/app/backend/errors"
+	metricapi "github.com/CentaurusInfra/dashboard/src/app/backend/integration/metric/api"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/resource/common"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/resource/controller"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/resource/dataselect"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/resource/persistentvolumeclaim"
+	p "github.com/CentaurusInfra/dashboard/src/app/backend/resource/pod"
+	v1 "k8s.io/api/core/v1"
+	res "k8s.io/apimachinery/pkg/api/resource"
+	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 )
 
 // VirtualMachineDetail is a presentation layer view of Kubernetes Pod resource.
@@ -108,7 +108,7 @@ func GetVirtualMachineDetailWithMultiTenancy(client kubernetes.Interface, metric
 		return nil, err
 	}
 
-	virtualMachineController, err := getVirtualMachineController(client,tenant, common.NewSameNamespaceQuery(namespace), pod)
+	virtualMachineController, err := getVirtualMachineController(client, tenant, common.NewSameNamespaceQuery(namespace), pod)
 	nonCriticalErrors, criticalError := errorHandler.HandleError(err)
 	if criticalError != nil {
 		return nil, criticalError
@@ -150,9 +150,9 @@ func GetVirtualMachineDetailWithMultiTenancy(client kubernetes.Interface, metric
 	return &podDetail, nil
 }
 
-func getVirtualMachineController(client kubernetes.Interface,tenant string, nsQuery *common.NamespaceQuery, pod *v1.Pod) (*controller.ResourceOwner, error) {
+func getVirtualMachineController(client kubernetes.Interface, tenant string, nsQuery *common.NamespaceQuery, pod *v1.Pod) (*controller.ResourceOwner, error) {
 	channels := &common.ResourceChannels{
-    VMList:    common.GetVMListChannelWithMultiTenancyAndOptions(client, tenant, nsQuery, metaV1.ListOptions{}, 1),
+		VMList:    common.GetVMListChannelWithMultiTenancyAndOptions(client, tenant, nsQuery, metaV1.ListOptions{}, 1),
 		EventList: common.GetEventListChannel(client, nsQuery, 1),
 	}
 
@@ -213,7 +213,7 @@ func toVirtualmachineDetail(pod *v1.Pod, metrics []metricapi.Metric, configMaps 
 	controller *controller.ResourceOwner, events *common.EventList,
 	persistentVolumeClaimList *persistentvolumeclaim.PersistentVolumeClaimList, nonCriticalErrors []error) VirtualMachineDetail {
 	return VirtualMachineDetail{
-		ObjectMeta:                NewObjectMeta(pod.ObjectMeta,pod.Spec),
+		ObjectMeta:                NewObjectMeta(pod.ObjectMeta, pod.Spec),
 		TypeMeta:                  api.NewTypeMeta(api.ResourceKindPod),
 		PodPhase:                  pod.Status.Phase,
 		PodIP:                     pod.Status.PodIP,

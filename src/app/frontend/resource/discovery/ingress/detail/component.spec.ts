@@ -44,7 +44,9 @@ const maxiName = 'my-maxi-ingress';
 class MiniTestComponent {
   isInitialized = true;
   ingress: IngressDetail = {
+    clusterName: '',
     objectMeta: {
+      type: undefined,
       name: miniName,
       namespace: 'my-namespace',
       labels: {},
@@ -59,12 +61,14 @@ class MiniTestComponent {
 class MaxiTestComponent {
   isInitialized = true;
   ingress: IngressDetail = {
+    clusterName: '',
     objectMeta: {
+      type: undefined,
       name: maxiName,
       namespace: 'my-namespace',
       labels: {
         'addonmanager.kubernetes.io/mode': 'Reconcile',
-        app: 'kubernetes-dashboard',
+        app: 'centaurus-dashboard',
         'pod-template-hash': '1054779233',
         version: 'v1.8.1',
       },

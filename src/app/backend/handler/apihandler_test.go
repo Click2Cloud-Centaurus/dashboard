@@ -23,15 +23,15 @@ import (
 	"reflect"
 	"strings"
 
-	restful "github.com/emicklei/go-restful"
-	"github.com/kubernetes/dashboard/src/app/backend/args"
-	"github.com/kubernetes/dashboard/src/app/backend/auth"
-	authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
-	"github.com/kubernetes/dashboard/src/app/backend/auth/jwe"
-	"github.com/kubernetes/dashboard/src/app/backend/client"
-	"github.com/kubernetes/dashboard/src/app/backend/settings"
-	"github.com/kubernetes/dashboard/src/app/backend/sync"
-	"github.com/kubernetes/dashboard/src/app/backend/systembanner"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/args"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/auth"
+	authApi "github.com/CentaurusInfra/dashboard/src/app/backend/auth/api"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/auth/jwe"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/client"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/settings"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/sync"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/systembanner"
+	"github.com/emicklei/go-restful"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
@@ -47,7 +47,7 @@ func TestCreateHTTPAPIHandler(t *testing.T) {
 	authManager := auth.NewAuthManager(cManager, getTokenManager(), authApi.AuthenticationModes{}, true)
 	sManager := settings.NewSettingsManager()
 	sbManager := systembanner.NewSystemBannerManager("Hello world!", "INFO")
-	_, err := CreateHTTPAPIHandler(nil, cManager, authManager, sManager, sbManager)
+	_, err := CreateHTTPAPIHandler(nil, cManager, nil, nil, authManager, sManager, sbManager, nil)
 	if err != nil {
 		t.Fatal("CreateHTTPAPIHandler() cannot create HTTP API handler")
 	}
@@ -153,7 +153,10 @@ func TestFormatRequestLog(t *testing.T) {
 		jsonValue, _ := json.Marshal(c.content)
 
 		req, err := http.NewRequest(c.method, c.uri, bytes.NewReader(jsonValue))
-		req.Header.Set("Content-Type", "application/json")
+
+		if req != nil {
+			req.Header.Set("Content-Type", "application/json")
+		}
 
 		if err != nil {
 			t.Error("Cannot mockup request")
