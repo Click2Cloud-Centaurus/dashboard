@@ -10,6 +10,7 @@ export interface ListMeta {
 
 export interface ObjectMeta {
   type: any;
+  id?: any;
   name?: string;
   namespace?: string;
   labels?: StringMap;
