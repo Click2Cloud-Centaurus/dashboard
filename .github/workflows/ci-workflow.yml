@@ -2,7 +2,7 @@ name: Continuous Integration - Code
 
 on:
   push:
-    branches: [ dev-scale-out ]
+    branches: [ k8s2centaurus-i18n ]
     ignore-paths:
       - '**/*.md'
       - 'aio/deploy/**'
@@ -10,7 +10,7 @@ on:
       - 'docs/**'
       - '.github/workflows/cd-workflow.yml'
   pull_request:
-    branches: [ dev-scale-out ]
+    branches: [ k8s2centaurus-i18n ]
     ignore-paths:
       - '**/*.md'
       - 'aio/deploy/**'

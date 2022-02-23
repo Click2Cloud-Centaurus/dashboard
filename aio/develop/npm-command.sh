@@ -1,6 +1,5 @@
 #!/bin/bash
-
-# Copyright 2019 The Kubernetes Authors.
+# Copyright 2017 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,18 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Install dependencies
+echo "Install dependencies"
+npm ci
+aio/scripts/install-codegen.sh
+
 # Run npm command if K8S_DASHBOARD_NPM_CMD is set,
-# otherwise install and start dashboard.
+# otherwise start dashboard.
 if [[ -n "${K8S_DASHBOARD_NPM_CMD}" ]] ; then
   # Run npm command
   echo "Run npm '${K8S_DASHBOARD_NPM_CMD}'"
   npm ${K8S_DASHBOARD_NPM_CMD} \
     --centaurus-dashboard:bind_address=${K8S_DASHBOARD_BIND_ADDRESS} \
-    --centaurus-dashboard:sidecar_host=${K8S_DASHBOARD_SIDECAR_HOST}
+    --centaurus-dashboard:sidecar_host=${K8S_DASHBOARD_SIDECAR_HOST} \
+    --centaurus-dashboard:port=${K8S_DASHBOARD_PORT}
 else
-  # Install dashboard.
-  echo "Install dashboard"
-  npm ci
   if [[ "${K8S_OWN_CLUSTER}" != true ]] ; then
     # Stop cluster.
     echo "Stop cluster"
@@ -54,5 +56,6 @@ else
   echo "Start dashboard"
   npm start \
     --centaurus-dashboard:bind_address=${K8S_DASHBOARD_BIND_ADDRESS} \
-    --centaurus-dashboard:sidecar_host=${K8S_DASHBOARD_SIDECAR_HOST}
+    --centaurus-dashboard:sidecar_host=${K8S_DASHBOARD_SIDECAR_HOST} \
+    --centaurus-dashboard:port=${K8S_DASHBOARD_PORT}
 fi

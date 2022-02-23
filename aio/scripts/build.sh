@@ -29,20 +29,22 @@ function clean {
 }
 
 function build::frontend {
-  say "\nBuilding frontend for default locale: en"
-  mkdir -p ${FRONTEND_DIR}/en
-  ${NG_BIN} build --aot --prod --outputPath=${TMP_DIR}/frontend/en
+  say "\nBuilding localized frontend"
+  mkdir -p ${FRONTEND_DIR}
+  ${NG_BIN} build \
+            --configuration production \
+            --localize \
+            --outputPath=${FRONTEND_DIR}
 
-  languages=($(ls i18n | awk -F"." '{if (NF>2) print $2}'))
+  # Avoid locale caching due to the same output file naming
+  # We'll add language code prefix to the generated main javascript file.
+  languages=($(ls ${FRONTEND_DIR}))
   for language in "${languages[@]}"; do
-    mkdir -p ${FRONTEND_DIR}/${language}
+    localeDir=${FRONTEND_DIR}/${language}
+    filename=("$(find "${localeDir}" -name 'main.*.js' -exec basename {} \;)")
 
-    say "Building frontend for locale: ${language}"
-    ${NG_BIN} build --aot \
-                    --prod \
-                    --i18nFile=${I18N_DIR}/messages.${language}.xlf \
-                    --i18nFormat=xlf \
-                    --i18nLocale=${language} --outputPath=${TMP_DIR}/frontend/${language}
+    mv "${localeDir}/${filename}" "${localeDir}/${language}.${filename}"
+    perl -i -pe"s/${filename}/${language}.${filename}/" "${localeDir}/index.html"
   done
 }
 
@@ -106,7 +108,7 @@ function parse::args {
 }
 
 # Execute script.
-START=$(date +%s.%N)
+START=$(date +%s)
 
 parse::args "$@"
 clean
@@ -129,6 +131,6 @@ copy::frontend
 copy::supported-locales
 copy::dockerfile
 
-END=$(date +%s.%N)
+END=$(date +%s)
 TOOK=$(echo "${END} - ${START}" | bc)
 say "\nBuild finished successfully after ${TOOK}s"
