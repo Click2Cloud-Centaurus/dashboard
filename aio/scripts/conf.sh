@@ -43,7 +43,7 @@ HEAPSTER_VERSION="v1.5.4"
 HEAPSTER_PORT=8082
 KIND_VERSION="v0.10.0"
 KIND_BIN=${CACHE_DIR}/kind-${KIND_VERSION}
-CODEGEN_PKG=${GOPATH}/src/github.com/arktos/staging/src/k8s.io/code-generator
+CODEGEN_PKG=${GOPATH}/src/github.com/CentaurusInfra/arktos/staging/src/k8s.io/code-generator
 CODEGEN_BIN=${CODEGEN_PKG}/generate-groups.sh
 
 # Setup logger.
