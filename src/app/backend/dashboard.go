@@ -123,6 +123,8 @@ func main() {
 	var tpclients []clientapi.ClientManager
 	var rpclients []clientapi.ClientManager
 	var tppodinformer []cache.SharedIndexInformer
+	var tpclientmaps = make(map[string]clientapi.ClientManager)
+
 	clientManager := client.NewClientManager(args.Holder.GetKubeConfigFile(), args.Holder.GetApiServerHost())
 	versionInfo, err := clientManager.InsecureClient().Discovery().ServerVersion()
 	if err != nil {
@@ -146,6 +148,9 @@ func main() {
 			informerfactory.Start(stopch)
 			informerfactory.WaitForCacheSync(stopch)
 			tppodinformer = append(tppodinformer, podinformer)
+			clients = append(clients, newclientmanager)
+			configname := strings.Split(name, ".")[1]
+			tpclientmaps[configname] = newclientmanager
 			tpclients = append(tpclients, newclientmanager)
 		}
 	}
@@ -158,10 +163,11 @@ func main() {
 	if err != nil {
 		log.Printf("Failed to create admin user: %s \n", error.Error())
 	}
-
+	//var tpauthmaps = make(map[string]authApi.AuthManager)
 	// Init auth manager
 	authManager := initAuthManager(clientManager)
-
+	tpauthManagers := initAuthManager2(tpclientmaps)
+	fmt.Printf("tpauthmgrsss %v", tpauthManagers)
 	// Init settings manager
 	settingsManager := settings.NewSettingsManager()
 
@@ -195,6 +201,8 @@ func main() {
 		rpclients,
 		authManager,
 		settingsManager,
+		tpclientmaps,
+		tpauthManagers,
 		systemBannerManager,
 		tppodinformer)
 	if err != nil {
@@ -276,6 +284,40 @@ func initAuthManager(clientManager clientapi.ClientManager) authApi.AuthManager 
 	authenticationSkippable := args.Holder.GetEnableSkipLogin()
 
 	return auth.NewAuthManager(clientManager, tokenManager, authModes, authenticationSkippable)
+}
+func initAuthManager2(clientManagermaps map[string]clientapi.ClientManager) []authApi.AuthManager {
+	var tpauthmaps []authApi.AuthManager
+	for _, clientManager := range clientManagermaps {
+		insecureClient := clientManager.InsecureClient()
+
+		// Init default encryption key synchronizer
+		synchronizerManager := sync.NewSynchronizerManager(insecureClient)
+		keySynchronizer := synchronizerManager.Secret(args.Holder.GetNamespace(), authApi.EncryptionKeyHolderName)
+
+		// Register synchronizer. Overwatch will be responsible for restarting it in case of error.
+		sync.Overwatch.RegisterSynchronizer(keySynchronizer, sync.AlwaysRestart)
+
+		// Init encryption key holder and token manager
+		keyHolder := jwe.NewRSAKeyHolder(keySynchronizer)
+		tokenManager := jwe.NewJWETokenManager(keyHolder)
+		tokenTTL := time.Duration(args.Holder.GetTokenTTL())
+		if tokenTTL != authApi.DefaultTokenTTL {
+			tokenManager.SetTokenTTL(tokenTTL)
+		}
+
+		// Set token manager for client manager.
+		clientManager.SetTokenManager(tokenManager)
+		authModes := authApi.ToAuthenticationModes(args.Holder.GetAuthenticationMode())
+		if len(authModes) == 0 {
+			authModes.Add(authApi.Token)
+		}
+
+		// UI logic dictates this should be the inverse of the cli option
+		authenticationSkippable := args.Holder.GetEnableSkipLogin()
+
+		tpauthmaps = append(tpauthmaps, auth.NewAuthManager(clientManager, tokenManager, authModes, authenticationSkippable))
+	}
+	return tpauthmaps
 }
 
 func initArgHolder() {
