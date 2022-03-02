@@ -61,6 +61,7 @@ import {NodeListComponent} from './resourcelist/node/component';
 import {PersistentVolumeListComponent} from './resourcelist/persistentvolume/component';
 import {PersistentVolumeClaimListComponent} from './resourcelist/persistentvolumeclaim/component';
 import {PodListComponent} from './resourcelist/pod/component';
+import {VirtualMachineListComponent} from './resourcelist/virtualmachine/component'
 import {ReplicaSetListComponent} from './resourcelist/replicaset/component';
 import {ReplicationControllerListComponent} from './resourcelist/replicationcontroller/component';
 import {SecretListComponent} from './resourcelist/secret/component';
@@ -74,7 +75,6 @@ import {UploadFileComponent} from './uploadfile/component';
 import {WorkloadStatusComponent} from './workloadstatus/component';
 import {ZeroStateComponent} from './zerostate/component';
 import {ServiceAccountListComponent} from "./resourcelist/serviceaccount/component";
-//module added
 import {TenantSelectorComponent} from './tenant/component';
 import {TenantListComponent} from './resourcelist/tenantlist/component';
 import {UserListComponent} from "./resourcelist/user/component";
@@ -85,6 +85,9 @@ import {TenantPartitionListComponent} from "./resourcelist/tenantpartition/compo
 import {RoleListComponent} from "./resourcelist/role/component";
 import {ResourceQuotaListComponent} from "./quotas/component";
 import {TpTenantListComponent} from "./resourcelist/tptenants/component";
+import {NetworkListComponent} from './resourcelist/network/component';
+import {NetworkObjectListComponent} from './resourcelist/networkobject/component';
+import {NetworkVersionListComponent} from './resourcelist/networkversion/component';
 
 const components = [
   ActionbarDetailActionsComponent,
@@ -153,6 +156,7 @@ const components = [
   PropertyComponent,
   ProxyComponent,
   PodListComponent,
+  VirtualMachineListComponent,
   PersistentVolumeListComponent,
   PersistentVolumeClaimListComponent,
   PolicyRuleListComponent,
@@ -188,6 +192,10 @@ const components = [
 
   ServiceAccountListComponent,
   UserListComponent,
+
+  NetworkListComponent,
+  NetworkObjectListComponent,
+  NetworkVersionListComponent,
 ];
 
 @NgModule({

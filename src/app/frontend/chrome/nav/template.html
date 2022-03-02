@@ -133,30 +133,10 @@
               <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
               Stateful Sets
             </kd-nav-item>
-
-            <mat-expansion-panel [expanded]="true">
-              <mat-expansion-panel-header>
-                <mat-panel-title>
-                  <kd-nav-item class="kd-nav-item" state="/instance" i18n>
-                    <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-                    Virtual Machine
-                  </kd-nav-item>
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-
-            <kd-nav-item class="kd-nav-sub-item" state="/image" i18n>
+            <kd-nav-item class="kd-nav-item" state="/virtualmachine" i18n>
               <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-              Images
+              Virtual Machines
             </kd-nav-item>
-            <kd-nav-item class="kd-nav-sub-item" state="/instance" i18n>
-              <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-              Instances
-            </kd-nav-item>
-            <kd-nav-item class="kd-nav-sub-item" state="/keypair" i18n>
-              <img class="submenu_icon" src="assets/images/right_double_arrow.svg" alt="">
-              Key Pairs
-            </kd-nav-item>
-            </mat-expansion-panel>
           </div>
         </mat-expansion-panel>
       </mat-accordion>
@@ -231,6 +211,17 @@
         </kd-nav-item>
       </mat-panel-title>
       <kd-pinner-nav kind="customresourcedefinition"></kd-pinner-nav>
+      <mat-divider></mat-divider>
+    </div>
+
+    <div class="kd-nav-group" *ngIf=showCluster >
+      <mat-panel-title>
+        <kd-nav-item class="kd-nav-group-item" state="/network" [exact]="true" i18n>
+          <img class="menu_icon" src="assets/images/networking.svg" alt="" style="height: 22px; width: 22px">
+          <strong>Networks</strong>
+        </kd-nav-item>
+      </mat-panel-title>
+      <kd-pinner-nav kind="network"></kd-pinner-nav>
       <mat-divider></mat-divider>
     </div>
 

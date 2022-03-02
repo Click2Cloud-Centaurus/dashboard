@@ -24,6 +24,7 @@ export enum Resource {
   daemonSet = 'daemonset',
   deployment = 'deployment',
   pod = 'pod',
+  virtualMachine = 'virtualmachine',
   replicaSet = 'replicaset',
   oldReplicaSet = 'oldreplicaset',
   newReplicaSet = 'newreplicaset',
@@ -52,6 +53,9 @@ export enum Resource {
   imagePullSecret= 'imagePullSecret',
   resourcePartition = 'resourcepartition',
   tenantPartition = 'tenantpartition',
+  network = 'crd',
+  networkFull = 'network',
+  networkObject = 'object',
 }
 
 export enum Utility {
@@ -78,14 +82,21 @@ class ResourceEndpoint {
     }/:name`;
   }
 
-  child(resourceName: string, relatedResource: Resource, resourceNamespace?: string): string {
+  child(resourceName: string, relatedResource: Resource, resourceNamespace?: string, tenant?: string): string {
     if (!resourceNamespace) {
       resourceNamespace = ':namespace';
     }
-
-    return `${baseHref}${this.tenanted_ ? '/tenants/:tenant' : ''}/${this.resource_}${
-      this.namespaced_ ? `/${resourceNamespace}` : ''
-    }/${resourceName}/${relatedResource}`;
+    let url = ''
+    if (tenant) {
+      url = `${baseHref}${this.tenanted_ ? `/tenants/${tenant}` : ''}/${this.resource_}${
+        this.namespaced_ ? `/${resourceNamespace}` : ''
+      }/${resourceName}/${relatedResource}`
+    } else {
+      url = `${baseHref}${this.tenanted_ ? '/tenants/:tenant' : ''}/${this.resource_}${
+        this.namespaced_ ? `/${resourceNamespace}` : ''
+      }/${resourceName}/${relatedResource}`
+    }
+    return url;
   }
 }
 

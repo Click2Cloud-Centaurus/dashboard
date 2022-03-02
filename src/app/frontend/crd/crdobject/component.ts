@@ -39,7 +39,7 @@ export class CRDObjectDetailComponent implements OnInit, OnDestroy {
   @ViewChild('code', {static: true}) codeRef: ElementRef;
 
   private objectSubscription_: Subscription;
-  private readonly endpoint_ = EndpointManager.resource(Resource.crd, true, true);
+  private readonly endpoint_ = EndpointManager.resource(Resource.crd, false, true);
   object: CRDObjectDetail;
   modes = Modes;
   isInitialized = false;

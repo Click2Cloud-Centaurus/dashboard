@@ -14,7 +14,7 @@
 
 import {HttpParams} from '@angular/common/http';
 import {Component, Input} from '@angular/core';
-import {Tenant, TenantList} from '@api/backendapi';
+import {ObjectMeta, Tenant, TenantList, TypeMeta} from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 
 import {ResourceListWithStatuses} from '../../../resources/list';
@@ -33,25 +33,26 @@ import {isNil} from "lodash";
 })
 export class TenantListComponent extends ResourceListWithStatuses<TenantList, Tenant> {
   @Input() endpoint = EndpointManager.resource(Resource.tenant).list();
-  displayName:any;
-  typeMeta:any;
-  objectMeta:any;
-  nodeName: any
-  clusterName: any
+
+  displayName: string;
+  typeMeta: TypeMeta;
+  objectMeta: ObjectMeta;
+  nodeName: string
+  clusterName: string
   tenantList: Tenant[]
   tenantCount: number
 
   constructor(
     readonly verber_: VerberService,
     private readonly tenant_: ResourceService<TenantList>,
-    private readonly route_: ActivatedRoute,
+    private readonly activatedRoute_: ActivatedRoute,
     notifications: NotificationsService,
   ) {
     super('tenant', notifications);
     this.id = ListIdentifier.tenant;
     this.groupId = ListGroupIdentifier.cluster;
 
-    this.nodeName = this.route_.snapshot.params.resourceName
+    this.nodeName = this.activatedRoute_.snapshot.params.resourceName
 
     // Register status icon handlers
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
@@ -61,16 +62,20 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
   }
 
-  getResourceObservable(params?: HttpParams): Observable<TenantList> {
-    return this.tenant_.get(this.endpoint, undefined, params);
+  getResourceObservable(): Observable<TenantList> {
+    return this.tenant_.get(this.endpoint, undefined);
   }
 
   map(tenantList: TenantList): Tenant[] {
     this.tenantList = []
     this.tenantCount = 0
-    if (isNil(this.nodeName) && tenantList.tenants != null){
-      this.tenantList = tenantList.tenants
-      this.tenantCount = this.tenantList.length
+    if (tenantList.tenants !== null) {
+      const tenantsList: any = [];
+      tenantList.tenants.map((tenant)=>{
+        tenantsList.push(tenant);
+      })
+      this.tenantList = tenantsList
+      this.totalItems = this.tenantList.length
     }
     return this.tenantList;
   }

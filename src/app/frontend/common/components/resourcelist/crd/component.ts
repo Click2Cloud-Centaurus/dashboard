@@ -58,7 +58,14 @@ export class CRDListComponent extends ResourceListWithStatuses<CRDList, CRD> {
   }
 
   map(crdList: CRDList): CRD[] {
-    return crdList.items;
+    const crdLists:CRD[] = [];
+    crdList.items.map((crd)=>{
+      if (crd.names.kind !== 'Network' && crd.group !== 'mizar.com') {
+        crdLists.push(crd)
+      }
+    })
+    this.totalItems = crdLists.length
+    return crdLists;
   }
 
   isInErrorState(resource: CRD): boolean {

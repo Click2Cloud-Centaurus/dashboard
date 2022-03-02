@@ -33,7 +33,9 @@
             <ng-container [matColumnDef]="getColumns()[1]">
               <mat-header-cell *matHeaderCellDef mat-sort-header disableClear="true" i18n>Name</mat-header-cell>
               <mat-cell *matCellDef="let namespace">
-                <a [routerLink]="getDetailsHref(namespace.objectMeta.name)" queryParamsHandling="preserve">
+                <a [routerLink]="getDetailsHref(namespace.objectMeta.name)"
+                   queryParamsHandling="preserve"
+                   [state]="{namespace: namespace.objectMeta.name}">
                   {{namespace.objectMeta.name}}
                 </a>
               </mat-cell>

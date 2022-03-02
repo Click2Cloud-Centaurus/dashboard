@@ -37,7 +37,7 @@ type TenantPartitionDetail struct {
 
 type ResourcePartition struct {
 	Name             string  `json:"name"`
-	NodeCount        int     `json:"nodeCount"`
+	NodeCount        int64   `json:"nodeCount"`
 	CPULimit         int64   `json:"cpuLimit"`
 	CPUUsed          float64 `json:"cpuUsed"`
 	MemoryLimit      int64   `json:"memoryLimit"`
@@ -50,7 +50,7 @@ type TenantPartition struct {
 	NodeName         string  `json:"nodeName"`
 	PodCount         int64   `json:"podCount"`
 	TotalPods        int64   `json:"totalPods"`
-	TenantCount      int     `json:"tenantCount"`
+	TenantCount      int64   `json:"tenantCount"`
 	CPUUsed          float64 `json:"cpuUsed"`
 	CPULimit         int64   `json:"cpuLimit"`
 	MemoryUsed       float64 `json:"memoryUsed"`
@@ -116,10 +116,10 @@ func GetResourcePartitionDetail(client client.Interface, clusterName string) (*R
 		allocatedResources, _ := resource.GetNodeAllocatedResources(node, pods)
 
 		cpuLimit += allocatedResources.CPUCapacity
-		cpuUsed += allocatedResources.CPULimitsFraction
+		cpuUsed += allocatedResources.CPURequestsFraction
 
 		memoryLimit += allocatedResources.MemoryCapacity
-		memoryUsed += allocatedResources.MemoryLimitsFraction
+		memoryUsed += allocatedResources.MemoryRequestsFraction
 
 		for _, condition := range node.Status.Conditions {
 			if condition.Type == v1.NodeConditionType("Ready") && condition.Status == v1.ConditionTrue {
@@ -130,7 +130,7 @@ func GetResourcePartitionDetail(client client.Interface, clusterName string) (*R
 	}
 
 	partitionDetail := new(ResourcePartitionDetail)
-	partitionDetail.ObjectMeta.NodeCount = len(nodes.Items)
+	partitionDetail.ObjectMeta.NodeCount = int64(len(nodes.Items))
 	partitionDetail.ObjectMeta.CPUUsed = cpuUsed
 	partitionDetail.ObjectMeta.CPULimit = cpuLimit
 	partitionDetail.ObjectMeta.MemoryUsed = memoryUsed
@@ -151,8 +151,8 @@ func GetTenantPartitionDetail(client client.Interface, clusterName string) (*Ten
 	var memoryLimit int64 = 0
 	var memoryUsed float64 = 0
 	var healthyNodeCount int64 = 0
-	//var podCount int64 = 0
-	var totalPods int64 = 0
+	var podCount int64 = 0
+	var nodePods int64 = 0
 	nodeName := ``
 
 	for _, node := range nodes.Items {
@@ -161,13 +161,13 @@ func GetTenantPartitionDetail(client client.Interface, clusterName string) (*Ten
 		allocatedResources, _ := resource.GetNodeAllocatedResources(node, pods)
 
 		cpuLimit += allocatedResources.CPUCapacity
-		cpuUsed += allocatedResources.CPULimitsFraction
+		cpuUsed += allocatedResources.CPURequestsFraction
 
 		memoryLimit += allocatedResources.MemoryCapacity
-		memoryUsed += allocatedResources.MemoryLimitsFraction
+		memoryUsed += allocatedResources.MemoryRequestsFraction
 
-		totalPods = node.Status.Capacity.Pods().Value()
-		//podCount += int64(allocatedResources.AllocatedPods)
+		nodePods = node.Status.Capacity.Pods().Value()
+		podCount += int64(allocatedResources.AllocatedPods)
 
 		for _, condition := range node.Status.Conditions {
 			if condition.Type == v1.NodeConditionType("Ready") && condition.Status == v1.ConditionTrue {
@@ -180,19 +180,28 @@ func GetTenantPartitionDetail(client client.Interface, clusterName string) (*Ten
 	if err != nil {
 		return nil, err
 	}
-
 	partitionDetail := new(TenantPartitionDetail)
-	partitionDetail.ObjectMeta.TenantCount = len(tenants.Items)
+	partitionDetail.ObjectMeta.TenantCount = int64(len(tenants.Items))
 	partitionDetail.ObjectMeta.CPUUsed = cpuUsed
 	partitionDetail.ObjectMeta.CPULimit = cpuLimit
 	partitionDetail.ObjectMeta.MemoryUsed = memoryUsed
 	partitionDetail.ObjectMeta.MemoryLimit = memoryLimit
 	partitionDetail.ObjectMeta.HealthyNodeCount = healthyNodeCount
-	//partitionDetail.ObjectMeta.PodCount = podCount
-	partitionDetail.ObjectMeta.TotalPods = totalPods
+	partitionDetail.ObjectMeta.PodCount = podCount
+	partitionDetail.ObjectMeta.TotalPods = nodePods
 	partitionDetail.ObjectMeta.Name = clusterName
 	partitionDetail.ObjectMeta.NodeName = nodeName
 	partitionDetail.TypeMeta.Kind = "TenantPartition"
-
 	return partitionDetail, nil
+}
+
+func GetWorkerCount(client client.Interface) int64 {
+	nodes, _ := client.CoreV1().Nodes().List(api.ListEverything)
+	var workerCount int64 = 0
+	if len(nodes.Items) == 1 {
+		workerCount = 1
+	} else {
+		workerCount = int64(len(nodes.Items) - 1)
+	}
+	return workerCount
 }

@@ -120,7 +120,7 @@ func main() {
 		log.Printf("No RPs & TPs config files found")
 		//TODO chceck
 	}
-	var clients []clientapi.ClientManager
+	var tpclients []clientapi.ClientManager
 	var rpclients []clientapi.ClientManager
 	var tppodinformer []cache.SharedIndexInformer
 	var tpclientmaps = make(map[string]clientapi.ClientManager)
@@ -141,7 +141,8 @@ func main() {
 			//For rpconfigs
 			rpclients = append(rpclients, newclientmanager)
 		} else if strings.Contains(name, strings.ToLower(TENANTPARTITION)) {
-			informerfactory := informers.NewSharedInformerFactory(newclientmanager.InsecureClient(), 1*time.Minute)
+			sharedoption := informers.WithNamespaceWithMultiTenancy("", "all")
+			informerfactory := informers.NewSharedInformerFactoryWithOptions(newclientmanager.InsecureClient(), 1*time.Minute, sharedoption)
 			podinformer := informerfactory.Core().V1().Pods().Informer()
 			stopch := make(chan struct{})
 			informerfactory.Start(stopch)
@@ -150,6 +151,7 @@ func main() {
 			clients = append(clients, newclientmanager)
 			configname := strings.Split(name, ".")[1]
 			tpclientmaps[configname] = newclientmanager
+			tpclients = append(tpclients, newclientmanager)
 		}
 	}
 
@@ -195,7 +197,7 @@ func main() {
 	apiHandler, err := handler.CreateHTTPAPIHandler(
 		integrationManager,
 		clientManager,
-		clients,
+		tpclients,
 		rpclients,
 		authManager,
 		settingsManager,

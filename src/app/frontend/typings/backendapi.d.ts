@@ -10,6 +10,7 @@ export interface ListMeta {
 
 export interface ObjectMeta {
   type: any;
+  id?: any;
   name?: string;
   namespace?: string;
   labels?: StringMap;
@@ -74,9 +75,18 @@ export interface CRDList extends ResourceList {
   items: CRD[];
 }
 
+export interface NetworkList extends ResourceList {
+  items: Network[];
+}
+
 export interface CRDObjectList extends ResourceList {
   typeMeta: TypeMeta;
   items: CRDObject[];
+}
+
+export interface NetworkObjectList extends ResourceList {
+  typeMeta: TypeMeta;
+  items: NetworkObject[];
 }
 
 export interface DaemonSetList extends ResourceList {
@@ -159,6 +169,13 @@ export interface PodList extends ResourceList {
   cumulativeMetrics: Metric[] | null;
 }
 
+export interface VirtualMachineList extends ResourceList {
+  virtualMachines: VirtualMachine[];
+  status: Status;
+  virtualMachineInfo?: VirtualMachineInfo;
+  cumulativeMetrics: Metric[] | null;
+}
+
 export interface ReplicaSetList extends ResourceList {
   replicaSets: ReplicaSet[];
   status: Status;
@@ -217,9 +234,28 @@ export interface CRD extends Resource {
   scope: string;
   nameKind: string;
   established: string;
+  names: Names;
+}
+
+export interface Network extends Resource {
+  group: string;
+  scope: string;
+  nameKind: string;
+  established: string;
+  names: Names;
+}
+
+export interface Names {
+  plural: string;
+  singular: string;
+  shortNames: string[];
+  kind: string;
+  listKind: string;
 }
 
 export interface CRDObject extends Resource {}
+
+export interface NetworkObject extends Resource {}
 
 export interface DaemonSet extends Resource {
   podInfo: PodInfo;
@@ -351,6 +387,16 @@ export interface Pod extends Resource {
   restartCount: number;
   qosClass?: string;
   metrics: PodMetrics;
+  warnings: Event[];
+  nodeName: string;
+}
+
+export interface VirtualMachine extends Resource {
+  podStatus: VirtualMachineStatus;
+  virtualMachineIP?: string;
+  restartCount: number;
+  qosClass?: string;
+  metrics: VirtualMachineMetrics;
   warnings: Event[];
   nodeName: string;
 }
@@ -516,7 +562,19 @@ export interface CRDDetail extends ResourceDetail {
   conditions: Condition[];
 }
 
+export interface NetworkDetail extends ResourceDetail {
+  version?: string;
+  group: string;
+  scope: string;
+  names: CRDNames;
+  versions: CRDVersion[];
+  objects: CRDObjectList;
+  conditions: Condition[];
+}
+
 export interface CRDObjectDetail extends ResourceDetail {}
+
+export interface NetworkObjectDetail extends ResourceDetail {}
 
 export interface JobDetail extends ResourceDetail {
   podInfo: PodInfo;
@@ -566,6 +624,24 @@ export interface PodDetail extends ResourceDetail {
   restartCount: number;
   qosClass: string;
   metrics: PodMetrics;
+  conditions: Condition[];
+  controller: Resource;
+  eventList: EventList;
+  persistentVolumeClaimList: PersistentVolumeClaimList;
+}
+
+export interface VirtualMachineDetail extends ResourceDetail {
+  initContainers: Container[];
+  containers: Container[];
+  podPhase: string;
+  podIP: string;
+  nodeName: string;
+  restartCount: number;
+  qosClass: string;
+  keyPair: string;
+  imagePullPolicy: string;
+  shutdownBehavior: string;
+  metrics: VirtualMachineMetrics;
   conditions: Condition[];
   controller: Resource;
   eventList: EventList;
@@ -825,13 +901,36 @@ export interface CRDNames {
   categories?: string[];
 }
 
+export interface NetworkNames {
+  plural: string;
+  singular?: string;
+  shortNames?: string[];
+  kind: string;
+  listKind?: string;
+  categories?: string[];
+}
+
+
 export interface CRDVersion {
   name: string;
   served: boolean;
   storage: boolean;
 }
 
+export interface NetworkVersion {
+  name: string;
+  served: boolean;
+  storage: boolean;
+}
+
 export interface PodMetrics {
+  cpuUsage: number;
+  memoryUsage: number;
+  cpuUsageHistory: MetricResult[];
+  memoryUsageHistory: MetricResult[];
+}
+
+export interface VirtualMachineMetrics {
   cpuUsage: number;
   memoryUsage: number;
   cpuUsageHistory: MetricResult[];
@@ -851,7 +950,23 @@ export interface PodStatus {
   containerStates: ContainerState[];
 }
 
+export interface VirtualMachineStatus {
+  podPhase: string;
+  status: string;
+  containerStates: ContainerState[];
+}
+
 export interface PodInfo {
+  current: number;
+  desired: number;
+  running: number;
+  pending: number;
+  failed: number;
+  succeeded: number;
+  warnings: Event[];
+}
+
+export interface VirtualMachineInfo {
   current: number;
   desired: number;
   running: number;

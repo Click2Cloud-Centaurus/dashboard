@@ -126,16 +126,8 @@ const routes: Routes = [
         loadChildren: 'resource/workloads/statefulset/module#StatefulSetModule',
       },
       {
-        path: 'instance',
-        loadChildren: 'resource/virtualmachine/instance/module#InstanceModule',
-      },
-      {
-        path: 'image',
-        loadChildren: 'resource/virtualmachine/image/module#ImageModule',
-      },
-      {
-        path: 'keypair',
-        loadChildren: 'resource/virtualmachine/keypair/module#KeypairModule',
+        path: 'virtualmachine',
+        loadChildren: 'resource/workloads/virtualmachine/module#VirtualMachineModule',
       },
 
       // Discovery and load balancing group
@@ -182,6 +174,12 @@ const routes: Routes = [
       {
         path: 'customresourcedefinition',
         loadChildren: 'crd/module#CrdModule',
+      },
+
+      // Networks
+      {
+        path: 'network',
+        loadChildren: 'network/module#NetworkModule',
       },
 
       // Others
