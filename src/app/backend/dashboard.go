@@ -148,7 +148,7 @@ func main() {
 			informerfactory.Start(stopch)
 			informerfactory.WaitForCacheSync(stopch)
 			tppodinformer = append(tppodinformer, podinformer)
-			clients = append(clients, newclientmanager)
+			//clients = append(clients, newclientmanager)
 			configname := strings.Split(name, ".")[1]
 			tpclientmaps[configname] = newclientmanager
 			tpclients = append(tpclients, newclientmanager)
