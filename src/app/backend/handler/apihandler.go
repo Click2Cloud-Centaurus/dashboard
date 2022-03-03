@@ -16,75 +16,75 @@
 package handler
 
 import (
-	"encoding/base64"
-	er "errors"
-	"fmt"
-	//"github.com/kubernetes/dashboard/src/app/backend/client"
-	"github.com/kubernetes/dashboard/src/app/backend/iam"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/partition"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/vm"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/cache"
-	"log"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
+  "encoding/base64"
+  er "errors"
+  "fmt"
+  //"github.com/kubernetes/dashboard/src/app/backend/client"
+  "github.com/kubernetes/dashboard/src/app/backend/iam"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/partition"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/vm"
+  "k8s.io/client-go/kubernetes"
+  "k8s.io/client-go/tools/cache"
+  "log"
+  "net/http"
+  "strconv"
+  "strings"
+  "time"
 
-	"github.com/kubernetes/dashboard/src/app/backend/iam/db"
-	"github.com/kubernetes/dashboard/src/app/backend/iam/model"
-	_ "github.com/lib/pq" // postgres golang driver
+  "github.com/kubernetes/dashboard/src/app/backend/iam/db"
+  "github.com/kubernetes/dashboard/src/app/backend/iam/model"
+  _ "github.com/lib/pq" // postgres golang driver
 
-	restful "github.com/emicklei/go-restful"
-	"github.com/kubernetes/dashboard/src/app/backend/api"
-	"github.com/kubernetes/dashboard/src/app/backend/auth"
-	authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
-	clientapi "github.com/kubernetes/dashboard/src/app/backend/client/api"
-	"github.com/kubernetes/dashboard/src/app/backend/errors"
-	"github.com/kubernetes/dashboard/src/app/backend/integration"
-	metricapi "github.com/kubernetes/dashboard/src/app/backend/integration/metric/api"
-	"github.com/kubernetes/dashboard/src/app/backend/plugin"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/clusterrole"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/clusterrolebinding"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/common"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/configmap"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/container"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/controller"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/cronjob"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/customresourcedefinition"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/daemonset"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/dataselect"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/deployment"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/event"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/horizontalpodautoscaler"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/ingress"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/job"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/logs"
-	ns "github.com/kubernetes/dashboard/src/app/backend/resource/namespace"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/node"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/persistentvolume"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/persistentvolumeclaim"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/pod"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/replicaset"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/replicationcontroller"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/resourcequota"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/role"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/rolebinding"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/secret"
-	resourceService "github.com/kubernetes/dashboard/src/app/backend/resource/service"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/serviceaccount"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/statefulset"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/storageclass"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/tenant"
-	"github.com/kubernetes/dashboard/src/app/backend/scaling"
-	"github.com/kubernetes/dashboard/src/app/backend/settings"
-	settingsApi "github.com/kubernetes/dashboard/src/app/backend/settings/api"
-	"github.com/kubernetes/dashboard/src/app/backend/systembanner"
-	"github.com/kubernetes/dashboard/src/app/backend/validation"
-	"golang.org/x/net/xsrftoken"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/remotecommand"
+  restful "github.com/emicklei/go-restful"
+  "github.com/kubernetes/dashboard/src/app/backend/api"
+  "github.com/kubernetes/dashboard/src/app/backend/auth"
+  authApi "github.com/kubernetes/dashboard/src/app/backend/auth/api"
+  clientapi "github.com/kubernetes/dashboard/src/app/backend/client/api"
+  "github.com/kubernetes/dashboard/src/app/backend/errors"
+  "github.com/kubernetes/dashboard/src/app/backend/integration"
+  metricapi "github.com/kubernetes/dashboard/src/app/backend/integration/metric/api"
+  "github.com/kubernetes/dashboard/src/app/backend/plugin"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/clusterrole"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/clusterrolebinding"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/common"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/configmap"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/container"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/controller"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/cronjob"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/customresourcedefinition"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/daemonset"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/dataselect"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/deployment"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/event"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/horizontalpodautoscaler"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/ingress"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/job"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/logs"
+  ns "github.com/kubernetes/dashboard/src/app/backend/resource/namespace"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/node"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/persistentvolume"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/persistentvolumeclaim"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/pod"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/replicaset"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/replicationcontroller"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/resourcequota"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/role"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/rolebinding"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/secret"
+  resourceService "github.com/kubernetes/dashboard/src/app/backend/resource/service"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/serviceaccount"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/statefulset"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/storageclass"
+  "github.com/kubernetes/dashboard/src/app/backend/resource/tenant"
+  "github.com/kubernetes/dashboard/src/app/backend/scaling"
+  "github.com/kubernetes/dashboard/src/app/backend/settings"
+  settingsApi "github.com/kubernetes/dashboard/src/app/backend/settings/api"
+  "github.com/kubernetes/dashboard/src/app/backend/systembanner"
+  "github.com/kubernetes/dashboard/src/app/backend/validation"
+  "golang.org/x/net/xsrftoken"
+  v1 "k8s.io/api/core/v1"
+  "k8s.io/apimachinery/pkg/runtime"
+  "k8s.io/client-go/tools/remotecommand"
 )
 
 const (
@@ -5308,19 +5308,42 @@ func (apiHandler *APIHandlerV2) handleGetCustomResourceDefinitionList(request *r
 
 func (apiHandler *APIHandlerV2) handleGetCustomResourceDefinitionListWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
-	client := ResourceAllocator(tenant, apiHandler.tpManager)
-	apiextensionsclient, err := client.APIExtensionsClient(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
+	newrequest:= restful.NewRequest(&http.Request{})
 
-	dataSelect := parseDataSelectPathParameter(request)
-	result, err := customresourcedefinition.GetCustomResourceDefinitionList(apiextensionsclient, dataSelect)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
+	result:= new(customresourcedefinition.CustomResourceDefinitionList)
+	if tenant!="system" {
+    client := ResourceAllocator(tenant, apiHandler.tpManager)
+    apiextensionsclient, err := client.APIExtensionsClient(request)
+    if err != nil {
+      errors.HandleInternalError(response, err)
+      return
+    }
+
+    dataSelect := parseDataSelectPathParameter(request)
+    result, err = customresourcedefinition.GetCustomResourceDefinitionList(apiextensionsclient, dataSelect)
+    if err != nil {
+      errors.HandleInternalError(response, err)
+      return
+    }
+  } else {
+    for _,client := range apiHandler.tpManager{
+      apiextensionsclient, err := client.APIExtensionsClient(newrequest)
+      if err != nil {
+        errors.HandleInternalError(response, err)
+        return
+      }
+
+      dataSelect := parseDataSelectPathParameter(newrequest)
+      nresult, err := customresourcedefinition.GetCustomResourceDefinitionList(apiextensionsclient, dataSelect)
+      if err != nil {
+        errors.HandleInternalError(response, err)
+        return
+      }
+      result.Items = append(result.Items, nresult.Items...)
+      result.ListMeta.TotalItems += nresult.ListMeta.TotalItems
+      result.Errors = append(result.Errors, nresult.Errors...)
+    }
+  }
 
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
