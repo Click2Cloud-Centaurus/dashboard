@@ -58,7 +58,7 @@ export class CreateNamespaceDialog implements OnInit {
   createNamespace(): void {
     if (!this.form1.valid) return;
     const namespaceSpec = {name: this.namespace.value, tenant: this.currentTenant};
-    const tokenPromise = this.csrfToken_.getTokenForAction('namespace');
+    const tokenPromise = this.csrfToken_.getTokenForAction(this.currentTenant,'namespace');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(

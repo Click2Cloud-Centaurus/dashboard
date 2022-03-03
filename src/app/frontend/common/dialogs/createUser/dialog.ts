@@ -282,7 +282,7 @@ export class CreateUserDialog implements OnInit {
       }
 
 
-      const userTokenPromise = await this.csrfToken_.getTokenForAction('users');
+      const userTokenPromise = await this.csrfToken_.getTokenForAction(this.tenant.value,'users');
       userTokenPromise.subscribe(csrfToken => {
         return this.http_
           .post<{valid: boolean}>(
@@ -303,7 +303,7 @@ export class CreateUserDialog implements OnInit {
 
   createTenant(): void {
     const tenantSpec= {name: this.username.value,storageclusterid: this.storageclusterid.value};
-    const tokenPromise = this.csrfToken_.getTokenForAction('tenant');
+    const tokenPromise = this.csrfToken_.getTokenForAction('system','tenant');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(
@@ -335,7 +335,7 @@ export class CreateUserDialog implements OnInit {
     }
 
     const serviceAccountSpec= {name: this.username.value,namespace: this.namespaceUsed,tenant: this.tenantUsed};
-    const tokenPromise = this.csrfToken_.getTokenForAction('serviceaccounts');
+    const tokenPromise = this.csrfToken_.getTokenForAction(this.tenantUsed,'serviceaccounts');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(
@@ -370,7 +370,7 @@ export class CreateUserDialog implements OnInit {
 
   createClusterRole(): void {
     const clusterRoleSpec = {name:this.username.value, apiGroups:this.apiGroups, verbs:this.verbs, resources:this.resources};
-    const tokenPromise = this.csrfToken_.getTokenForAction('clusterrole');
+    const tokenPromise = this.csrfToken_.getTokenForAction(this.currentTenant,'clusterrole');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(
@@ -394,7 +394,7 @@ export class CreateUserDialog implements OnInit {
       this.adminroleUsed = this.username.value
     }
     const crbSpec= {name: this.username.value,namespace: this.namespaceUsed, subject: { kind: "ServiceAccount", name: this.username.value,  namespace : this.namespaceUsed, apiGroup : ""},role_ref:{kind: "ClusterRole",name: this.adminroleUsed,apiGroup: "rbac.authorization.k8s.io"}};
-    const tokenPromise = this.csrfToken_.getTokenForAction('clusterrolebinding');
+    const tokenPromise = this.csrfToken_.getTokenForAction('system','clusterrolebinding');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(
@@ -418,7 +418,7 @@ export class CreateUserDialog implements OnInit {
       this.namespaceUsed = this.selectednamespace
     }
     const roleBindingsSpec= {name: this.username.value,namespace: this.namespaceUsed,tenant:this.tenantUsed, subject: { kind: "ServiceAccount", name: this.username.value,  namespace : this.namespaceUsed, apiGroup : ""},role_ref:{kind: "Role",name: this.role.value,apiGroup: "rbac.authorization.k8s.io"}};
-    const tokenPromise = this.csrfToken_.getTokenForAction('rolebindings');
+    const tokenPromise = this.csrfToken_.getTokenForAction(this.tenantUsed,'rolebindings');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(

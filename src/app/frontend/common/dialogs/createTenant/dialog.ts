@@ -76,7 +76,7 @@ export class CreateTenantDialog implements OnInit {
     if (!this.form1.valid) return;
 
     const tenantSpec= {name: this.tenant.value,StorageClusterId: this.StorageClusterId.value};
-    const tokenPromise = this.csrfToken_.getTokenForAction('tenant');
+    const tokenPromise = this.csrfToken_.getTokenForAction(this.tenant.value,'tenant');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(

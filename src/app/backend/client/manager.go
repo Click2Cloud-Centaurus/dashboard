@@ -229,7 +229,7 @@ func (self *clientManager) CSRFKey() string {
 }
 
 // GetTenant gets the tenant name using the provided AuthInfo
-func (self *clientManager) GetTenant(authInfo api.AuthInfo, nameSpace string,tenant string) (string, error) {
+func (self *clientManager) GetTenant(authInfo api.AuthInfo, nameSpace string, tenant string) (string, error) {
 	cfg, err := self.buildConfigFromFlags(self.apiserverHost, self.kubeConfigPath)
 	if err != nil {
 		return "", err
@@ -247,14 +247,14 @@ func (self *clientManager) GetTenant(authInfo api.AuthInfo, nameSpace string,ten
 	}
 
 	// Get the tenant name from default namespace.
-  _, err = client.CoreV1().PodsWithMultiTenancy(nameSpace,tenant).List(metaV1.ListOptions{})
-  if err==nil{
-    return tenant, nil
-  }
+	_, err = client.CoreV1().PodsWithMultiTenancy(nameSpace, tenant).List(metaV1.ListOptions{})
+	if err == nil {
+		return tenant, nil
+	}
 	result, err := client.CoreV1().NamespacesWithMultiTenancy("").Get(nameSpace, metaV1.GetOptions{})
 	if err != nil {
-    log.Printf("list namespace failed: %s",err.Error())
-  }
+		log.Printf("list namespace failed: %s", err.Error())
+	}
 	tenant = result.ObjectMeta.Tenant
 	return tenant, err
 }
@@ -388,10 +388,8 @@ func (self *clientManager) extractAuthInfo(req *restful.Request) (*api.AuthInfo,
 	}
 
 	if self.tokenManager != nil && len(jweToken) > 0 {
-	  log.Printf("tokenmanagermila %v","de")
 		return self.tokenManager.Decrypt(jweToken)
 	}
-  log.Printf("tokenmanager nahi mila %v","de")
 
 	return nil, errors.NewUnauthorized(errors.MsgLoginUnauthorizedError)
 }

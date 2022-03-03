@@ -136,7 +136,7 @@ export class assignQuotaDialog implements OnInit {
       ephemeral_storage: this.ephemeral_storage.value,
     };
 
-    const tokenPromise = this.csrfToken_.getTokenForAction('resourcequota');
+    const tokenPromise = this.csrfToken_.getTokenForAction(this.tenants.value,'resourcequota');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(

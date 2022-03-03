@@ -126,7 +126,7 @@ export class CreateRoleDialog implements OnInit {
     this.verbs1 = this.verbs.value.split(',')
 
     const roleSpec = {name: this.role.value, tenant: this.currentTenant, namespace: this.namespace.value, apiGroups: this.apiGroups1,verbs: this.verbs1,resources: this.resources1};
-    const tokenPromise = this.csrfToken_.getTokenForAction('roles');
+    const tokenPromise = this.csrfToken_.getTokenForAction(roleSpec.tenant,'roles');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(

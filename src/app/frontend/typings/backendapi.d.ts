@@ -736,6 +736,7 @@ export interface LoginSpec {
   password: string;
   token: string;
   kubeconfig: string;
+  tenant: string;
 }
 
 export interface LoginStatus {
@@ -1256,6 +1257,7 @@ export interface LoginSpec {
   password: string;
   token: string;
   kubeConfig: string;
+  tenant: string;
 }
 
 export interface AuthResponse {

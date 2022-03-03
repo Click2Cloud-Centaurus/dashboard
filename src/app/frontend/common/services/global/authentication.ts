@@ -94,7 +94,7 @@ export class AuthService {
    */
   login(loginSpec: LoginSpec): Observable<K8SError[]> {
     return this.csrfTokenService_
-      .getTokenForAction('login')
+      .getTokenForAction(loginSpec.tenant,'login')
       .pipe(
         switchMap((csrfToken: CsrfToken) =>
           this.http_.post<AuthResponse>('api/v1/login', loginSpec, {
@@ -129,7 +129,7 @@ export class AuthService {
     if (token.length === 0) return;
 
     this.csrfTokenService_
-      .getTokenForAction('token')
+      .getTokenForAction(this.getTenant_(),'token')
       .pipe(
         switchMap(csrfToken => {
           return this.http_.post<AuthResponse>(

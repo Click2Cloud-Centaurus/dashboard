@@ -29,6 +29,8 @@ type TenantSpec struct {
 	// Name of the tenant.
 	Name             string `json:"name"`
 	StorageClusterId string `json:"storageclusterid"` // Storage Cluster Id of the Tenant
+	Username         string `json:"username"`         // Username of the Tenant
+	Password         string `json:"password"`         // Password of the Tenant
 }
 
 // CreateTenant creates tenant based on given specification.
