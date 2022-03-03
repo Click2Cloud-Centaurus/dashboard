@@ -30,6 +30,7 @@ import {MenuComponent} from '../../list/column/menu/component';
 export class NetworkObjectListComponent extends ResourceListBase<NetworkObjectList, NetworkObject> {
   @Input() endpoint: string;
   @Input() networkName: string;
+  networkObjectKind: string;
 
   constructor(
     private readonly networkObject_: NamespacedResourceService<NetworkObjectList>,
@@ -49,6 +50,7 @@ export class NetworkObjectListComponent extends ResourceListBase<NetworkObjectLi
   }
 
   map(networkObjectList: NetworkObjectList): NetworkObject[] {
+    this.networkObjectKind = networkObjectList.typeMeta.kind.split("List")[0]+"s"
     return networkObjectList.items;
   }
 
