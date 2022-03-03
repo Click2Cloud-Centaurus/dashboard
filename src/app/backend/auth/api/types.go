@@ -129,6 +129,7 @@ type LoginSpec struct {
 	// Kubeconfig can not contain any paths. All data has to be provided within the file.
 	KubeConfig string `json:"kubeconfig,omitempty"`
 	NameSpace  string `json:"namespace,omitempty"`
+  Tenant     string `json:"tenant,omitempty"`
 }
 
 // AuthResponse is returned from our backend as a response for login/refresh requests. It contains generated JWEToken

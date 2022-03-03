@@ -229,7 +229,7 @@ func (self *clientManager) CSRFKey() string {
 }
 
 // GetTenant gets the tenant name using the provided AuthInfo
-func (self *clientManager) GetTenant(authInfo api.AuthInfo, nameSpace string) (string, error) {
+func (self *clientManager) GetTenant(authInfo api.AuthInfo, nameSpace string,tenant string) (string, error) {
 	cfg, err := self.buildConfigFromFlags(self.apiserverHost, self.kubeConfigPath)
 	if err != nil {
 		return "", err
@@ -247,8 +247,12 @@ func (self *clientManager) GetTenant(authInfo api.AuthInfo, nameSpace string) (s
 	}
 
 	// Get the tenant name from default namespace.
+  _, err = client.CoreV1().PodsWithMultiTenancy(nameSpace,tenant).List(metaV1.ListOptions{})
+  if err==nil{
+    return tenant, nil
+  }
 	result, err := client.CoreV1().NamespacesWithMultiTenancy("").Get(nameSpace, metaV1.GetOptions{})
-	tenant := result.ObjectMeta.Tenant
+	tenant = result.ObjectMeta.Tenant
 	return tenant, err
 }
 
@@ -350,7 +354,7 @@ func (self *clientManager) extractAuthInfo(req *restful.Request) (*api.AuthInfo,
 	authHeader := req.HeaderParameter("Authorization")
 	impersonationHeader := req.HeaderParameter("Impersonate-User")
 	jweToken := req.HeaderParameter(JWETokenHeader)
-
+  log.Printf("Header laya: %s %s %s",authHeader,impersonationHeader,"roshan")
 	// Authorization header will be more important than our token
 	token := self.extractTokenFromHeader(authHeader)
 	if len(token) > 0 {
@@ -382,8 +386,10 @@ func (self *clientManager) extractAuthInfo(req *restful.Request) (*api.AuthInfo,
 	}
 
 	if self.tokenManager != nil && len(jweToken) > 0 {
+	  log.Printf("tokenmanagermila %v","de")
 		return self.tokenManager.Decrypt(jweToken)
 	}
+  log.Printf("tokenmanager nahi mila %v","de")
 
 	return nil, errors.NewUnauthorized(errors.MsgLoginUnauthorizedError)
 }
@@ -421,11 +427,14 @@ func (self *clientManager) isSecureModeEnabled(req *restful.Request) bool {
 func (self *clientManager) secureClient(req *restful.Request) (kubernetes.Interface, error) {
 	cfg, err := self.secureConfig(req)
 	if err != nil {
+    log.Printf("roshan-error-1")
 		return nil, err
+
 	}
 
 	client, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
+    log.Printf("roshan-error-2")
 		return nil, err
 	}
 
@@ -464,12 +473,14 @@ func (self *clientManager) secureConfig(req *restful.Request) (*rest.Config, err
 	cmdConfig, err := self.ClientCmdConfig(req)
 	if err != nil {
 		log.Println("ClientCmdConfig Failed")
+    log.Printf("roshan-error-3")
 		return nil, err
 	}
 
 	cfg, err := cmdConfig.ClientConfig()
 	if err != nil {
 		return nil, err
+    log.Printf("roshan-error-4")
 	}
 
 	self.initConfig(cfg)

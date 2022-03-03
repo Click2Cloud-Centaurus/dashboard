@@ -50,11 +50,14 @@ func (self authManager) Login(spec *authApi.LoginSpec) (*authApi.AuthResponse, e
 		err = nil
 	}
 
-	tenant, err := self.GetTenant(authInfo, spec.NameSpace)
+	tenant, err := self.GetTenant(authInfo, spec.NameSpace,spec.Tenant)
 	nonCriticalErrors, criticalError = errors.HandleError(err)
 	if criticalError != nil || len(nonCriticalErrors) > 0 {
 		return &authApi.AuthResponse{Errors: nonCriticalErrors}, criticalError
 	}
+	if tenant==""{
+	  tenant=spec.Tenant
+  }
 
 	token, err := self.tokenManager.Generate(authInfo)
 	if err != nil {
@@ -102,8 +105,8 @@ func (self authManager) healthCheck(authInfo api.AuthInfo) error {
 }
 
 // Get the tenant name from the provided AuthInfo
-func (self authManager) GetTenant(authInfo api.AuthInfo, nameSpace string) (string, error) {
-	return self.clientManager.GetTenant(authInfo, nameSpace)
+func (self authManager) GetTenant(authInfo api.AuthInfo, nameSpace string,tenant string) (string, error) {
+	return self.clientManager.GetTenant(authInfo, nameSpace,tenant)
 }
 
 // NewAuthManager creates auth manager.

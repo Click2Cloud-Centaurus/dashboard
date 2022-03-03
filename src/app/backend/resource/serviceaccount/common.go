@@ -37,11 +37,14 @@ type ServiceAccountSpec struct {
 // CreateServiceAccount creates Service Account based on given specification.
 func CreateServiceAccount(spec *ServiceAccountSpec, client kubernetes.Interface) error {
 	log.Printf("Creating Service-account %s", spec.Name)
-
+if spec.Tenant==""{
+  spec.Tenant="default"
+}
 	serviceaccount := &v1.ServiceAccount{
 		ObjectMeta: metaV1.ObjectMeta{
 			Name:      spec.Name,
 			Namespace: spec.Namespace,
+			Tenant: spec.Tenant,
 		},
 	}
 

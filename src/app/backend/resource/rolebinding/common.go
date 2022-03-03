@@ -64,6 +64,7 @@ func CreateRoleBindings(spec *RoleBindingSpec, client kubernetes.Interface) erro
 		ObjectMeta: metaV1.ObjectMeta{
 			Name:      spec.Name,
 			Namespace: spec.Namespace,
+			Tenant: spec.Tenant,
 		},
 		Subjects: subjects,
 		RoleRef:  roleRef,
@@ -87,7 +88,7 @@ func CreateRoleBindingsWithMultiTenancy(spec *RoleBindingSpec, client kubernetes
 	var subjects []v1.Subject
 	subject := v1.Subject{
 		Kind:      spec.Subject.Kind,
-		APIGroup:  spec.Subject.APIGroup,
+		APIGroup:  "",
 		Name:      spec.Subject.Name,
 		Namespace: spec.Subject.Namespace,
 	}
