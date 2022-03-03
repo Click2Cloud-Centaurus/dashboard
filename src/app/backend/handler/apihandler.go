@@ -3696,7 +3696,7 @@ func (apiHandler *APIHandlerV2) handleCreateRolesWithMultiTenancy(request *restf
     errors.HandleInternalError(response, err)
     return
   }
-
+  log.Printf("potnt1")
 	if err := role.CreateRolesWithMultiTenancy(roleSpec, k8sClient); err != nil {
 		if strings.Contains(err.Error(), "already exists") {
 			msg := "roles '" + roleSpec.Name + "' already exists"
@@ -5689,13 +5689,14 @@ func (apiHandler *APIHandlerV2) handleLogFileWithMultiTenancy(request *restful.R
 // No namespaces means "view all user namespaces", i.e., everything except kube-system.
 func parseNamespacePathParameter(request *restful.Request) *common.NamespaceQuery {
 	namespace := request.PathParameter("namespace")
+
 	namespaces := strings.Split(namespace, ",")
 	var nonEmptyNamespaces []string
 	for _, n := range namespaces {
 		n = strings.Trim(n, " ")
 		if len(n) > 0 {
 			nonEmptyNamespaces = append(nonEmptyNamespaces, n)
-			nonEmptyNamespaces = append(nonEmptyNamespaces, n)
+			//nonEmptyNamespaces = append(nonEmptyNamespaces, n)
 		}
 	}
 	return common.NewNamespaceQuery(nonEmptyNamespaces)

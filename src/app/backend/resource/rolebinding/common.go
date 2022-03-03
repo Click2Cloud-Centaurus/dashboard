@@ -83,7 +83,7 @@ func DeleteRoleBindings(namespaceName string, rolebindingName string, client kub
 
 // CreateRoleBindingsWithMultiTenancy creates role-binding based on given specification.
 func CreateRoleBindingsWithMultiTenancy(spec *RoleBindingSpec, client kubernetes.Interface) error {
-	log.Printf("Creating Role-binding %s", spec.Name)
+	log.Printf("Creating Role-binding %v", spec)
 
 	var subjects []v1.Subject
 	subject := v1.Subject{

@@ -16,19 +16,19 @@
 package common
 
 import (
-	"github.com/kubernetes/dashboard/src/app/backend/api"
-	apps "k8s.io/api/apps/v1"
-	autoscaling "k8s.io/api/autoscaling/v1"
-	batch "k8s.io/api/batch/v1"
-	batch2 "k8s.io/api/batch/v1beta1"
-	v1 "k8s.io/api/core/v1"
-	extensions "k8s.io/api/extensions/v1beta1"
-	rbac "k8s.io/api/rbac/v1"
-	storage "k8s.io/api/storage/v1"
-	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	client "k8s.io/client-go/kubernetes"
+  "github.com/kubernetes/dashboard/src/app/backend/api"
+  apps "k8s.io/api/apps/v1"
+  autoscaling "k8s.io/api/autoscaling/v1"
+  batch "k8s.io/api/batch/v1"
+  batch2 "k8s.io/api/batch/v1beta1"
+  v1 "k8s.io/api/core/v1"
+  extensions "k8s.io/api/extensions/v1beta1"
+  rbac "k8s.io/api/rbac/v1"
+  storage "k8s.io/api/storage/v1"
+  apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+  apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+  metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+  client "k8s.io/client-go/kubernetes"
 )
 
 // ResourceChannels struct holds channels to resource lists. Each list channel is paired with

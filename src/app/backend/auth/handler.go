@@ -121,7 +121,6 @@ func (self *AuthHandler) handleJWETokenRefresh(request *restful.Request, respons
 	}
 	var refreshedJWEToken string
 	var err error
-	log.Printf("refreshing token for user %s","roshan")
 	for _, authmanager := range self.manager {
     refreshedJWEToken, err = authmanager.Refresh(tokenRefreshSpec.JWEToken)
     if err == nil {
