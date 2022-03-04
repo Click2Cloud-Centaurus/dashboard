@@ -5297,7 +5297,7 @@ func (apiHandler *APIHandlerV2) handleGetCustomResourceDefinitionList(request *r
 	}
 
 	dataSelect := parseDataSelectPathParameter(request)
-	result, err := customresourcedefinition.GetCustomResourceDefinitionList(apiextensionsclient, dataSelect)
+	result, err := customresourcedefinition.GetCustomResourceDefinitionList(apiextensionsclient, dataSelect, client.GetClusterName())
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -5320,7 +5320,7 @@ func (apiHandler *APIHandlerV2) handleGetCustomResourceDefinitionListWithMultiTe
     }
 
     dataSelect := parseDataSelectPathParameter(request)
-    result, err = customresourcedefinition.GetCustomResourceDefinitionList(apiextensionsclient, dataSelect)
+    result, err = customresourcedefinition.GetCustomResourceDefinitionList(apiextensionsclient, dataSelect, client.GetClusterName())
     if err != nil {
       errors.HandleInternalError(response, err)
       return
@@ -5334,7 +5334,7 @@ func (apiHandler *APIHandlerV2) handleGetCustomResourceDefinitionListWithMultiTe
       }
 
       dataSelect := parseDataSelectPathParameter(newrequest)
-      nresult, err := customresourcedefinition.GetCustomResourceDefinitionList(apiextensionsclient, dataSelect)
+      nresult, err := customresourcedefinition.GetCustomResourceDefinitionList(apiextensionsclient, dataSelect, client.GetClusterName())
       if err != nil {
         errors.HandleInternalError(response, err)
         return

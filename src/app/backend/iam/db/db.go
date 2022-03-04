@@ -40,14 +40,13 @@ func CreateConnection() *sql.DB {
 	db, err := sql.Open("postgres", connStr)
 
 	if err != nil {
-		panic(err)
-	}
-
+    log.Fatalf("Error opening database: %q", err)
+  }
 	// check the connection
 	err = db.Ping()
 
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error connecting to the database: %s", err)
 	}
 
 	fmt.Println("Successfully connected!")
