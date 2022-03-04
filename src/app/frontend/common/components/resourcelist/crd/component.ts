@@ -58,14 +58,7 @@ export class CRDListComponent extends ResourceListWithStatuses<CRDList, CRD> {
   }
 
   map(crdList: CRDList): CRD[] {
-    const crdLists:CRD[] = [];
-    crdList.items.map((crd)=>{
-      if (crd.names.kind !== 'Network' && crd.group !== 'mizar.com') {
-        crdLists.push(crd)
-      }
-    })
-    this.totalItems = crdLists.length
-    return crdLists;
+    return crdList.items;
   }
 
   isInErrorState(resource: CRD): boolean {
@@ -81,10 +74,10 @@ export class CRDListComponent extends ResourceListWithStatuses<CRDList, CRD> {
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'group', 'fullName', 'namespaced', 'age'];
+    return ['statusicon','clusterName', 'name', 'group', 'fullName', 'namespaced',  'age'];
   }
 
   getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'group', 'fullName', 'namespaced', 'age'];
+    return ['statusicon','clusterName', 'name', 'group', 'fullName', 'namespaced',  'age'];
   }
 }

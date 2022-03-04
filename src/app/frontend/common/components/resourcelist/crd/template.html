@@ -57,23 +57,29 @@ limitations under the License.
 
       <ng-container [matColumnDef]="getColumns()[2]">
         <mat-header-cell *matHeaderCellDef
+                         i18n>Cluster Name</mat-header-cell>
+        <mat-cell *matCellDef="let crd">{{crd.clusterName}}</mat-cell>
+      </ng-container>
+
+      <ng-container [matColumnDef]="getColumns()[3]">
+        <mat-header-cell *matHeaderCellDef
                          i18n>Group</mat-header-cell>
         <mat-cell *matCellDef="let crd">{{crd.group}}</mat-cell>
       </ng-container>
 
-      <ng-container [matColumnDef]="getColumns()[3]">
+      <ng-container [matColumnDef]="getColumns()[4]">
         <mat-header-cell *matHeaderCellDef
                          i18n>Full Name</mat-header-cell>
         <mat-cell *matCellDef="let crd">{{crd.objectMeta.name}}</mat-cell>
       </ng-container>
 
-      <ng-container [matColumnDef]="getColumns()[4]">
+      <ng-container [matColumnDef]="getColumns()[5]">
         <mat-header-cell *matHeaderCellDef
                          i18n>Namespaced</mat-header-cell>
         <mat-cell *matCellDef="let crd">{{isNamespaced(crd)}}</mat-cell>
       </ng-container>
 
-      <ng-container [matColumnDef]="getColumns()[5]">
+      <ng-container [matColumnDef]="getColumns()[6]">
         <mat-header-cell *matHeaderCellDef
                          mat-sort-header
                          disableClear="true"
