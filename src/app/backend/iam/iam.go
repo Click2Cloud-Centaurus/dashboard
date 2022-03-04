@@ -262,7 +262,7 @@ func TenantAdmin(user model.User, client clientapi.ClientManager) (model.User, e
 		Username: user.Username,
 		Password: user.Password,
 		Token:    string(token),
-		Type:     user.Type,
+		Type:     "tenant-admin",
 		Tenant:   user.Tenant,
 		//Role:              clusterRoleName,
 		NameSpace:         "default",
