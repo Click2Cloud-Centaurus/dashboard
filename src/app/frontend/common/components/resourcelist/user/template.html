@@ -55,7 +55,10 @@
                                matSortDirection="asc"
                                i18n>Tenant</mat-header-cell>
               <mat-cell *matCellDef="let user">
+                <a routerLink="/tenant/{{user.objectMeta.tenant}}"
+                   queryParamsHandling="preserve">
                   {{user.objectMeta.tenant}}
+                </a>
               </mat-cell>
             </ng-container>
 
