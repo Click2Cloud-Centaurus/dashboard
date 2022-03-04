@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2017 The Kubernetes Authors.
+# Copyright 2019 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,9 @@ if [[ -n "${K8S_DASHBOARD_NPM_CMD}" ]] ; then
     --centaurus-dashboard:sidecar_host=${K8S_DASHBOARD_SIDECAR_HOST} \
     --centaurus-dashboard:port=${K8S_DASHBOARD_PORT}
 else
+  # Install dashboard.
+  echo "Install dashboard"
+  npm ci
   if [[ "${K8S_OWN_CLUSTER}" != true ]] ; then
     # Stop cluster.
     echo "Stop cluster"

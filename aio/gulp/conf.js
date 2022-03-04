@@ -41,9 +41,9 @@ const arch = {
  * Configuration for container registry to push images to.
  */
 const containerRegistry = {
-  release: 'c2cengg20190034',
+  release: 'centaurusui',
   /** Default to an environment variable */
-  head: 'c2cengg20190034',
+  head: 'centaurusdashboarddev',
 };
 
 /**
