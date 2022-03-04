@@ -48,18 +48,26 @@
               </mat-cell>
             </ng-container>
 
-            <ng-container [matColumnDef]="getColumns()[4]">
+            <ng-container [matColumnDef]="getColumns()[2]">
               <mat-header-cell *matHeaderCellDef
                                mat-sort-header
                                disableClear="true"
-                               i18n>Age</mat-header-cell>
+                               matSortDirection="asc"
+                               i18n>Tenant</mat-header-cell>
               <mat-cell *matCellDef="let user">
-                <kd-date [date]="user.objectMeta.creationTimestamp"
-                         relative></kd-date>
+                  {{user.objectMeta.tenant}}
               </mat-cell>
             </ng-container>
 
-            <ng-container [matColumnDef]="getColumns()[5]">
+            <ng-container [matColumnDef]="getColumns()[3]">
+              <mat-header-cell *matHeaderCellDef
+                               i18n>Type</mat-header-cell>
+              <mat-cell *matCellDef="let user">
+                {{user.objectMeta.type}}
+              </mat-cell>
+            </ng-container>
+
+            <ng-container [matColumnDef]="getColumns()[4]">
               <mat-header-cell *matHeaderCellDef
                                mat-sort-header
                                disableClear="true"
@@ -72,17 +80,20 @@
               </mat-cell>
             </ng-container>
 
-            <ng-container [matColumnDef]="getColumns()[2]">
+            <ng-container [matColumnDef]="getColumns()[5]">
               <mat-header-cell *matHeaderCellDef
                                i18n>Phase</mat-header-cell>
               <mat-cell *matCellDef="let user">{{user.phase}}</mat-cell>
             </ng-container>
 
-            <ng-container [matColumnDef]="getColumns()[3]">
+            <ng-container [matColumnDef]="getColumns()[6]">
               <mat-header-cell *matHeaderCellDef
-                               i18n>Type</mat-header-cell>
+                               mat-sort-header
+                               disableClear="true"
+                               i18n>Age</mat-header-cell>
               <mat-cell *matCellDef="let user">
-                {{user.objectMeta.type}}
+                <kd-date [date]="user.objectMeta.creationTimestamp"
+                         relative></kd-date>
               </mat-cell>
             </ng-container>
 
