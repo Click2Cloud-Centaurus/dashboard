@@ -1,4 +1,3 @@
-
 import {Component, OnInit, Inject} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
@@ -14,6 +13,7 @@ import Swal from "sweetalert2/dist/sweetalert2.js";
 export interface CreateTenantDialogMeta {
   tenants: string[];
   StorageClusterId: string []
+
 }
 
 @Component({
@@ -27,6 +27,12 @@ export class CreateTenantDialog implements OnInit {
 
   tenantMaxLength = 24;
   tenantPattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
+
+  usernameMaxLength = 24;
+  usernamePattern: RegExp = new RegExp('^[a-z0-9]([-a-z-0-9]*[a-z0-9])?$');
+
+  passwordMaxLength = 20;
+  passwordPattern: RegExp = new RegExp('^[a-z\\A-Z\\0-9\\d_@.#$=!%^~)(\\]:\\*;\\?\\/\\,}{\'\\|<>\\[&\\+-]*$');
 
   storageidMaxLength =3;
   storageidPattern: RegExp = new RegExp('^[0-9]*$');
@@ -59,6 +65,22 @@ export class CreateTenantDialog implements OnInit {
             Validators.pattern(this.storageidPattern),
           ]),
         ],
+      username :[
+        '',
+        Validators.compose([
+          Validators.required,
+          Validators.maxLength(this.usernameMaxLength),
+          Validators.pattern(this.usernamePattern),
+        ]),
+      ],
+      password :[
+        '',
+        Validators.compose([
+          Validators.required,
+          Validators.maxLength(this.passwordMaxLength),
+          Validators.pattern(this.passwordPattern),
+        ]),
+      ],
       },
     );
   }
@@ -70,12 +92,19 @@ export class CreateTenantDialog implements OnInit {
   get StorageClusterId(): AbstractControl {
     return this.form1.get('StorageClusterId')
   }
+  get username(): AbstractControl {
+    return this.form1.get('username')
+  }
+  get password(): AbstractControl{
+    return this.form1.get('password')
+  }
+
 
 
   createTenant(): void {
     if (!this.form1.valid) return;
 
-    const tenantSpec= {name: this.tenant.value,StorageClusterId: this.StorageClusterId.value};
+    const tenantSpec= {name: this.tenant.value,StorageClusterId: this.StorageClusterId.value,username: this.username.value,password: this.password.value};
     const tokenPromise = this.csrfToken_.getTokenForAction(this.tenant.value,'tenant');
     tokenPromise.subscribe(csrfToken => {
       return this.http_

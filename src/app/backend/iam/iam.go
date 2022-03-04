@@ -17,9 +17,9 @@ package iam
 
 import (
 	"errors"
-  clientapi "github.com/kubernetes/dashboard/src/app/backend/client/api"
-  "github.com/kubernetes/dashboard/src/app/backend/resource/clusterrole"
-  "log"
+	clientapi "github.com/kubernetes/dashboard/src/app/backend/client/api"
+	"github.com/kubernetes/dashboard/src/app/backend/resource/clusterrole"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -162,116 +162,114 @@ func CreateClusterAdmin() error {
 	return nil
 }
 
+func TenantAdmin(user model.User, client clientapi.ClientManager) (model.User, error) {
+	const namespace = "default"
+	var clusterRoleName = user.Tenant + "-" + "role"
+	var saName = user.Tenant + "-sa"
+	//clientManager := client.NewClientManager(args.Holder.GetKubeConfigFile(), args.Holder.GetApiServerHost())
 
-func TenantAdmin(user model.User, client clientapi.ClientManager ) (model.User, error) {
-  const namespace = "default"
-  var clusterRoleName = user.Tenant +"-"+"role"
-var saName = user.Tenant +"-sa"
-  //clientManager := client.NewClientManager(args.Holder.GetKubeConfigFile(), args.Holder.GetApiServerHost())
+	// TODO Check if centaurus-dashboard namespace exists or not using GET method
+	k8sClient := client.InsecureClient()
 
-  // TODO Check if centaurus-dashboard namespace exists or not using GET method
-  k8sClient := client.InsecureClient()
+	// Create tenant
 
-  // Create tenant
+	// Create Service Account
+	serviceAccountSpec := new(serviceaccount.ServiceAccountSpec)
+	serviceAccountSpec.Name = saName
+	serviceAccountSpec.Namespace = "default"
+	serviceAccountSpec.Tenant = "system"
+	if err := serviceaccount.CreateServiceAccount(serviceAccountSpec, k8sClient); err != nil {
+		log.Printf("Create service account for admin user failed, err:%s ", err.Error())
+		//return err
+	}
 
+	// Create Cluster Role
+	var verbs []string
+	var apiGroups []string
+	var resources []string
+	verbs = append(verbs, "*")
+	//apiGroups = append(apiGroups, "", "extensions", "apps")
+	//resources = append(resources, "deployments", "pods", "services", "secrets", "namespaces")
+	apiGroups = append(apiGroups, "*")
+	resources = append(resources, "*")
+	clusterRoleSpec := &clusterrole.ClusterRoleSpec{
+		Name:      user.Tenant + "-" + "role",
+		Verbs:     verbs,
+		APIGroups: apiGroups,
+		Resources: resources,
+	}
+	//
+	if err := clusterrole.CreateClusterRole(clusterRoleSpec, k8sClient); err != nil {
+		log.Printf("Create cluster role for admin user failed, err:%s ", err.Error())
+		return user, err
+	}
 
-  // Create Service Account
-  serviceAccountSpec := new(serviceaccount.ServiceAccountSpec)
-  serviceAccountSpec.Name = saName
-  serviceAccountSpec.Namespace = "default"
-  serviceAccountSpec.Tenant="system"
-  if err := serviceaccount.CreateServiceAccount(serviceAccountSpec, k8sClient); err != nil {
-    log.Printf("Create service account for admin user failed, err:%s ", err.Error())
-    //return err
-  }
+	// Create Cluster Role Binding
+	clusterRoleBindingSpec := &clusterrolebinding.ClusterRoleBindingSpec{
+		Name: saName + "-rb",
+		Subject: rbac.Subject{
+			Kind:      "ServiceAccount",
+			APIGroup:  "",
+			Name:      saName,
+			Namespace: "default",
+		},
+		RoleRef: rbac.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "ClusterRole",
+			Name:     clusterRoleName,
+		},
+	}
+	if err := clusterrolebinding.CreateClusterRoleBindings(clusterRoleBindingSpec, k8sClient); err != nil {
+		log.Printf("Create cluster role binding for admin user failed, err:%s ", err.Error())
+		return user, err
+	}
 
-  // Create Cluster Role
-  var verbs []string
-  var apiGroups []string
-  var resources []string
-  verbs = append(verbs, "*")
-  //apiGroups = append(apiGroups, "", "extensions", "apps")
-  //resources = append(resources, "deployments", "pods", "services", "secrets", "namespaces")
-  apiGroups = append(apiGroups, "*")
-  resources = append(resources, "*")
-  clusterRoleSpec := &clusterrole.ClusterRoleSpec{
-  	Name:      user.Tenant+"-"+"role",
-  	Verbs:     verbs,
-  	APIGroups: apiGroups,
-  	Resources: resources,
-  }
-  //
-  if err := clusterrole.CreateClusterRole(clusterRoleSpec, k8sClient); err != nil {
-  	log.Printf("Create cluster role for admin user failed, err:%s ", err.Error())
-  	return user,err
-  }
+	// Get Token
+	var found = false
+	var retrial = 0
+	var token []byte
+	for {
+		if retrial == 4 && !found {
+			break
+		}
+		secretList, err := k8sClient.CoreV1().SecretsWithMultiTenancy(namespace, "").List(api.ListEverything)
+		if err != nil {
+			log.Printf("Get secret for admin user failed, err:%s \n", err.Error())
+			return user, errors.New("secret not found for admin user")
+		}
 
-  // Create Cluster Role Binding
-  clusterRoleBindingSpec := &clusterrolebinding.ClusterRoleBindingSpec{
-    Name: saName+"-rb",
-    Subject: rbac.Subject{
-      Kind:      "ServiceAccount",
-      APIGroup:  "",
-      Name:      saName,
-      Namespace: "default",
-    },
-    RoleRef: rbac.RoleRef{
-      APIGroup: "rbac.authorization.k8s.io",
-      Kind:     "ClusterRole",
-      Name:     clusterRoleName,
-    },
-  }
-  if err := clusterrolebinding.CreateClusterRoleBindings(clusterRoleBindingSpec, k8sClient); err != nil {
-    log.Printf("Create cluster role binding for admin user failed, err:%s ", err.Error())
-    return user,err
-  }
+		for _, secret := range secretList.Items {
+			checkName := strings.Contains(secret.Name, saName)
+			if secret.Namespace == namespace && checkName {
+				token = secret.Data["token"]
+				found = true
+				break
+			}
+		}
+		if found {
+			break
+		}
+		time.Sleep(1)
+	}
+	if !found && retrial == 4 {
+		log.Printf("Get token for admin user failed after 3 retrial, err:%s \n", "Get token failed")
+		return user, nil
+	}
 
-  // Get Token
-  var found = false
-  var retrial = 0
-  var token []byte
-  for {
-    if retrial == 4 && !found {
-      break
-    }
-    secretList, err := k8sClient.CoreV1().SecretsWithMultiTenancy(namespace, "").List(api.ListEverything)
-    if err != nil {
-      log.Printf("Get secret for admin user failed, err:%s \n", err.Error())
-      return user,errors.New("secret not found for admin user")
-    }
+	// Create User and enter data into DB
+	user2 := model.User{
+		ID:       0,
+		Username: user.Username,
+		Password: user.Password,
+		Token:    string(token),
+		Type:     user.Type,
+		Tenant:   user.Tenant,
+		//Role:              clusterRoleName,
+		NameSpace:         "default",
+		CreationTimestamp: time.Now(),
+	}
 
-    for _, secret := range secretList.Items {
-      checkName := strings.Contains(secret.Name, saName)
-      if secret.Namespace == namespace && checkName {
-        token = secret.Data["token"]
-        found = true
-        break
-      }
-    }
-    if found {
-      break
-    }
-    time.Sleep(1)
-  }
-  if !found && retrial == 4 {
-    log.Printf("Get token for admin user failed after 3 retrial, err:%s \n", "Get token failed")
-    return user,nil
-  }
-
-  // Create User and enter data into DB
-  user2 := model.User{
-    ID:                0,
-    Username:          user.Username,
-    Password:          user.Password,
-    Token:             string(token),
-    Type:              user.Type,
-    Tenant:           user.Tenant,
-    Role:              clusterRoleName,
-    NameSpace:         "default",
-    CreationTimestamp: time.Now(),
-  }
-
-  // call insertUser function and pass the user data
-log.Printf("Created tenant admin successfully : %s", user2.Username)
-  return user2, nil
+	// call insertUser function and pass the user data
+	log.Printf("Created tenant admin successfully : %s", user2.Username)
+	return user2, nil
 }

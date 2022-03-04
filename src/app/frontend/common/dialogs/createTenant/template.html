@@ -28,6 +28,29 @@
         <span class="red" *ngIf="StorageClusterId.hasError('maxlength')">StorageClusterid should not be greater than 3 digits.</span>
       </div>
     </div>
+    <div class="col-10 col-sm-10 col-md-10 col-lg-10">
+      <mat-form-field appearance="fill">
+        <mat-label>Username</mat-label>
+        <input matInput type="text" formControlName="username" required autocomplete="off"/>
+      </mat-form-field>
+      <div class="error_sec" *ngIf="username.errors && (username.dirty || username.touched)">
+        <span class="red" *ngIf="username.errors.required">Name is required.</span>
+        <span class="red" *ngIf="username.hasError('pattern')">Name must be alphanumeric and may contain dashes.</span>
+        <span class="red" *ngIf="username.hasError('maxlength')">Name should not be greater than 24 characters.</span>
+      </div>
+    </div>
+    <div class="col-10 col-sm-10 col-md-10 col-lg-10">
+      <mat-form-field appearance="fill">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" required autocomplete="off"/>
+      </mat-form-field>
+      <div class="error_sec" *ngIf="password.errors && (password.dirty || password.touched)">
+        <span class="red" *ngIf="password.errors.required">Name is required.</span>
+        <span class="red" *ngIf="password.hasError('pattern')">Name must be alphanumeric and may contain dashes.</span>
+        <span class="red" *ngIf="password.hasError('maxlength')">Name should not be greater than 24 characters.</span>
+      </div>
+    </div>
+
   </div>
   <div class="row">
     <div class="col-10 col-sm-10 col-md-10 col-lg-10">
