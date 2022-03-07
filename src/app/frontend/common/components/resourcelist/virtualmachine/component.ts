@@ -87,11 +87,6 @@ export class VirtualMachineListComponent extends ResourceListWithStatuses<Virtua
     return ['statusicon', 'name', 'image', 'keypair', 'status', 'phase', 'restart','age'];
   }
 
-  getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'image', 'keypair', 'status', 'phase', 'restart', 'age'];
-  }
-
-
   hasErrors(virtualMachine: VirtualMachine): boolean {
     return virtualMachine.warnings.length > 0;
   }

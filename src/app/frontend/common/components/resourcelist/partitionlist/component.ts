@@ -87,11 +87,6 @@ export class ResourcePartitionListComponent extends ResourceListWithStatuses<Res
     return ['statusicon', 'name', 'nodecount','cpu','memory','health','etcd'];
   }
 
-  getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'nodecount','cpu','memory','health','etcd'];
-  }
-
-  //added the code
   onClick(): void {
     this.verber_.showNodeCreateDialog(this.displayName, this.typeMeta, this.objectMeta); //added
   }
@@ -135,11 +130,6 @@ export class TenantPartitionListComponent extends ResourceListWithStatuses<Tenan
     return ['statusicon', 'name', 'tenantcount','pods','cpu','memory','health','etcd'];
   }
 
-  getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'tenantcount','pods','cpu','memory','health','etcd'];
-  }
-
-  //added the code
   onClick(): void {
     this.verber_.showNodeCreateDialog(this.displayName, this.typeMeta, this.objectMeta); //added
   }
