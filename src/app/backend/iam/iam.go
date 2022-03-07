@@ -22,14 +22,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kubernetes/dashboard/src/app/backend/api"
-	"github.com/kubernetes/dashboard/src/app/backend/args"
-	"github.com/kubernetes/dashboard/src/app/backend/client"
-	"github.com/kubernetes/dashboard/src/app/backend/iam/db"
-	"github.com/kubernetes/dashboard/src/app/backend/iam/model"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/clusterrolebinding"
-	ns "github.com/kubernetes/dashboard/src/app/backend/resource/namespace"
-	"github.com/kubernetes/dashboard/src/app/backend/resource/serviceaccount"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/api"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/args"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/client"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/iam/db"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/iam/model"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/resource/clusterrolebinding"
+	ns "github.com/CentaurusInfra/dashboard/src/app/backend/resource/namespace"
+	"github.com/CentaurusInfra/dashboard/src/app/backend/resource/serviceaccount"
 	rbac "k8s.io/api/rbac/v1"
 )
 

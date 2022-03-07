@@ -13,7 +13,7 @@ After significant improvements have been done it is worth to release a new versi
 4. Create a git [release](https://github.com/kubernetes/dashboard/releases/) tag for the merged pull request. Release description should include a changelog.
 5. Update add-ons on the [Kubernetes](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/dashboard) repository. If the update is minor, all that needs to be done is to change image version number in the main controller config file (`dashboard-controller.yaml`), and other configs, as described in the header of the config. If the release is major, this needs coordination with Kubernetes core team and possibly alignment with the schedule of the core.
 6. Update addon config in the [minikube](https://github.com/kubernetes/minikube/tree/master/deploy/addons) repository.
-7. Update addon config in the [kops](https://github.com/kubernetes/kops/tree/master/addons/kubernetes-dashboard) repository.
+7. Update addon config in the [kops](https://github.com/kubernetes/kops/tree/master/addons/centaurus-dashboard) repository.
 
 Official release procedures are done by CI after successful TAG build automatically, that are pushed to [`kubernetesui/dashboard*`](https://hub.docker.com/u/kubernetesui) repositories.
 

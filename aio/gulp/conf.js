@@ -41,9 +41,9 @@ const arch = {
  * Configuration for container registry to push images to.
  */
 const containerRegistry = {
-  release: 'kubernetesui',
+  release: 'centaurusui',
   /** Default to an environment variable */
-  head: 'kubernetesdashboarddev',
+  head: 'centaurusdashboarddev',
 };
 
 /**
@@ -53,15 +53,15 @@ const version = {
   /**
    * Current release version of the project.
    */
-  release: 'v2.0.0-beta4',
+  release: 'v0.0.1',
   /**
    * Version name of the head release of the project.
    */
-  head: 'head',
+  head: 'dev',
   /**
    * Year of last source change of the project
    */
-  year: '2019',
+  year: '2022',
 };
 
 /**
@@ -82,7 +82,7 @@ export default {
    * the expression of recording version info into src/app/backend/client/manager.go
    */
   recordVersionExpression:
-      `-X github.com/kubernetes/dashboard/src/app/backend/client.Version=${version.release}`,
+      `-X github.com/CentaurusInfra/dashboard/src/app/backend/client.Version=${version.release}`,
 
   /**
    * Configuration for container registry to push images to.
@@ -100,14 +100,14 @@ export default {
     /**
      * Name of the main backend package that is used in go build command.
      */
-    mainPackageName: 'github.com/kubernetes/dashboard/src/app/backend',
+    mainPackageName: 'github.com/CentaurusInfra/dashboard/src/app/backend',
     /**
      * Names of all backend packages prefixed with 'test' command.
      */
     testCommandArgs:
         [
           'test',
-          'github.com/kubernetes/dashboard/src/app/backend/...',
+          'github.com/CentaurusInfra/dashboard/src/app/backend/...',
         ],
     /**
      * Insecure port number of the backend server. Only used during development.
@@ -118,7 +118,7 @@ export default {
      */
     secureDevServerPort: 8443,
     /**
-     * Address for the Kubernetes API server.
+     * Address for the Centaurus API server.
      */
     apiServerHost: 'http://localhost:8080',
     /**
@@ -184,6 +184,18 @@ export default {
     enableSkipButton: argv.enableSkipButton !== undefined ?
         argv.enableSkipButton :
         false,
+    /**
+     * Allows to enable login view when serving on http.
+     */
+    enableInsecureLogin: argv.enableInsecureLogin !== undefined ?
+      argv.enableInsecureLogin :
+      false,
+    /**
+     * Defines token time to live.
+     */
+    tokenTTL: argv.tokenTTL !== undefined ?
+      argv.tokenTTL :
+      0,
   },
 
   /**
@@ -251,7 +263,7 @@ export default {
     /**
      * The name of the root Angular module, i.e., the module that bootstraps the application.
      */
-    rootModuleName: 'kubernetesDashboard',
+    rootModuleName: 'centaurusDashboard',
     /**
      * If defined `gulp serve` will serve on HTTPS.
      */

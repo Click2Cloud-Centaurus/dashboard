@@ -90,10 +90,6 @@ export class UserListComponent extends ResourceListWithStatuses<UserList, User> 
     return ['statusicon', 'username', 'phase', 'type','age','role'];
   }
 
-  getDisplayColumns2(): string[] {
-    return ['statusicon', 'username', 'phase', 'type','age','role'];
-  }
-
   onClick(): void {
     this.verber_.showUserCreateDialog(this.displayName, this.typeMeta, this.objectMeta);
   }

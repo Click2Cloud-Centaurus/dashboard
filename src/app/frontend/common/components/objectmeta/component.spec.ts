@@ -42,11 +42,14 @@ const miniName = 'my-mini-meta-name';
 class TestComponent {
   initialized = true;
   objectMeta: ObjectMeta = {
+    annotations: undefined,
+    type: undefined,
+    uid: '',
     name: miniName,
     namespace: 'my-namespace',
     labels: {
       'addonmanager.kubernetes.io/mode': 'Reconcile',
-      app: 'kubernetes-dashboard',
+      app: 'centaurus-dashboard',
       'pod-template-hash': '1054779233',
       version: 'v1.8.1',
     },

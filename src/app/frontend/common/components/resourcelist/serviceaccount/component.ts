@@ -30,9 +30,6 @@ import {ListGroupIdentifier, ListIdentifier} from '../groupids';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServiceAccountListComponent extends ResourceListBase<ServiceAccountList, ServiceAccount> {
-  protected getDisplayColumns2(): string[] {
-      throw new Error('Method not implemented.');
-  }
   @Input() endpoint = EndpointManager.resource(Resource.serviceaccount, false).list();
 
   constructor(

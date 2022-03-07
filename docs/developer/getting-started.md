@@ -147,7 +147,7 @@ To allow accessing dashboard from outside the development container,
 pass value for `--insecure-bind-address` option to dashboard as follows:
 
 * Set `K8S_DASHBOARD_BIND_ADDRESS` environment variable as `"0.0.0.0"` before using `aio/develop/run-npm-on-container.sh`.
-* Run like `npm run [command] --kubernetes-dashboard:bind_address="0.0.0.0"`, when you run dashboard from inside the container.
+* Run like `npm run [command] --centaurus-dashboard:bind_address="0.0.0.0"`, when you run dashboard from inside the container.
 
 ### To run dashboard using Docker at ease
 
