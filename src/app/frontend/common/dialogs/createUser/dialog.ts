@@ -1,19 +1,3 @@
-// Copyright 2020 Authors of Arktos - file modified.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-
-
 import {Component, OnInit, Inject,NgZone} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
@@ -45,7 +29,6 @@ export interface UserToken {
 
 export interface CreateUserDialogMeta {
   tenants: string;
-  storageclusterid: string;
 }
 
 @Component({
@@ -86,9 +69,6 @@ export class CreateUserDialog implements OnInit {
 
   usertypeMaxLength = 24;
   usertypePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
-
-  storageidMaxLength =10;
-  storageidPattern: RegExp = new RegExp('^[0-9]$');
 
   secret: SecretDetail;
   secretName =""
@@ -146,13 +126,6 @@ export class CreateUserDialog implements OnInit {
           Validators.compose([
             Validators.maxLength(this.passwordMaxLength),
             Validators.pattern(this.passwordPattern),
-          ]),
-        ],
-        storageclusterid :[
-          '',
-          Validators.compose([
-            Validators.maxLength(this.storageidMaxLength),
-            Validators.pattern(this.storageidPattern),
           ]),
         ],
       },
@@ -301,24 +274,33 @@ export class CreateUserDialog implements OnInit {
     })
   }
 
-  createTenant(): void {
-    const tenantSpec= {name: this.username.value,storageclusterid: this.storageclusterid.value};
-    const tokenPromise = this.csrfToken_.getTokenForAction('system','tenant');
-    tokenPromise.subscribe(csrfToken => {
-      return this.http_
-        .post<{valid: boolean}>(
-          'api/v1/tenant',
-          {...tenantSpec},
-          {
-            headers: new HttpHeaders().set(this.config_.csrfHeaderName, csrfToken.token),
-          },
-        )
-        .subscribe(
-          () => {
-          },
-          () => {},
-        );
-    });
+  createTenantAdmin() {
+    const currentType = sessionStorage.getItem('userType')
+    {
+      const userSpec = {
+        name: this.username.value,
+        password: this.password.value,
+        type: this.usertype.value,
+        tenant: this.currentTenant
+      };
+      const userTokenPromise = this.csrfToken_.getTokenForAction(this.currentTenant, 'users');
+      userTokenPromise.subscribe(csrfToken => {
+        return this.http_
+          .post<{ valid: boolean }>(
+            'api/v1/users',
+            {...userSpec},
+            {
+              headers: new HttpHeaders().set(this.config_.csrfHeaderName, csrfToken.token),
+            },
+          )
+          .subscribe(
+            () => {
+            },
+            () => {
+            },
+          );
+      });
+    }
   }
 
   createServiceAccount() {
@@ -366,26 +348,6 @@ export class CreateUserDialog implements OnInit {
           },
         );
     })
-  }
-
-  createClusterRole(): void {
-    const clusterRoleSpec = {name:this.username.value, apiGroups:this.apiGroups, verbs:this.verbs, resources:this.resources};
-    const tokenPromise = this.csrfToken_.getTokenForAction(this.currentTenant,'clusterrole');
-    tokenPromise.subscribe(csrfToken => {
-      return this.http_
-        .post<{valid: boolean}>(
-          'api/v1/clusterrole',
-          {...clusterRoleSpec},
-          {
-            headers: new HttpHeaders().set(this.config_.csrfHeaderName, csrfToken.token),
-          },
-        )
-        .subscribe(
-          () => {
-          },
-          () => {},
-        );
-    });
   }
 
   createClusterRoleBinding(): void{
@@ -462,20 +424,19 @@ export class CreateUserDialog implements OnInit {
   }
 
   createTenantUser() {
-    this.createServiceAccount()
     if(this.usertype.value === "tenant-user"){
+      this.createServiceAccount()
       this.createRoleBinding()
-    } else {
-      if(this.usertype.value === "cluster-admin") {
-        this.adminroleUsed = "admin-role"
-      }
-      else{
-        this.createTenant()
-        this.createClusterRole()
-      }
+      this.createUser()
+    } else if(this.usertype.value === "cluster-admin") {
+      this.createServiceAccount()
       this.createClusterRoleBinding()
+      //this.adminroleUsed = "admin-role"
+      this.createUser()
     }
-    this.createUser()
+    else{
+      this.createTenantAdmin()
+    }
   }
 
   decode(s: string): string {

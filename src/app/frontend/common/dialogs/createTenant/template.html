@@ -19,17 +19,6 @@
 
     <div class="col-10 col-sm-10 col-md-10 col-lg-10">
       <mat-form-field appearance="fill">
-        <mat-label>StorageClusterid</mat-label>
-        <input matInput type="text" formControlName="StorageClusterId" placeholder="0" autocomplete="off" >
-      </mat-form-field>
-      <div class="error_sec" *ngIf="StorageClusterId.errors && (StorageClusterId.dirty || StorageClusterId.touched)">
-        <span class="red" *ngIf="StorageClusterId.errors.required">StorageClusterid is required</span>
-        <span class="red" *ngIf="StorageClusterId.hasError('pattern')">StorageClusterid must be in numbers only.</span><br>
-        <span class="red" *ngIf="StorageClusterId.hasError('maxlength')">StorageClusterid should not be greater than 3 digits.</span>
-      </div>
-    </div>
-    <div class="col-10 col-sm-10 col-md-10 col-lg-10">
-      <mat-form-field appearance="fill">
         <mat-label>Username</mat-label>
         <input matInput type="text" formControlName="username" required autocomplete="off"/>
       </mat-form-field>

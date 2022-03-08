@@ -57,14 +57,6 @@ export class CreateTenantDialog implements OnInit {
             Validators.pattern(this.tenantPattern),
           ]),
         ],
-        StorageClusterId :[
-          '',
-          Validators.compose([
-            Validators.required,
-            Validators.maxLength(this.storageidMaxLength),
-            Validators.pattern(this.storageidPattern),
-          ]),
-        ],
       username :[
         '',
         Validators.compose([
@@ -89,9 +81,6 @@ export class CreateTenantDialog implements OnInit {
   get tenant(): AbstractControl {
     return this.form1.get('tenant');
   }
-  get StorageClusterId(): AbstractControl {
-    return this.form1.get('StorageClusterId')
-  }
   get username(): AbstractControl {
     return this.form1.get('username')
   }
@@ -104,7 +93,7 @@ export class CreateTenantDialog implements OnInit {
   createTenant(): void {
     if (!this.form1.valid) return;
 
-    const tenantSpec= {name: this.tenant.value,StorageClusterId: this.StorageClusterId.value,username: this.username.value,password: this.password.value};
+    const tenantSpec= {name: this.tenant.value,username: this.username.value,password: this.password.value};
     const tokenPromise = this.csrfToken_.getTokenForAction(this.tenant.value,'tenant');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
