@@ -230,7 +230,7 @@ func DeployApp(spec *AppDeploymentSpec, client client.Interface) error {
 	if spec.Tenant == "" {
 		spec.Tenant = "system"
 	}
-	log.Printf("Bharath Namespace : %s", spec.Tenant)
+	log.Printf("Tenant : %s", spec.Tenant)
 	_, err := client.AppsV1().DeploymentsWithMultiTenancy(spec.Namespace, spec.Tenant).Create(deployment)
 
 	if err != nil {
