@@ -118,21 +118,21 @@ type TerminalResponse struct {
 
 func ResourceAllocator(tenant string, clients []clientapi.ClientManager) clientapi.ClientManager {
 	if tenant == "system" || tenant == "" {
-	  log.Printf("selected config of %s cluster",clients[0].GetClusterName())
+		log.Printf("selected config of %s cluster", clients[0].GetClusterName())
 		return clients[0]
 	}
 	if clienlen := len(clients); clienlen > 1 {
 		pref := []rune(strings.ToUpper(tenant))
 		log.Printf("prefix:%v", pref[0])
 		if pref[0] <= rune(77) {
-      log.Printf("selected config of %s cluster",clients[0].GetClusterName())
+			log.Printf("selected config of %s cluster", clients[0].GetClusterName())
 			return clients[0]
 		} else {
-      log.Printf("selected config of %s cluster",clients[1].GetClusterName())
+			log.Printf("selected config of %s cluster", clients[1].GetClusterName())
 			return clients[1]
 		}
 	}
-  log.Printf("selected config of %s cluster",clients[0].GetClusterName())
+	log.Printf("selected config of %s cluster", clients[0].GetClusterName())
 	return clients[0]
 }
 
@@ -171,7 +171,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 	authHandler := auth.NewAuthHandler(authManager)
 	authHandler.Install(apiV1Ws)
 
-	settingsHandler := settings.NewSettingsHandler(sManager, tpManager)
+	settingsHandler := settings.NewSettingsHandler(sManager, tpManagers)
 	settingsHandler.Install(apiV1Ws)
 
 	systemBannerHandler := systembanner.NewSystemBannerHandler(sbManager)
@@ -1285,11 +1285,11 @@ func (apiHandler *APIHandlerV2) handleCreateTenant(request *restful.Request, res
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-  userdetail, _:= db.GetUser(tenantSpec.Username)
-  if userdetail.ObjectMeta.Username!=""{
-    errors.HandleInternalError(response, errors.NewInternal("User already exists"))
-    return
-  }
+	userdetail, _ := db.GetUser(tenantSpec.Username)
+	if userdetail.ObjectMeta.Username != "" {
+		errors.HandleInternalError(response, errors.NewInternal("User already exists"))
+		return
+	}
 	client := ResourceAllocator(tenantSpec.Name, apiHandler.tpManager)
 	k8sClient := client.InsecureClient()
 	//k8sClient, err := client.Client(request)
@@ -1309,7 +1309,7 @@ func (apiHandler *APIHandlerV2) handleCreateTenant(request *restful.Request, res
 		Token:             "",
 		Type:              "tenant-admin",
 		Tenant:            tenantSpec.Name,
-		Role:              tenantSpec.Name+"-admin",
+		Role:              tenantSpec.Name + "-admin",
 		NameSpace:         "default",
 		CreationTimestamp: time.Time{},
 	}
@@ -1326,7 +1326,7 @@ func (apiHandler *APIHandlerV2) handleCreateTenant(request *restful.Request, res
 //for delete tenant
 func (apiHandler *APIHandlerV2) handleDeleteTenant(request *restful.Request, response *restful.Response) {
 	//tenant := request.PathParameter("tenant")
-  tenantName := request.PathParameter("tenant")
+	tenantName := request.PathParameter("tenant")
 	client := ResourceAllocator(tenantName, apiHandler.tpManager)
 	k8sClient := client.InsecureClient()
 
@@ -1334,8 +1334,8 @@ func (apiHandler *APIHandlerV2) handleDeleteTenant(request *restful.Request, res
 		errors.HandleInternalError(response, err)
 		return
 	} else {
-    db.DeleteTenantUser(tenantName)
-  }
+		db.DeleteTenantUser(tenantName)
+	}
 	response.WriteHeader(http.StatusOK)
 }
 
@@ -1374,26 +1374,26 @@ func (apiHandler *APIHandlerV2) handleGetTenantDetail(request *restful.Request, 
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-  client := ResourceAllocator(tenantName, apiHandler.tpManager)
-  c,err:= request.Request.Cookie("tenant")
-  var CookieTenant string
-  if err != nil {
-    log.Printf("Cookie error: %v", err)
-    CookieTenant=tenantName
-  } else{
-    CookieTenant=c.Value
-  }
-  log.Printf("cookie_tenant is: %s",CookieTenant)
-  var k8sClient kubernetes.Interface
-  if tenantName != CookieTenant {
-    k8sClient=client.InsecureClient()
-  } else {
-    k8sClient, err = client.Client(request)
-    if err != nil {
-      errors.HandleInternalError(response, err)
-      return
-    }
-  }
+	client := ResourceAllocator(tenantName, apiHandler.tpManager)
+	c, err := request.Request.Cookie("tenant")
+	var CookieTenant string
+	if err != nil {
+		log.Printf("Cookie error: %v", err)
+		CookieTenant = tenantName
+	} else {
+		CookieTenant = c.Value
+	}
+	log.Printf("cookie_tenant is: %s", CookieTenant)
+	var k8sClient kubernetes.Interface
+	if tenantName != CookieTenant {
+		k8sClient = client.InsecureClient()
+	} else {
+		k8sClient, err = client.Client(request)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+	}
 
 	result, err := tenant.GetTenantDetail(k8sClient, tenantName)
 	if err != nil {
@@ -2193,19 +2193,20 @@ func (apiHandler *APIHandlerV2) handleGetNodePods(request *restful.Request, resp
 }
 
 func (apiHandler *APIHandlerV2) handleDeploy(request *restful.Request, response *restful.Response) {
-	tenant := request.PathParameter("tenant")
-	client := ResourceAllocator(tenant, apiHandler.tpManager)
-	k8sClient, err := client.Client(request)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
 
 	appDeploymentSpec := new(deployment.AppDeploymentSpec)
 	if err := request.ReadEntity(appDeploymentSpec); err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
+
+	client := ResourceAllocator(appDeploymentSpec.Tenant, apiHandler.tpManager)
+	k8sClient, err := client.Client(request)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
 	if err := deployment.DeployApp(appDeploymentSpec, k8sClient); err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -2297,16 +2298,17 @@ func (apiHandler *APIHandlerV2) handleGetReplicaCountWithMultiTenancy(request *r
 }
 
 func (apiHandler *APIHandlerV2) handleDeployFromFile(request *restful.Request, response *restful.Response) {
-	tenant := request.PathParameter("tenant")
-	client := ResourceAllocator(tenant, apiHandler.tpManager)
-	cfg, err := client.Config(request)
-	if err != nil {
+	//tenant := request.PathParameter("tenant")
+
+	deploymentSpec := new(deployment.AppDeploymentFromFileSpec)
+	if err := request.ReadEntity(deploymentSpec); err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
 
-	deploymentSpec := new(deployment.AppDeploymentFromFileSpec)
-	if err := request.ReadEntity(deploymentSpec); err != nil {
+	client := ResourceAllocator(deploymentSpec.Tenant, apiHandler.tpManager)
+	cfg, err := client.Config(request)
+	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
@@ -2443,25 +2445,25 @@ func (apiHandler *APIHandlerV2) handleGetReplicaSets(request *restful.Request, r
 func (apiHandler *APIHandlerV2) handleGetReplicaSetsWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
 	client := ResourceAllocator(tenant, apiHandler.tpManager)
-	c,err:= request.Request.Cookie("tenant")
+	c, err := request.Request.Cookie("tenant")
 	var CookieTenant string
-if err != nil {
-  log.Printf("Cookie error: %v", err)
-  CookieTenant=tenant
-} else{
-  CookieTenant=c.Value
-}
-  log.Printf("cookie_tenant is: %s",CookieTenant)
-  var k8sClient kubernetes.Interface
-  if tenant != CookieTenant {
-    k8sClient=client.InsecureClient()
-  } else {
-    k8sClient, err = client.Client(request)
-    if err != nil {
-      errors.HandleInternalError(response, err)
-      return
-    }
-  }
+	if err != nil {
+		log.Printf("Cookie error: %v", err)
+		CookieTenant = tenant
+	} else {
+		CookieTenant = c.Value
+	}
+	log.Printf("cookie_tenant is: %s", CookieTenant)
+	var k8sClient kubernetes.Interface
+	if tenant != CookieTenant {
+		k8sClient = client.InsecureClient()
+	} else {
+		k8sClient, err = client.Client(request)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+	}
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics
@@ -2773,25 +2775,25 @@ func (apiHandler *APIHandlerV2) handleGetDeploymentsWithMultiTenancy(request *re
 	tenant := request.PathParameter("tenant")
 	client := ResourceAllocator(tenant, apiHandler.tpManager)
 
-  c,err:= request.Request.Cookie("tenant")
-  var CookieTenant string
-  if err != nil {
-    log.Printf("Cookie error: %v", err)
-    CookieTenant=tenant
-  } else{
-    CookieTenant=c.Value
-  }
-  log.Printf("cookie_tenant is: %s",CookieTenant)
-  var k8sClient kubernetes.Interface
-  if tenant != CookieTenant {
-    k8sClient=client.InsecureClient()
-  } else {
-    k8sClient, err = client.Client(request)
-    if err != nil {
-      errors.HandleInternalError(response, err)
-      return
-    }
-  }
+	c, err := request.Request.Cookie("tenant")
+	var CookieTenant string
+	if err != nil {
+		log.Printf("Cookie error: %v", err)
+		CookieTenant = tenant
+	} else {
+		CookieTenant = c.Value
+	}
+	log.Printf("cookie_tenant is: %s", CookieTenant)
+	var k8sClient kubernetes.Interface
+	if tenant != CookieTenant {
+		k8sClient = client.InsecureClient()
+	} else {
+		k8sClient, err = client.Client(request)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+	}
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics
@@ -2986,25 +2988,25 @@ func (apiHandler *APIHandlerV2) handleGetPods(request *restful.Request, response
 func (apiHandler *APIHandlerV2) handleGetPodsWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
 	client := ResourceAllocator(tenant, apiHandler.tpManager)
-  c,err:= request.Request.Cookie("tenant")
-  var CookieTenant string
-  if err != nil {
-    log.Printf("Cookie error: %v", err)
-    CookieTenant=tenant
-  } else{
-    CookieTenant=c.Value
-  }
-  log.Printf("cookie_tenant is: %s",CookieTenant)
-  var k8sClient kubernetes.Interface
-  if tenant != CookieTenant {
-    k8sClient=client.InsecureClient()
-  } else {
-    k8sClient, err = client.Client(request)
-    if err != nil {
-      errors.HandleInternalError(response, err)
-      return
-    }
-  }
+	c, err := request.Request.Cookie("tenant")
+	var CookieTenant string
+	if err != nil {
+		log.Printf("Cookie error: %v", err)
+		CookieTenant = tenant
+	} else {
+		CookieTenant = c.Value
+	}
+	log.Printf("cookie_tenant is: %s", CookieTenant)
+	var k8sClient kubernetes.Interface
+	if tenant != CookieTenant {
+		k8sClient = client.InsecureClient()
+	} else {
+		k8sClient, err = client.Client(request)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+	}
 
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
@@ -3833,25 +3835,25 @@ func (apiHandler *APIHandlerV2) handleAddResourceQuota(request *restful.Request,
 func (apiHandler *APIHandlerV2) handleGetResourceQuotaList(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
 	client := ResourceAllocator(tenant, apiHandler.tpManager)
-  c,err:= request.Request.Cookie("tenant")
-  var CookieTenant string
-  if err != nil {
-    log.Printf("Cookie error: %v", err)
-    CookieTenant=tenant
-  } else{
-    CookieTenant=c.Value
-  }
-  log.Printf("cookie_tenant is: %s",CookieTenant)
-  var k8sClient kubernetes.Interface
-  if tenant != CookieTenant {
-    k8sClient=client.InsecureClient()
-  } else {
-    k8sClient, err = client.Client(request)
-    if err != nil {
-      errors.HandleInternalError(response, err)
-      return
-    }
-  }
+	c, err := request.Request.Cookie("tenant")
+	var CookieTenant string
+	if err != nil {
+		log.Printf("Cookie error: %v", err)
+		CookieTenant = tenant
+	} else {
+		CookieTenant = c.Value
+	}
+	log.Printf("cookie_tenant is: %s", CookieTenant)
+	var k8sClient kubernetes.Interface
+	if tenant != CookieTenant {
+		k8sClient = client.InsecureClient()
+	} else {
+		k8sClient, err = client.Client(request)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+	}
 
 	//Namespace := request.PathParameter("namespace")
 	var namespaces []string
@@ -4142,26 +4144,26 @@ func (apiHandler *APIHandlerV2) handleGetNamespaces(request *restful.Request, re
 
 func (apiHandler *APIHandlerV2) handleGetNamespacesWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
-  client := ResourceAllocator(tenant, apiHandler.tpManager)
-  c,err:= request.Request.Cookie("tenant")
-  var CookieTenant string
-  if err != nil {
-    log.Printf("Cookie error: %v", err)
-    CookieTenant=tenant
-  } else{
-    CookieTenant=c.Value
-  }
-  log.Printf("cookie_tenant is: %s",CookieTenant)
-  var k8sClient kubernetes.Interface
-  if tenant != CookieTenant {
-    k8sClient=client.InsecureClient()
-  } else {
-    k8sClient, err = client.Client(request)
-    if err != nil {
-      errors.HandleInternalError(response, err)
-      return
-    }
-  }
+	client := ResourceAllocator(tenant, apiHandler.tpManager)
+	c, err := request.Request.Cookie("tenant")
+	var CookieTenant string
+	if err != nil {
+		log.Printf("Cookie error: %v", err)
+		CookieTenant = tenant
+	} else {
+		CookieTenant = c.Value
+	}
+	log.Printf("cookie_tenant is: %s", CookieTenant)
+	var k8sClient kubernetes.Interface
+	if tenant != CookieTenant {
+		k8sClient = client.InsecureClient()
+	} else {
+		k8sClient, err = client.Client(request)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+	}
 	dataSelect := parseDataSelectPathParameter(request)
 	result, err := ns.GetNamespaceListWithMultiTenancy(k8sClient, tenant, dataSelect)
 	if err != nil {
@@ -5410,7 +5412,7 @@ func (apiHandler *APIHandlerV2) handleGetCustomResourceDefinitionListWithMultiTe
 		}
 
 		dataSelect := parseDataSelectPathParameter(request)
-		result, err = customresourcedefinition.GetCustomResourceDefinitionListWithMultiTenancy(apiextensionsclient, dataSelect,tenant, client.GetClusterName())
+		result, err = customresourcedefinition.GetCustomResourceDefinitionListWithMultiTenancy(apiextensionsclient, dataSelect, tenant, client.GetClusterName())
 		if err != nil {
 			errors.HandleInternalError(response, err)
 			return
@@ -6010,18 +6012,18 @@ func (apiHandler *APIHandlerV2) handleDeleteUser(w *restful.Request, r *restful.
 
 	userName := w.PathParameter("username")
 	userid := w.PathParameter("userid")
-  userDetail, _:= db.GetUser(userName)
-  if userDetail.ObjectMeta.Username==""{
-    errors.HandleInternalError(r, errors.NewInternal("User do not exists"))
-    return
-  }
-  client := ResourceAllocator(userDetail.ObjectMeta.Tenant, apiHandler.tpManager)
-  k8sClient=client.InsecureClient()
-  //k8sClient, err = client.Client(w)
-  //if err != nil {
-  //  errors.HandleInternalError(r, err)
-  //  return
-  //}
+	userDetail, _ := db.GetUser(userName)
+	if userDetail.ObjectMeta.Username == "" {
+		errors.HandleInternalError(r, errors.NewInternal("User do not exists"))
+		return
+	}
+	client := ResourceAllocator(userDetail.ObjectMeta.Tenant, apiHandler.tpManager)
+	k8sClient = client.InsecureClient()
+	//k8sClient, err = client.Client(w)
+	//if err != nil {
+	//  errors.HandleInternalError(r, err)
+	//  return
+	//}
 	if tenantName == userDetail.ObjectMeta.Tenant && userDetail.ObjectMeta.Type == `tenant-admin` {
 		errors.HandleInternalError(r, er.New("Cannot delete admin users"))
 		return
@@ -6032,9 +6034,9 @@ func (apiHandler *APIHandlerV2) handleDeleteUser(w *restful.Request, r *restful.
 			errors.HandleInternalError(r, err)
 			return
 		} else {
-      count:= db.DeleteTenantUser(userDetail.ObjectMeta.Tenant)
-      log.Printf("Deleted %d users of tenant %s", count, userDetail.ObjectMeta.Tenant)
-    }
+			count := db.DeleteTenantUser(userDetail.ObjectMeta.Tenant)
+			log.Printf("Deleted %d users of tenant %s", count, userDetail.ObjectMeta.Tenant)
+		}
 		if err := clusterrolebinding.DeleteClusterRoleBindings(userDetail.ObjectMeta.Tenant+"-sa-rb", k8sClient); err != nil {
 			//errors.HandleInternalError(r, err)
 			//return
@@ -6068,19 +6070,19 @@ func (apiHandler *APIHandlerV2) handleDeleteUser(w *restful.Request, r *restful.
 			}
 		}
 	}
-	msg:= "User deleted successfully"
-  id, err := strconv.Atoi(userid)
-  if userDetail.ObjectMeta.Type != `tenant-admin` {
+	msg := "User deleted successfully"
+	id, err := strconv.Atoi(userid)
+	if userDetail.ObjectMeta.Type != `tenant-admin` {
 
-    deletedRows := db.DeleteUser(int64(id))
+		deletedRows := db.DeleteUser(int64(id))
 
-    if err != nil {
-      log.Printf("Unable to get user. %v", err)
-      errors.HandleInternalError(r, err)
-      return
-    }
-    msg = fmt.Sprintf("User deleted successfully. Total rows/record affected %v", deletedRows)
-  }
+		if err != nil {
+			log.Printf("Unable to get user. %v", err)
+			errors.HandleInternalError(r, err)
+			return
+		}
+		msg = fmt.Sprintf("User deleted successfully. Total rows/record affected %v", deletedRows)
+	}
 	res := response{
 		ID:      int64(id),
 		Message: msg,
