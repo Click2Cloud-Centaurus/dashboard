@@ -6030,22 +6030,25 @@ func (apiHandler *APIHandlerV2) handleDeleteUser(w *restful.Request, r *restful.
 	}
 
 	if userDetail.ObjectMeta.Type == `tenant-admin` {
-		if err := tenant.DeleteTenant(userDetail.ObjectMeta.Tenant, k8sClient); err != nil {
-			errors.HandleInternalError(r, err)
-			return
-		} else {
-			count := db.DeleteTenantUser(userDetail.ObjectMeta.Tenant)
-			log.Printf("Deleted %d users of tenant %s", count, userDetail.ObjectMeta.Tenant)
-		}
-		if err := clusterrolebinding.DeleteClusterRoleBindings(userDetail.ObjectMeta.Tenant+"-sa-rb", k8sClient); err != nil {
+    var clusterRoleName = userDetail.ObjectMeta.Username+"-"+userDetail.ObjectMeta.Tenant + "-" + "role"
+    var saName = userDetail.ObjectMeta.Tenant +"-"+userDetail.ObjectMeta.Tenant + "-sa"
+    var clusterRoleBinding = userDetail.ObjectMeta.Username+"-"+userDetail.ObjectMeta.Tenant + "-" + "rb"
+		//if err := tenant.DeleteTenant(userDetail.ObjectMeta.Tenant, k8sClient); err != nil {
+		//	errors.HandleInternalError(r, err)
+		//	return
+		//} else {
+		//	count := db.DeleteTenantUser(userDetail.ObjectMeta.Tenant)
+		//	log.Printf("Deleted %d users of tenant %s", count, userDetail.ObjectMeta.Tenant)
+		//}
+		if err := clusterrolebinding.DeleteClusterRoleBindings(clusterRoleBinding, k8sClient); err != nil {
 			//errors.HandleInternalError(r, err)
 			//return
 		}
-		if err := serviceaccount.DeleteServiceAccount(userDetail.ObjectMeta.NameSpace, userDetail.ObjectMeta.Tenant+"-sa", k8sClient); err != nil {
+		if err := serviceaccount.DeleteServiceAccount(userDetail.ObjectMeta.NameSpace, saName, k8sClient); err != nil {
 			//errors.HandleInternalError(r, err)
 			//return
 		}
-		if err := clusterrole.DeleteClusterRole(userDetail.ObjectMeta.Tenant+"-role", k8sClient); err != nil {
+		if err := clusterrole.DeleteClusterRole(clusterRoleName, k8sClient); err != nil {
 			//errors.HandleInternalError(r, err)
 			//return
 		}
@@ -6072,7 +6075,7 @@ func (apiHandler *APIHandlerV2) handleDeleteUser(w *restful.Request, r *restful.
 	}
 	msg := "User deleted successfully"
 	id, err := strconv.Atoi(userid)
-	if userDetail.ObjectMeta.Type != `tenant-admin` {
+	//if userDetail.ObjectMeta.Type != `tenant-admin` {
 
 		deletedRows := db.DeleteUser(int64(id))
 
@@ -6082,7 +6085,7 @@ func (apiHandler *APIHandlerV2) handleDeleteUser(w *restful.Request, r *restful.
 			return
 		}
 		msg = fmt.Sprintf("User deleted successfully. Total rows/record affected %v", deletedRows)
-	}
+	//}
 	res := response{
 		ID:      int64(id),
 		Message: msg,
