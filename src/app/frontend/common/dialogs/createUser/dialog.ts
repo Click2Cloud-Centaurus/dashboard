@@ -285,8 +285,10 @@ export class CreateUserDialog implements OnInit {
         userSpec.role = '';
       }
 
-
-      const userTokenPromise = await this.csrfToken_.getTokenForAction(this.tenant.value,'users');
+      if (this.currentTenant==='') {
+        this.currentTenant=this.tenantService_.current()
+      }
+      const userTokenPromise = await this.csrfToken_.getTokenForAction(this.currentTenant,'users');
       userTokenPromise.subscribe(csrfToken => {
         return this.http_
           .post<{valid: boolean}>(
