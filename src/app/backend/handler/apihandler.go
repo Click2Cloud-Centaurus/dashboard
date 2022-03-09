@@ -1017,6 +1017,10 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 		apiV1Ws.GET("/tenants/{tenant}/role/{namespace}").
 			To(apiHandler.handleGetRolesWithMultiTenancy).
 			Writes(role.RoleList{}))
+  apiV1Ws.Route(
+    apiV1Ws.GET("/tenants/{tenant}/role").
+      To(apiHandler.handleGetRolesWithMultiTenancy).
+      Writes(role.RoleList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenant/{tenant}/namespace/{namespace}/roles").
 			To(apiHandler.handleGetRolesWithMultiTenancy).
@@ -1178,6 +1182,10 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 		apiV1Ws.GET("/tenants/{tenant}/crd/{namespace}/{crd}/{object}/event").
 			To(apiHandler.handleGetCustomResourceObjectEventsWithMultiTenancy).
 			Writes(common.EventList{}))
+  apiV1Ws.Route(
+    apiV1Ws.GET("/tenants/{tenant}/crd/{crd}/{object}/event").
+      To(apiHandler.handleGetCustomResourceObjectEventsWithMultiTenancy).
+      Writes(common.EventList{}))
 
 	apiV1Ws.Route(
 		apiV1Ws.GET("/storageclass").
@@ -1248,7 +1256,7 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 			Reads(model.User{}).
 			Writes(model.User{}))
 	apiV1Ws.Route(
-		apiV1Ws.GET("/users").
+		apiV1Ws.GET("/tenants/{tenant}/users").
 			To(apiHandler.handleGetAllUser).
 			Writes(model.User{}))
 
@@ -1344,6 +1352,7 @@ func (apiHandler *APIHandlerV2) handleGetTenantList(request *restful.Request, re
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
+  dataSelect := parseDataSelectPathParameter(request)
 	for _, tpManager := range apiHandler.tpManager {
 		k8sClient := tpManager.InsecureClient()
 
@@ -1353,7 +1362,7 @@ func (apiHandler *APIHandlerV2) handleGetTenantList(request *restful.Request, re
 		//	return
 		//}
 
-		dataSelect := parseDataSelectPathParameter(request)
+    dataSelect := dataselect.NewDataSelectQuery(dataselect.NoPagination,dataselect.NoSort,dataselect.NoFilter,dataselect.NoMetrics)
 		result, err := tenant.GetTenantList(k8sClient, dataSelect, tpManager.GetClusterName())
 		if err != nil {
 			errors.HandleInternalError(response, err)
@@ -1366,9 +1375,39 @@ func (apiHandler *APIHandlerV2) handleGetTenantList(request *restful.Request, re
 		}
 
 	}
+  tenantCells, filteredTotal := dataselect.GenericDataSelectWithFilter(toCells(tenantsList.Tenants), dataSelect)
+  tenantsList.Tenants = fromCells(tenantCells)
+
+  tenantsList.ListMeta = api.ListMeta{TotalItems: filteredTotal}
+
 	response.WriteHeaderAndEntity(http.StatusOK, tenantsList)
 }
+type TenantCell tenant.Tenant
 
+func (self TenantCell) GetProperty(name dataselect.PropertyName) dataselect.ComparableValue {
+  switch name {
+  case dataselect.NameProperty:
+    return dataselect.StdComparableString(self.ObjectMeta.Name)
+  case dataselect.CreationTimestampProperty:
+    return dataselect.StdComparableTime(self.ObjectMeta.CreationTimestamp.Time)
+  default:
+    return nil
+  }
+}
+func toCells(std []tenant.Tenant) []dataselect.DataCell {
+  cells := make([]dataselect.DataCell, len(std))
+  for i := range std {
+    cells[i] = TenantCell(std[i])
+  }
+  return cells
+}
+func fromCells(cells []dataselect.DataCell) []tenant.Tenant {
+  std := make([]tenant.Tenant, len(cells))
+  for i := range std {
+    std[i] = tenant.Tenant(cells[i].(TenantCell))
+  }
+  return std
+}
 func (apiHandler *APIHandlerV2) handleGetTenantDetail(request *restful.Request, response *restful.Response) {
 	tenantName := request.PathParameter("name")
 	if len(apiHandler.tpManager) == 0 {
@@ -3736,8 +3775,12 @@ func (apiHandler *APIHandlerV2) handleGetRolesWithMultiTenancy(request *restful.
 		errors.HandleInternalError(response, err)
 		return
 	}
+  //var namespaces []string
+  //namespaces = append(namespaces, Namespace)
+  //namespace := common.NewNamespaceQuery(namespaces)
 	namespace := request.PathParameter("namespace")
 	result, err := role.GetRolesWithMultiTenancy(k8sClient, tenant, namespace)
+	//role.GetRoleList(k8sClient, namespace, result)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -5411,7 +5454,8 @@ func (apiHandler *APIHandlerV2) handleGetCustomResourceDefinitionListWithMultiTe
 			return
 		}
 
-		dataSelect := parseDataSelectPathParameter(request)
+		//dataSelect := parseDataSelectPathParameter(request)
+    dataSelect := dataselect.NewDataSelectQuery(dataselect.NoPagination,dataselect.NoSort,dataselect.NoFilter,dataselect.NoMetrics)
 		result, err = customresourcedefinition.GetCustomResourceDefinitionListWithMultiTenancy(apiextensionsclient, dataSelect, tenant, client.GetClusterName())
 		if err != nil {
 			errors.HandleInternalError(response, err)
@@ -5425,7 +5469,8 @@ func (apiHandler *APIHandlerV2) handleGetCustomResourceDefinitionListWithMultiTe
 				return
 			}
 
-			dataSelect := parseDataSelectPathParameter(newrequest)
+
+      dataSelect := dataselect.NewDataSelectQuery(dataselect.NoPagination,dataselect.NoSort,dataselect.NoFilter,dataselect.NoMetrics)
 			nresult, err := customresourcedefinition.GetCustomResourceDefinitionList(apiextensionsclient, dataSelect, client.GetClusterName())
 			if err != nil {
 				errors.HandleInternalError(response, err)
@@ -5436,8 +5481,39 @@ func (apiHandler *APIHandlerV2) handleGetCustomResourceDefinitionListWithMultiTe
 			result.Errors = append(result.Errors, nresult.Errors...)
 		}
 	}
+	dataselect2:=parseDataSelectPathParameter(request)
+  crdCells, filteredTotal := dataselect.GenericDataSelectWithFilter(toCellsCRD(result.Items), dataselect2)
+  result.Items = fromCellsCRD(crdCells)
+  result.ListMeta = api.ListMeta{TotalItems: filteredTotal}
+
 
 	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+type CrdCell customresourcedefinition.CustomResourceDefinition
+
+func (self CrdCell) GetProperty(name dataselect.PropertyName) dataselect.ComparableValue {
+  switch name {
+  case dataselect.NameProperty:
+    return dataselect.StdComparableString(self.ObjectMeta.Name)
+  case dataselect.CreationTimestampProperty:
+    return dataselect.StdComparableTime(self.ObjectMeta.CreationTimestamp.Time)
+  default:
+    return nil
+  }
+}
+func toCellsCRD(std []customresourcedefinition.CustomResourceDefinition) []dataselect.DataCell {
+  cells := make([]dataselect.DataCell, len(std))
+  for i := range std {
+    cells[i] = CrdCell(std[i])
+  }
+  return cells
+}
+func fromCellsCRD(cells []dataselect.DataCell) []customresourcedefinition.CustomResourceDefinition {
+  std := make([]customresourcedefinition.CustomResourceDefinition, len(cells))
+  for i := range std {
+    std[i] = customresourcedefinition.CustomResourceDefinition(cells[i].(CrdCell))
+  }
+  return std
 }
 
 func (apiHandler *APIHandlerV2) handleGetCustomResourceDefinitionDetail(request *restful.Request, response *restful.Response) {
@@ -5973,27 +6049,56 @@ func (apiHandler *APIHandlerV2) handleGetUserDetail(w *restful.Request, r *restf
 	r.WriteHeaderAndEntity(http.StatusOK, user)
 }
 
-func (apiHandler *APIHandlerV2) handleGetAllUser(w *restful.Request, r *restful.Response) {
+func (apiHandler *APIHandlerV2) handleGetAllUser(request *restful.Request, response *restful.Response) {
+  tenant := request.PathParameter("tenant")
+  client := ResourceAllocator(tenant, apiHandler.tpManager)
+  _, err := client.Client(request)
+  if err != nil {
+    errors.HandleInternalError(response, err)
+    return
+  }
 
-	var err error
-	for _, cManager := range apiHandler.tpManager {
-		_, err = cManager.Client(w)
-		if err == nil {
-			break
-		}
-	}
-	if err != nil {
-		errors.HandleInternalError(r, err)
-		return
-	}
-
-	users, err := db.GetAllUsers()
+	users, err := db.GetAllUsers(tenant)
 
 	if err != nil {
 		log.Fatalf("Unable to get all user. %v", err)
 	}
-	r.WriteHeaderAndEntity(http.StatusOK, users)
+  dataSelect := parseDataSelectPathParameter(request)
+  userCells, filteredTotal := dataselect.GenericDataSelectWithFilter(toCellsUser(users.Users), dataSelect)
+  users.Users = fromCellsUser(userCells)
+
+  users.ListMeta = api.ListMeta{TotalItems: filteredTotal}
+	response.WriteHeaderAndEntity(http.StatusOK, users)
 }
+
+type UserCell model.UserDetails
+
+func (self UserCell) GetProperty(name dataselect.PropertyName) dataselect.ComparableValue {
+  switch name {
+  case dataselect.NameProperty:
+    return dataselect.StdComparableString(self.ObjectMeta.Username)
+  case dataselect.CreationTimestampProperty:
+    return dataselect.StdComparableTime(self.ObjectMeta.CreationTimestamp)
+  default:
+    return nil
+  }
+}
+func toCellsUser(std []model.UserDetails) []dataselect.DataCell {
+  cells := make([]dataselect.DataCell, len(std))
+  for i := range std {
+    cells[i] = UserCell(std[i])
+  }
+  return cells
+}
+func fromCellsUser(cells []dataselect.DataCell) []model.UserDetails {
+  std := make([]model.UserDetails, len(cells))
+  for i := range std {
+    std[i] = model.UserDetails(cells[i].(UserCell))
+  }
+  return std
+}
+
+
 
 func (apiHandler *APIHandlerV2) handleDeleteUser(w *restful.Request, r *restful.Response) {
 	var k8sClient kubernetes.Interface

@@ -62,22 +62,23 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
   }
 
-  getResourceObservable(): Observable<TenantList> {
-    return this.tenant_.get(this.endpoint, undefined);
+  getResourceObservable(params?: HttpParams): Observable<TenantList> {
+    return this.tenant_.get(this.endpoint, undefined,params);
   }
 
   map(tenantList: TenantList): Tenant[] {
-    this.tenantList = []
-    this.tenantCount = 0
-    if (tenantList.tenants !== null) {
-      const tenantsList: any = [];
-      tenantList.tenants.map((tenant)=>{
-        tenantsList.push(tenant);
-      })
-      this.tenantList = tenantsList
-      this.totalItems = this.tenantList.length
-    }
-    return this.tenantList;
+    // this.tenantList = []
+    // this.tenantCount = 0
+    // if (tenantList.tenants !== null) {
+    //   const tenantsList: any = [];
+    //   tenantList.tenants.map((tenant)=>{
+    //     tenantsList.push(tenant);
+    //   })
+    //   this.tenantList = tenantsList
+    //   this.totalItems = this.tenantList.length
+    // }
+    // return this.tenantList;
+   return  tenantList.tenants
   }
 
   isInErrorState(resource: Tenant): boolean {
