@@ -33,7 +33,7 @@ import {CookieService} from "ngx-cookie-service";
 })
 //@ts-ignore
 export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, Tenant> {
-  @Input() endpoint = EndpointManager.resource(Resource.tenant).list();
+  @Input() endpoint = EndpointManager.resource(Resource.tenant,false,true).list();
 
   displayName: string;
   typeMeta: TypeMeta;

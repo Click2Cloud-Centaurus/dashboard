@@ -33,7 +33,7 @@ import {NotificationsService, NotificationSeverity} from 'common/services/global
 export class TenantSelectorComponent implements OnInit {
   private tenantUpdate_ = new Subject();
   private unsubscribe_ = new Subject();
-  private readonly endpoint_ = EndpointManager.resource(Resource.tenant);
+  private readonly endpoint_ = EndpointManager.resource(Resource.tenant,false,true);
 
   tenants: string[] = [];
   selectedTenant: string;
