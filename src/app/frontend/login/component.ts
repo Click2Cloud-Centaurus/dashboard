@@ -20,6 +20,7 @@ import {KdError, KdFile, StateError} from '@api/frontendapi';
 import {map} from 'rxjs/operators';
 import {AsKdError, K8SError} from '../common/errors/errors';
 import {AuthService} from '../common/services/global/authentication';
+import {CONFIG} from 'index.config';
 
 enum LoginModes {
   Kubeconfig = 'kubeconfig',
@@ -187,6 +188,7 @@ export class LoginComponent implements OnInit {
     sessionStorage.setItem('parentTenant', parentTenant);
   }
   private setDefaultNamespace (namespace:string) {
+    CONFIG.defaultNamespace = namespace ;
     sessionStorage.setItem('namespace', namespace);
   }
 }

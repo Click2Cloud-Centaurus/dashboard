@@ -18,21 +18,11 @@ import {MatTooltipDefaultOptions} from '@angular/material';
 
 const username = sessionStorage.getItem('parentTenant');
 const userType = sessionStorage.getItem('userType');
-const defaultnamespace = sessionStorage.getItem('namespace');
-let tenant = '';
-if (userType === 'cluster-admin'){
-  tenant = 'system'
-} else {
-  tenant = username
-}
+const defaultNamespace = sessionStorage.getItem('namespace');
 
-let namespace = '';
+const tenant = userType === 'cluster-admin' ? 'system' : username;
+const namespace = defaultNamespace === '' ? 'default' : defaultNamespace;
 
-if (defaultnamespace !== '') {
-  namespace = defaultnamespace
-} else {
-  namespace = 'default'
-}
 
 export let CONFIG_DI_TOKEN = new InjectionToken<Config>('kd.config');
 
@@ -52,8 +42,8 @@ export const CONFIG: Config = {
   authTenantCookieName: 'tenant',
   csrfHeaderName: 'X-CSRF-TOKEN',
   skipLoginPageCookieName: 'skipLoginPage',
-  defaultNamespace: namespace,//'default',  //default
-  systemTenantName: tenant,  //system
+  defaultNamespace: namespace,
+  systemTenantName: tenant,
 };
 
 // Override default material tooltip values.
