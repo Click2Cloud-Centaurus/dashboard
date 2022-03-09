@@ -153,7 +153,7 @@ export class CreateUserDialog implements OnInit {
         this.name.updateValueAndValidity();
       }
     });
-    this.http_.get(`api/v1/tenant`).subscribe((result: TenantList) => {
+    this.http_.get(`api/v1/tenants/${this.currentTenant}/tenant`).subscribe((result: TenantList) => {
       this.tenants = result.tenants.map((tenant: Tenant) => tenant.objectMeta.name);
       console.log("list: ", this.tenants)
       if (this.usertype === 'tenant-admin') {
