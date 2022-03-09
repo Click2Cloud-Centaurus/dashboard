@@ -14,7 +14,7 @@
 
 import {HttpParams} from '@angular/common/http';
 import {Component, Input} from '@angular/core';
-import {TenantPartitionList, TenantPartition} from '@api/backendapi';
+import {TenantPartitionList, TenantPartition, TypeMeta, ObjectMeta} from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 
 import {ResourceListWithStatuses} from '../../../resources/list';
@@ -33,9 +33,10 @@ import {Router} from "@angular/router";
 // @ts-ignore
 export class TenantPartitionListComponent extends ResourceListWithStatuses<TenantPartitionList, TenantPartition> {
   @Input() endpointTp = EndpointManager.resource(Resource.tenantPartition).list();
-  displayName:any;
-  typeMeta:any;
-  objectMeta:any;
+
+  displayName:string;
+  typeMeta:TypeMeta;
+  objectMeta:ObjectMeta;
 
   constructor(
     readonly verber_: VerberService,
@@ -75,11 +76,6 @@ export class TenantPartitionListComponent extends ResourceListWithStatuses<Tenan
     return ['statusicon', 'name', 'tenantcount','pods','cpu','memory','health','etcd'];
   }
 
-  getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'tenantcount','pods','cpu','memory','health','etcd'];
-  }
-
-  //added the code
   onClick(): void {
     this.verber_.showNodeCreateDialog(this.displayName, this.typeMeta, this.objectMeta); //added
   }

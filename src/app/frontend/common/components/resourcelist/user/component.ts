@@ -1,6 +1,6 @@
 import {HttpParams} from '@angular/common/http';
 import {Component, Input, ViewChild} from '@angular/core';
-import {User, UserList} from '@api/backendapi';
+import {ObjectMeta, TypeMeta, User, UserList} from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 import {MatDrawer} from '@angular/material';
 
@@ -25,9 +25,9 @@ export class UserListComponent extends ResourceListWithStatuses<UserList, User> 
   @Input() endpoint = EndpointManager.resource(Resource.user,false,true).list();
   @ViewChild(MatDrawer, {static: true}) private readonly nav_: MatDrawer;
 
-  displayName:any;
-  typeMeta:any;
-  objectMeta:any;
+  displayName:string;
+  typeMeta:TypeMeta;
+  objectMeta:ObjectMeta;
 
   private currentTenant: string;
 
@@ -71,10 +71,6 @@ export class UserListComponent extends ResourceListWithStatuses<UserList, User> 
 
   getDisplayColumns(): string[] {
     return ['statusicon', 'username', 'tenant', 'type', 'role', 'phase', 'age'];
-  }
-
-  getDisplayColumns2(): string[] {
-    return ['statusicon', 'username', 'tenant', 'phase', 'type','age','role'];
   }
 
   onClick(): void {

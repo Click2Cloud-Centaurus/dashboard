@@ -14,7 +14,7 @@
 
 import {HttpParams} from '@angular/common/http';
 import {Component, Input} from '@angular/core';
-import {Node, NodeList} from '@api/backendapi';
+import {Node, NodeList, ObjectMeta, TypeMeta} from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 import {ResourceListWithStatuses} from '../../../resources/list';
 import {NotificationsService} from '../../../services/global/notifications';
@@ -32,9 +32,9 @@ import {Router} from "@angular/router";
 // @ts-ignore
 export class NodeListComponent extends ResourceListWithStatuses<NodeList, Node> {
   @Input() endpoint = EndpointManager.resource(Resource.node).list();
-  displayName:any;
-  typeMeta:any;
-  objectMeta:any;
+  displayName:string;
+  typeMeta:TypeMeta;
+  objectMeta:ObjectMeta;
   nodeCount: number;
   partitions: [];
   clusterName: string;
@@ -130,11 +130,6 @@ export class NodeListComponent extends ResourceListWithStatuses<NodeList, Node> 
     return ['statusicon', 'name', 'labels', 'ready', 'cpureq', 'cpulim', 'memreq', 'memlim', 'age'];
   }
 
-  getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'labels', 'ready', 'cpureq', 'cpulim', 'memreq', 'memlim', 'age'];
-  }
-
-  //added the code
   onClick(): void {
     this.verber_.showNodeCreateDialog(this.displayName, this.typeMeta, this.objectMeta); //added
   }

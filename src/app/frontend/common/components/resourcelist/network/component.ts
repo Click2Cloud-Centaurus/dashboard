@@ -84,7 +84,4 @@ export class NetworkListComponent extends ResourceListWithStatuses<NetworkList, 
     return ['statusicon', 'name', 'group', 'fullName', 'namespaced', 'age'];
   }
 
-  getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'group', 'fullName', 'namespaced', 'age'];
-  }
 }

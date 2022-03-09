@@ -1,7 +1,7 @@
 
 import {HttpParams} from '@angular/common/http';
 import {Component, Input} from '@angular/core';
-import {Role, RoleList} from '@api/backendapi';
+import {ObjectMeta, Role, RoleList, TypeMeta} from '@api/backendapi';
 import {Observable} from 'rxjs';
 
 import {ResourceListBase} from '../../../resources/list';
@@ -19,8 +19,9 @@ import {VerberService} from '../../../services/global/verber';
 })
 export class RoleListComponent extends ResourceListBase<RoleList, Role> {
   @Input() endpoint = EndpointManager.resource(Resource.role, true,true).list();
-  typeMeta:any;
-  objectMeta:any;
+
+  typeMeta:TypeMeta;
+  objectMeta:ObjectMeta;
 
   constructor(
     private readonly role_: NamespacedResourceService<RoleList>,
@@ -51,10 +52,6 @@ export class RoleListComponent extends ResourceListBase<RoleList, Role> {
   }
 
   getDisplayColumns(): string[] {
-    return ['name', 'created'];
-  }
-
-  getDisplayColumns2(): string[] {
     return ['name', 'created'];
   }
 

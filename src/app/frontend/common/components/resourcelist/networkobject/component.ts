@@ -58,7 +58,4 @@ export class NetworkObjectListComponent extends ResourceListBase<NetworkObjectLi
     return ['name', 'namespace', 'age'];
   }
 
-  getDisplayColumns2(): string[] {
-    return ['name', 'namespace', 'age'];
-  }
 }

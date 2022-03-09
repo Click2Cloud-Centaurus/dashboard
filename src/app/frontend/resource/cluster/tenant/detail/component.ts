@@ -135,10 +135,6 @@ export class NamespaceListComponent extends ResourceListWithStatuses<NamespaceLi
     return ['statusicon', 'name', 'labels', 'phase', 'age'];
   }
 
-  getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'labels', 'phase', 'age'];
-  }
-  //added the code
   onClick(): void {
     this.verber_.showNamespaceCreateDialog(this.displayName, this.typeMeta, this.objectMeta); //added showNamespaceCreateDialog
   }
@@ -205,10 +201,6 @@ export class DeploymentListComponent extends ResourceListWithStatuses<Deployment
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'labels', 'pods', 'age', 'images'];
-  }
-
-  getDisplayColumns2(): string[] {
     return ['statusicon', 'name', 'labels', 'pods', 'age', 'images'];
   }
 
@@ -284,10 +276,6 @@ export class PodListComponent extends ResourceListWithStatuses<PodList, Pod> {
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'labels', 'node', 'status', 'restarts', 'cpu', 'mem', 'age'];
-  }
-
-  getDisplayColumns2(): string[] {
     return ['statusicon', 'name', 'labels', 'node', 'status', 'restarts', 'cpu', 'mem', 'age'];
   }
 
@@ -408,10 +396,6 @@ export class ReplicaSetListComponent extends ResourceListWithStatuses<ReplicaSet
     return ['statusicon', 'name', 'labels', 'pods', 'age', 'images'];
   }
 
-  protected getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'labels', 'pods', 'age', 'images'];
-  }
-
   private shouldShowNamespaceColumn_(): boolean {
     return this.namespaceService_.areMultipleNamespacesSelected();
   }
@@ -471,10 +455,6 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'namespace', 'age'];
-  }
-
-  getDisplayColumns2(): string[] {
     return ['statusicon', 'name', 'namespace', 'age'];
   }
 

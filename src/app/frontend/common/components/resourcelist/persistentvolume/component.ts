@@ -98,18 +98,4 @@ export class PersistentVolumeListComponent extends ResourceListWithStatuses<
     ];
   }
 
-  getDisplayColumns2(): string[] {
-    return [
-      'statusicon',
-      'name',
-      'capacity',
-      'accmodes',
-      'reclaimpol',
-      'status',
-      'claim',
-      'storagecl',
-      'reason',
-      'age',
-    ];
-  }
 }

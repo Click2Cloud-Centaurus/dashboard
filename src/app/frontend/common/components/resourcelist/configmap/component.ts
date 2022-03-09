@@ -55,10 +55,6 @@ export class ConfigMapListComponent extends ResourceListBase<ConfigMapList, Conf
     return ['name', 'labels', 'age'];
   }
 
-  getDisplayColumns2(): string[] {
-    return ['name', 'labels', 'age'];
-  }
-
   private shouldShowNamespaceColumn_(): boolean {
     return this.namespaceService_.areMultipleNamespacesSelected();
   }

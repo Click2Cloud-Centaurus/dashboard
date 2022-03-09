@@ -80,10 +80,6 @@ export class ReplicationControllerListComponent extends ResourceListWithStatuses
     return ['statusicon', 'name', 'labels', 'pods', 'age', 'images'];
   }
 
-  protected getDisplayColumns2(): string[] {
-    return ['statusicon', 'name', 'labels', 'pods', 'age', 'images'];
-  }
-
   private shouldShowNamespaceColumn_(): boolean {
     return this.namespaceService_.areMultipleNamespacesSelected();
   }
