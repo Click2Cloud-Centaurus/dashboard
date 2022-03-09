@@ -14,7 +14,7 @@ import {
   Role,
   RoleList,
   NamespaceList,
-  Namespace,
+  Namespace, TenantList, Tenant,
 } from '../../../typings/backendapi';
 import {validateUniqueName} from "../../../create/from/form/validator/uniquename.validator";
 import {TenantDetail} from "@api/backendapi";
@@ -91,6 +91,7 @@ export class CreateUserDialog implements OnInit {
     private readonly ngZone_: NgZone,
     private readonly tenants_: NamespacedResourceService<TenantDetail>,
     private readonly namespace_: NamespaceService,
+    //private readonly tenant_: TenantService
   ) {}
 
   ngOnInit(): void {
@@ -145,6 +146,29 @@ export class CreateUserDialog implements OnInit {
           : this.namespaces,
       );
     });
+    this.tenant.valueChanges.subscribe((tenant: string) => {
+      if (this.name !== null) {
+        this.name.clearAsyncValidators();
+        this.name.setAsyncValidators(validateUniqueName(this.http_, tenant));
+        this.name.updateValueAndValidity();
+      }
+    });
+    this.http_.get(`api/v1/tenant`).subscribe((result: TenantList) => {
+      this.tenants = result.tenants.map((tenant: Tenant) => tenant.objectMeta.name);
+      console.log("list: ", this.tenants)
+      if (this.usertype === 'tenant-admin') {
+        this.tenant.patchValue(
+          !this.tenantService_.isCurrentSystem()
+            ? this.route_.snapshot.params.tenant || this.tenants : this.currentTenant,
+        );
+      }
+      else if (this.usertype === 'cluster-admin'){
+        this.tenant.patchValue(
+          !this.tenantService_.isCurrentSystem()
+            ? this.route_.snapshot.params.tenant || this.tenants : this.tenants,
+        );
+      }
+    });
 
     this.ngZone_.run(() => {
       const usertype = sessionStorage.getItem('userType');
@@ -194,9 +218,9 @@ export class CreateUserDialog implements OnInit {
   get name(): AbstractControl {
     return this.form1.get('name');
   }
-  get tenant(): any {
-    return this.tenantService_.current()
-  }
+  // get tenant(): any {
+  //   return this.tenantService_.current()
+  // }
   get role(): any {
     return this.form1.get('role');
   }
@@ -218,6 +242,10 @@ export class CreateUserDialog implements OnInit {
 
   get namespace(): AbstractControl {
     return this.form1.get('namespace');
+  }
+
+  get tenant(): any {
+    return this.form1.get('tenant');
   }
 
   createUser() {
@@ -294,9 +322,23 @@ export class CreateUserDialog implements OnInit {
             },
           )
           .subscribe(
-            () => {
+            (data: any) => {
+              Swal.fire({
+                type: 'success',
+                title: this.username.value,
+                text: 'user successfully created!',
+                imageUrl: '/assets/images/tick-circle.svg',
+              });
+              this.dialogRef.close(this.username.value);
+              this.serviceAccountCreated.push(Object.entries(data))
             },
-            () => {
+            () =>{
+              Swal.fire({
+                type: 'error',
+                title: this.username.value,
+                text: 'user already exists!',
+                imageUrl: '/assets/images/close-circle.svg',
+              });
             },
           );
       });
