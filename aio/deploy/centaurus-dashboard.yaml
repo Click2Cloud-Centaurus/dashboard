@@ -19,6 +19,31 @@ metadata:
 
 ---
 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: centaurus-dashboard
+  labels:
+    app: postgres
+data:
+  Postgres_DB: postgres
+  DB_Host: postgres-service
+  DB_Port: "5432"
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  namespace: centaurus-dashboard
+data:
+  DB_User: cG9zdGdyZXM=
+  DB_User_Password: c29tZVBhc3N3b3Jk
+
+---
+
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -62,30 +87,6 @@ spec:
     requests:
       storage: 25Gi
 
----
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: postgres-config
-  namespace: centaurus-dashboard
-  labels:
-    app: postgres
-data:
-  Postgres_DB: postgres
-  DB_Host: postgres-service
-  DB_Port: "5432"
-
----
-
-apiVersion: v1
-kind: Secret
-metadata:
-  name: postgres-secret
-  namespace: centaurus-dashboard
-data:
-  DB_User: cG9zdGdyZXM=
-  DB_User_Password: c29tZVBhc3N3b3Jk
 ---
 
 apiVersion: apps/v1
@@ -153,7 +154,6 @@ metadata:
   labels:
     app: postgres
 spec:
-  type: LoadBalancer
   ports:
     - port: 5432
       targetPort: 5432
@@ -274,9 +274,9 @@ metadata:
   name: centaurus-dashboard
 rules:
   # Allow Metrics Scraper to get metrics from the Metrics server
-  - apiGroups: ["*"]
-    resources: ["*"]
-    verbs: ["*"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods", "nodes"]
+    verbs: ["get", "list", "watch"]
 
 ---
 
@@ -322,7 +322,7 @@ metadata:
   name: centaurus-dashboard
   namespace: centaurus-dashboard
 spec:
-  replicas: 1
+  replicas: 2
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -368,13 +368,9 @@ spec:
             - name: KUBECONFIG_DIR
               value: /var/run/centaurus-configs
           args:
-            - --auto-generate-certificates
-            - --enable-skip-login
-            - --disable-settings-authorizer
-            - --kubeconfig=/var/run/centaurus-configs/kubeconfig-proxy
-            - --enable-insecure-login
-            - --insecure-bind-address=0.0.0.0
+            - --auto-generate-certificates=true
             - --namespace=centaurus-dashboard
+            - --kubeconfig=/var/run/centaurus-configs/kubeconfig-proxy
             # Uncomment the following line to manually specify Kubernetes API server Host
             # If not specified, Dashboard will attempt to auto discover the API server and connect
             # to it. Uncomment only if the default does not work.
@@ -402,9 +398,9 @@ spec:
           emptyDir: {}
         - name: centaurus-configs
           hostPath:
-            path: /home/coreos/centaurus-configs
+            path: /opt/centaurus-configs
       serviceAccountName: centaurus-dashboard
-      # Comment the following tolerations if Dashboard must not be deployed on master
+      # Comment the following toleration if Dashboard must not be deployed on master
       tolerations:
         - key: node-role.centaurus.io/master
           effect: NoSchedule
@@ -462,7 +458,7 @@ spec:
             - mountPath: /tmp
               name: tmp-volume
       serviceAccountName: centaurus-dashboard
-      # Comment the following tolerations if Dashboard must not be deployed on master
+      # Comment the following toleration if Dashboard must not be deployed on master
       tolerations:
         - key: node-role.centaurus.io/master
           effect: NoSchedule
