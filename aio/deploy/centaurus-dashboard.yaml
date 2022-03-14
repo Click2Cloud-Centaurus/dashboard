@@ -48,7 +48,7 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: iam-storage-class
-provisioner: centaurus.io/host-path
+provisioner: kubernetes.io/host-path
 volumeBindingMode: WaitForFirstConsumer
 
 ---
@@ -64,7 +64,7 @@ metadata:
 spec:
   storageClassName: iam-storage-class
   capacity:
-    storage: 25Gi
+    storage: 5Gi
   accessModes:
     - ReadWriteMany
   hostPath:
@@ -85,7 +85,7 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: 25Gi
+      storage: 5Gi
 
 ---
 
@@ -402,7 +402,7 @@ spec:
       serviceAccountName: centaurus-dashboard
       # Comment the following toleration if Dashboard must not be deployed on master
       tolerations:
-        - key: node-role.centaurus.io/master
+        - key: node-role.kubernetes.io/master
           effect: NoSchedule
 
 ---
@@ -460,7 +460,7 @@ spec:
       serviceAccountName: centaurus-dashboard
       # Comment the following toleration if Dashboard must not be deployed on master
       tolerations:
-        - key: node-role.centaurus.io/master
+        - key: node-role.kubernetes.io/master
           effect: NoSchedule
       volumes:
         - name: tmp-volume
