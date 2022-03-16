@@ -51,9 +51,10 @@ export class NamespaceListComponent extends ResourceListWithStatuses<NamespaceLi
   }
 
   getResourceObservable(params?: HttpParams): Observable<NamespaceList> {
+    const partition = this.tenantName === 'system' ? 'partition/' + sessionStorage.getItem(`${this.tenantName}`) + '/' : ''
     let endpoint = ''
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/tenants/${this.tenantName}/namespace`
+      endpoint = `api/v1/${partition}tenants/${this.tenantName}/namespace`
     } else {
       endpoint = this.endpoint
     }

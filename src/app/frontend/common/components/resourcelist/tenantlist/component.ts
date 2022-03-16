@@ -37,10 +37,6 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
   displayName: string;
   typeMeta: TypeMeta;
   objectMeta: ObjectMeta;
-  nodeName: string
-  clusterName: string
-  tenantList: Tenant[]
-  tenantCount: number
 
   constructor(
     readonly verber_: VerberService,
@@ -52,8 +48,6 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
     this.id = ListIdentifier.tenant;
     this.groupId = ListGroupIdentifier.cluster;
 
-    this.nodeName = this.activatedRoute_.snapshot.params.resourceName
-
     // Register status icon handlers
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
     this.registerBinding(this.icon.error, 'kd-error', this.isInErrorState);
@@ -63,22 +57,11 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
   }
 
   getResourceObservable(params?: HttpParams): Observable<TenantList> {
-    return this.tenant_.get(this.endpoint, undefined,params);
+    return this.tenant_.get(this.endpoint, undefined, params);
   }
 
   map(tenantList: TenantList): Tenant[] {
-    // this.tenantList = []
-    // this.tenantCount = 0
-    // if (tenantList.tenants !== null) {
-    //   const tenantsList: any = [];
-    //   tenantList.tenants.map((tenant)=>{
-    //     tenantsList.push(tenant);
-    //   })
-    //   this.tenantList = tenantsList
-    //   this.totalItems = this.tenantList.length
-    // }
-    // return this.tenantList;
-   return  tenantList.tenants
+   return tenantList.tenants
   }
 
   isInErrorState(resource: Tenant): boolean {
@@ -90,10 +73,16 @@ export class TenantListComponent extends ResourceListWithStatuses<TenantList, Te
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'clusterName', 'name', 'phase', 'age'];
+    return ['statusicon', 'name', 'clusterName', 'phase', 'age'];
   }
 
   onClick(): void {
     this.verber_.showTenantCreateDialog(this.displayName, this.typeMeta, this.objectMeta);  //changes needed
   }
+
+  setPartition(partitionName:string, $event:any) {
+    const resourceName = $event.target.innerHTML.replace(/^\s+|\s+$/gm,'');
+    sessionStorage.setItem(`${resourceName}`,partitionName);
+  }
+
 }

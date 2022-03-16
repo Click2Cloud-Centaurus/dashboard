@@ -49,7 +49,7 @@ import {TenantService} from "../../../../common/services/global/tenant";
 
 export class TpTenantDetailComponent implements OnInit, OnDestroy {
   private tenantSubscription_: Subscription;
-  private readonly endpoint_ = EndpointManager.resource(Resource.tenant,false,false);
+  private readonly endpoint_ = EndpointManager.resource(Resource.tenant,false,false, true);
   tenant: TenantDetail;
   isInitialized = false;
 
@@ -62,9 +62,9 @@ export class TpTenantDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const resourceName = this.activatedRoute_.snapshot.params.resourceName;
-    const resourceNamespace = this.activatedRoute_.snapshot.params.resourceNamespace;
+    const resourcePartition = sessionStorage.getItem(`${resourceName}`);
     this.tenantSubscription_ = this.tenant_
-      .get(this.endpoint_.detail(), resourceName,resourceNamespace)
+      .get(this.endpoint_.detail(), resourceName, undefined, undefined,undefined, resourcePartition)
       .subscribe((d: TenantDetail) => {
         this.tenant = d;
         this.notifications_.pushErrors(d.errors);

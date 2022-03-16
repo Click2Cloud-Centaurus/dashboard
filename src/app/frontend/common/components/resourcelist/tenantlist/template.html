@@ -41,7 +41,8 @@
                                i18n>Name</mat-header-cell>
               <mat-cell *matCellDef="let tenant">
                 <a [routerLink]="getDetailsHref(tenant.objectMeta.name)"
-                   queryParamsHandling="preserve">
+                   queryParamsHandling="preserve"
+                   (click) = setPartition(tenant.clusterName,$event)>
                   {{tenant.objectMeta.name}}
                 </a>
               </mat-cell>

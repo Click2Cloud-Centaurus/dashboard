@@ -155,7 +155,6 @@ export class CreateUserDialog implements OnInit {
     });
     this.http_.get(`api/v1/tenants/${this.currentTenant}/tenant`).subscribe((result: TenantList) => {
       this.tenants = result.tenants.map((tenant: Tenant) => tenant.objectMeta.name);
-      console.log("list: ", this.tenants)
       this.tenant.patchValue(
          this.tenant.value,
       );

@@ -46,11 +46,9 @@ export enum Resource {
   partition = 'partition',
   resourcequota = 'resourcequota',
   role = 'role',
-  tenantpartition = 'tenantpartition',
   user = 'users',
   users = 'user',
   serviceaccount= 'serviceaccount',
-  imagePullSecret= 'imagePullSecret',
   resourcePartition = 'resourcepartition',
   tenantPartition = 'tenantpartition',
   network = 'crd',
@@ -67,17 +65,18 @@ class ResourceEndpoint {
     private readonly resource_: Resource,
     private readonly namespaced_ = false,
     private readonly tenanted_ = false,
+    private readonly partitioned_ = false,
   ) {
   }
 
   list(): string {
-    return `${baseHref}${this.tenanted_ ? '/tenants/:tenant' : ''}/${this.resource_}${
+    return `${baseHref}${this.partitioned_ ? '/partition/:partition' : ''}${this.tenanted_ ? '/tenants/:tenant' : ''}/${this.resource_}${
       this.namespaced_ ? '/:namespace' : ''
     }`;
   }
 
   detail(): string {
-    return `${baseHref}${this.tenanted_ ? '/tenants/:tenant' : ''}/${this.resource_}${
+    return `${baseHref}${this.partitioned_ ? '/partition/:partition' : ''}${this.tenanted_ ? '/tenants/:tenant' : ''}/${this.resource_}${
       this.namespaced_ ? '/:namespace' : ''
     }/:name`;
   }
@@ -113,8 +112,8 @@ class UtilityEndpoint {
 }
 
 export class EndpointManager {
-  static resource(resource: Resource, namespaced?: boolean, tenanted?: boolean): ResourceEndpoint {
-    return new ResourceEndpoint(resource, namespaced, tenanted);
+  static resource(resource: Resource, namespaced?: boolean, tenanted?: boolean, partitioned?: boolean): ResourceEndpoint {
+    return new ResourceEndpoint(resource, namespaced, tenanted, partitioned);
   }
 
   static utility(utility: Utility): UtilityEndpoint {

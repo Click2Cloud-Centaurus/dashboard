@@ -51,9 +51,10 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   }
 
   getResourceObservable(params?: HttpParams): Observable<ResourceQuotaList> {
+    const partition = this.tenantName === 'system' ? 'partition/' + sessionStorage.getItem(`${this.tenantName}`) + '/' : ''
     let endpoint = ''
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/tenants/${this.tenantName}/resourcequota`
+      endpoint = `api/v1/${partition}tenants/${this.tenantName}/resourcequota`
     } else {
       endpoint = this.endpoint
     }

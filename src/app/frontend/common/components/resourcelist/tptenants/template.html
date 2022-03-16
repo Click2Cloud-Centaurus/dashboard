@@ -41,19 +41,20 @@
                                i18n>Name</mat-header-cell>
               <mat-cell *matCellDef="let tenant">
                 <a [routerLink]="getDetailsHref(tenant.objectMeta.name)"
-                   queryParamsHandling="preserve">
+                   queryParamsHandling="preserve"
+                   (click) = setPartition(tenant.clusterName,$event)>
                   {{tenant.objectMeta.name}}
                 </a>
               </mat-cell>
             </ng-container>
 
-            <ng-container [matColumnDef]="getColumns()[2]">
+            <ng-container [matColumnDef]="getColumns()[3]">
               <mat-header-cell *matHeaderCellDef
                                i18n>Phase</mat-header-cell>
               <mat-cell *matCellDef="let tenant">{{tenant.phase}}</mat-cell>
             </ng-container>
 
-            <ng-container [matColumnDef]="getColumns()[3]">
+            <ng-container [matColumnDef]="getColumns()[4]">
               <mat-header-cell *matHeaderCellDef
                                mat-sort-header
                                disableClear="true"

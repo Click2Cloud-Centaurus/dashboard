@@ -100,10 +100,15 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'phase', 'age'];
+    return ['statusicon', 'name', 'clusterName', 'phase', 'age'];
   }
 
   onClick(): void {
     this.verber_.showTenantCreateDialog(this.displayName, this.typeMeta, this.objectMeta);
+  }
+
+  setPartition(partitionName:string, $event:any) {
+    const resourceName = $event.target.innerHTML.replace(/^\s+|\s+$/gm,'');
+    sessionStorage.setItem(`${resourceName}`,partitionName);
   }
 }
