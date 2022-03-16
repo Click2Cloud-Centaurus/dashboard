@@ -58,8 +58,12 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
     this.nodeName = this.route_.snapshot.params.resourceName
 
     const routeInfo = this.router_.getCurrentNavigation();
-    this.clusterName = (routeInfo.extras.state['clusterName']).toString();
-
+    if ( routeInfo === null || routeInfo.extras.state === undefined ) {
+      this.clusterName = sessionStorage.getItem(`${this.clusterName}`)
+    } else {
+      this.clusterName = (routeInfo.extras.state['clusterName']).toString();
+      sessionStorage.setItem(`${this.clusterName}`, this.clusterName)
+    }
 
     // Register status icon handlers
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
@@ -100,7 +104,7 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'clusterName', 'phase', 'age'];
+    return ['statusicon', 'name', 'phase', 'age'];
   }
 
   onClick(): void {
