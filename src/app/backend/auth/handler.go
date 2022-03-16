@@ -108,6 +108,10 @@ func (self AuthHandler) handleLogin(request *restful.Request, response *restful.
 	if loginSpec.NameSpace == "" {
 		loginSpec.NameSpace = "default"
 	}
+  if loginSpec.Tenant == "" {
+    response.WriteError(http.StatusUnauthorized,errors.NewUnauthorized("Invalid username or password"))
+    return
+  }
   authmanager := AuthAllocator(loginSpec.Tenant, self.manager)
 	loginResponse, err :=authmanager.Login(loginSpec)
 	if err != nil {
