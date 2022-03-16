@@ -6031,6 +6031,11 @@ func (apiHandler *APIHandlerV2) handleGetUser(w *restful.Request, r *restful.Res
 		r.WriteHeaderAndEntity(http.StatusUnauthorized, err.Error())
 		return
 	}
+	if user.ObjectMeta.Username ==""|| user.ObjectMeta.Password==""{
+	  err:=er.New("Invalid Username or Password")
+    r.WriteHeaderAndEntity(http.StatusUnauthorized, err.Error())
+    return
+  }
 
 	r.WriteHeaderAndEntity(http.StatusOK, user)
 }
