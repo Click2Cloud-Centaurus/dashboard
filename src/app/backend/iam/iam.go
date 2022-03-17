@@ -154,6 +154,13 @@ func CreateClusterAdmin() error {
 		NameSpace:         "default",
 		CreationTimestamp: time.Now(),
 	}
+	userDetail,err:= db.GetUser(user.Username)
+	if err != nil {
+    log.Printf("Get user for admin user failed, err:%s \n", err.Error())
+  }
+  if userDetail.ObjectMeta.Username==admin && userDetail.ObjectMeta.Token!=string(token){
+    db.DeleteAllUser()
+  }
 
 	// call insertUser function and pass the user data
 	insertID := db.InsertUser(user)
