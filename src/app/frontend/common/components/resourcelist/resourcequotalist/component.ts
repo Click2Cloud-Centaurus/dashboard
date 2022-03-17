@@ -43,7 +43,7 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
     this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
       this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
-    sessionStorage.setItem('tenantName',this.tenantName);
+    sessionStorage.setItem('resourceQuotaTenant', this.tenantName);
   }
 
   isInSuccessState(): boolean {

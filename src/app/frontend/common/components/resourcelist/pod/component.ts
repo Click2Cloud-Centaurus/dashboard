@@ -57,7 +57,7 @@ export class PodListComponent extends ResourceListWithStatuses<PodList, Pod> {
 
     this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
       this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
-    sessionStorage.setItem('tenantName',this.tenantName);
+    sessionStorage.setItem('podTenant', this.tenantName);
   }
 
   getResourceObservable(params?: HttpParams): Observable<PodList> {

@@ -37,8 +37,8 @@ export class ResourceQuotaDetailComponent implements OnInit, OnDestroy {
     const resourceName = this.route_.snapshot.params.resourceName;
     const resourceNamespace = this.route_.snapshot.params.resourceNamespace === undefined ?
       window.history.state.namespace : this.route_.snapshot.params.resourceNamespace;
-    const resourceTenant:any = this.tenant_.current() === 'system' ?
-      sessionStorage.getItem('tenantName') : this.tenant_.current()
+    const resourceTenant = this.tenant_.current() === 'system' ?
+      sessionStorage.getItem('systemTenant') : this.tenant_.current()
 
     this.allocationData = [];
     let endpoint = ''
@@ -49,7 +49,7 @@ export class ResourceQuotaDetailComponent implements OnInit, OnDestroy {
     }
 
     this.resourceQuota_
-      .get(endpoint, resourceName, resourceNamespace, resourceTenant)
+      .get(endpoint, resourceName, resourceNamespace, undefined, resourceTenant)
       .pipe(first())
       .subscribe((d: ResourceQuotaDetail) => {
         this.resourceQuota = d;
