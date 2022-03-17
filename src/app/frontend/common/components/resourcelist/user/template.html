@@ -77,7 +77,10 @@
                                matSortDirection="asc"
                                i18n>Role</mat-header-cell>
               <mat-cell *matCellDef="let user">
-                <a routerLink="/role/{{user.objectMeta.namespace}}/{{user.objectMeta.role}}" queryParamsHandling="preserve" routerLinkActive="active">
+                <a routerLink="/role/{{user.objectMeta.namespace}}/{{user.objectMeta.role}}"
+                   queryParamsHandling="preserve"
+                   routerLinkActive="active"
+                   [state]="{tenant: user.objectMeta.tenant}" >
                   {{user.objectMeta.role}}
                 </a>
               </mat-cell>
