@@ -58,7 +58,12 @@ export class NodeListComponent extends ResourceListWithStatuses<NodeList, Node> 
     this.registerBinding(this.icon.error, 'kd-error', this.isInErrorState);
 
     const routeInfo = this.router_.getCurrentNavigation();
-    this.clusterName = (routeInfo.extras.state['clusterName']).toString();
+    if ( routeInfo === null || routeInfo.extras.state === undefined ) {
+      this.clusterName = sessionStorage.getItem('rpClusterName')
+    } else {
+      this.clusterName = (routeInfo.extras.state['clusterName']).toString();
+      sessionStorage.setItem('rpClusterName', this.clusterName)
+    }
   }
 
   getResourceObservable(params?: HttpParams): Observable<NodeList> {
