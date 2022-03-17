@@ -4732,37 +4732,36 @@ func (apiHandler *APIHandlerV2) handleGetNamespaceDetail(request *restful.Reques
 }
 
 func (apiHandler *APIHandlerV2) handleGetNamespaceDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
-	tnt := request.PathParameter("tenant")
-	var result *ns.NamespaceDetail
-
-	for _, tpManager := range apiHandler.tpManager {
-		k8sClient := tpManager.InsecureClient()
-
-		//k8sClient, err := tpManager.Client(request)
-		//if err != nil {
-		//	errors.HandleInternalError(response, err)
-		//	return
-		//}
-
-		dataSelect := parseDataSelectPathParameter(request)
-		tenantList, err := tenant.GetTenantList(k8sClient, dataSelect, tpManager.GetClusterName(), "system")
+	tenant := request.PathParameter("tenant")
+	if len(apiHandler.tpManager) == 0 {
+		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
+	}
+	client := ResourceAllocator("", tenant, apiHandler.tpManager)
+	c, err := request.Request.Cookie("tenant")
+	var CookieTenant string
+	if err != nil {
+		log.Printf("Cookie error: %v", err)
+		CookieTenant = tenant
+	} else {
+		CookieTenant = c.Value
+	}
+	log.Printf("cookie_tenant is: %s", CookieTenant)
+	var k8sClient kubernetes.Interface
+	if tenant != CookieTenant {
+		k8sClient = client.InsecureClient()
+	} else {
+		k8sClient, err = client.Client(request)
 		if err != nil {
 			errors.HandleInternalError(response, err)
 			return
 		}
-		for _, tnts := range tenantList.Tenants {
-			if tnt == tnts.ObjectMeta.Name {
-				tnts.ClusterName = tpManager.GetClusterName()
-				name := request.PathParameter("name")
-				result, err = ns.GetNamespaceDetailWithMultiTenancy(k8sClient, tnt, name)
-				if err != nil {
-					errors.HandleInternalError(response, err)
-					return
-				}
-			}
-		}
 	}
-
+	name := request.PathParameter("name")
+	result, err := ns.GetNamespaceDetailWithMultiTenancy(k8sClient, tenant, name)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
 
