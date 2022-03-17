@@ -89,7 +89,7 @@ func GetDeploymentNewReplicaSetWithMultiTenancy(client client.Interface, dsQuery
 
 	newReplicaSet := &replicaset.ReplicaSet{}
 
-	deployment, err := client.AppsV1().DeploymentsWithMultiTenancy(namespace, metaV1.TenantAll).Get(deploymentName, metaV1.GetOptions{})
+	deployment, err := client.AppsV1().DeploymentsWithMultiTenancy(namespace, tenant).Get(deploymentName, metaV1.GetOptions{})
 	if err != nil {
 		return newReplicaSet, err
 	}
