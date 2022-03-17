@@ -46,12 +46,12 @@ export class NamespaceListComponent extends ResourceListWithStatuses<NamespaceLi
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
 
     this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
-      this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
+      this.tenant_.current() : this.tenant_.resourceTenant()
     sessionStorage.setItem('namespaceTenant', this.tenantName);
   }
 
   getResourceObservable(params?: HttpParams): Observable<NamespaceList> {
-    const partition = this.tenantName === 'system' ? 'partition/' + sessionStorage.getItem(`${this.tenantName}`) + '/' : ''
+    const partition = this.tenantName === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : ''
     let endpoint = ''
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
       endpoint = `api/v1/${partition}tenants/${this.tenantName}/namespace`

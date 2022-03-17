@@ -141,8 +141,8 @@ export abstract class ResourceListBase<T extends ResourceList, R extends Resourc
     this.unsubscribe_.complete();
   }
 
-  getDetailsHref(resourceName: string, namespace?: string): string {
-    return this.stateName_ ? this.kdState_.href(this.stateName_, resourceName, namespace) : '';
+  getDetailsHref(resourceName: string, namespace?: string, tenant?: string): string {
+    return this.stateName_ ? this.kdState_.href(this.stateName_, resourceName, namespace, tenant) : '';
   }
 
   getData(): DataSource<R> {

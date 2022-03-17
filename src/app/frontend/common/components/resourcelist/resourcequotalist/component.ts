@@ -42,7 +42,7 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
 
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
     this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
-      this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
+      this.tenant_.current() : this.tenant_.resourceTenant()
     sessionStorage.setItem('resourceQuotaTenant', this.tenantName);
   }
 
@@ -51,7 +51,7 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   }
 
   getResourceObservable(params?: HttpParams): Observable<ResourceQuotaList> {
-    const partition = this.tenantName === 'system' ? 'partition/' + sessionStorage.getItem(`${this.tenantName}`) + '/' : ''
+    const partition = this.tenantName === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : ''
     let endpoint = ''
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
       endpoint = `api/v1/${partition}tenants/${this.tenantName}/resourcequota`

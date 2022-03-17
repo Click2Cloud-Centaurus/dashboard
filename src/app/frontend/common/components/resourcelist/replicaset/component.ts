@@ -59,12 +59,12 @@ export class ReplicaSetListComponent extends ResourceListWithStatuses<ReplicaSet
     // Register dynamic columns.
     this.registerDynamicColumn('namespace', 'name', this.shouldShowNamespaceColumn_.bind(this));
     this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
-      this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
+      this.tenant_.current() : this.tenant_.resourceTenant()
     sessionStorage.setItem('replicaSetTenant', this.tenantName);
   }
 
   getResourceObservable(params?: HttpParams): Observable<ReplicaSetList> {
-    const partition = this.tenantName === 'system' ? 'partition/' + sessionStorage.getItem(`${this.tenantName}`) + '/' : ''
+    const partition = this.tenantName === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : ''
     let endpoint = ''
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
       endpoint = `api/v1/${partition}tenants/${this.tenantName}/replicaset`
