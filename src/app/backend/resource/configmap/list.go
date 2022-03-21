@@ -48,10 +48,19 @@ type ConfigMap struct {
 func GetConfigMapList(client kubernetes.Interface, nsQuery *common.NamespaceQuery, dsQuery *dataselect.DataSelectQuery) (*ConfigMapList, error) {
 	log.Printf("Getting list config maps in the namespace %s", nsQuery.ToRequestParam())
 	channels := &common.ResourceChannels{
-		ConfigMapList: common.GetConfigMapListChannel(client, nsQuery, 1),
+		ConfigMapList: common.GetConfigMapListChannel(client, nsQuery,1,""),
 	}
 
 	return GetConfigMapListFromChannels(channels, dsQuery)
+}
+
+func GetConfigMapListWithMultiTenancy(client kubernetes.Interface, tenant string,nsQuery *common.NamespaceQuery, dsQuery *dataselect.DataSelectQuery) (*ConfigMapList, error) {
+  log.Printf("Getting list config maps in the namespace %s", nsQuery.ToRequestParam())
+  channels := &common.ResourceChannels{
+    ConfigMapList: common.GetConfigMapListChannel(client, nsQuery, 1,tenant),
+  }
+
+  return GetConfigMapListFromChannels(channels, dsQuery)
 }
 
 // GetConfigMapListFromChannels returns a list of all Config Maps in the cluster reading required resource list once from the channels.
@@ -67,6 +76,8 @@ func GetConfigMapListFromChannels(channels *common.ResourceChannels, dsQuery *da
 
 	return result, nil
 }
+
+
 
 func toConfigMap(meta metaV1.ObjectMeta) ConfigMap {
 	return ConfigMap{

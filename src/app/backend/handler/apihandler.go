@@ -5000,7 +5000,7 @@ func (apiHandler *APIHandlerV2) handleGetConfigMapList(request *restful.Request,
 
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
-	result, err := configmap.GetConfigMapList(k8sClient, namespace, dataSelect)
+	result, err := configmap.GetConfigMapListWithMultiTenancy(k8sClient, tenant,namespace, dataSelect)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -5022,7 +5022,7 @@ func (apiHandler *APIHandlerV2) handleGetConfigMapDetail(request *restful.Reques
 
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("configmap")
-	result, err := configmap.GetConfigMapDetail(k8sClient, namespace, name)
+	result, err := configmap.GetConfigMapDetailWithMultiTenancy(k8sClient, namespace, name,tenant)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
