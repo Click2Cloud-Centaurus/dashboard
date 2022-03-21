@@ -42,6 +42,7 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
   clusterName: string;
   tenantList: Tenant[];
   tenantCount: number;
+  pageNo: number;
 
   constructor(
     readonly verber_: VerberService,
@@ -73,7 +74,8 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
   }
 
-  getResourceObservable(): Observable<TenantList> {
+  getResourceObservable(params?: HttpParams): Observable<TenantList> {
+    this.pageNo =  Number(params.get("page"))
     return this.tenant_.get(this.endpoint, undefined);
   }
 
@@ -89,8 +91,8 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
           tenantsList.push(tenant);
         }
       })
-      this.tenantList = tenantsList
-      this.totalItems = this.tenantList.length
+      this.tenantList = tenantsList.slice((this.pageNo - 1) * 10, this.pageNo * 10)
+      this.totalItems = tenantsList.length
     }
     return this.tenantList;
   }
