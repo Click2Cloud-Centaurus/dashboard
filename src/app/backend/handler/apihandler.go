@@ -721,10 +721,17 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 			To(apiHandler.handleGetNamespaceDetailWithMultiTenancy).
 			Writes(ns.NamespaceDetail{}))
 	apiV1Ws.Route(
+		apiV1Ws.GET("/partition/{partition}/tenants/{tenant}/namespace/{name}").
+			To(apiHandler.handleGetNamespaceDetailWithMultiTenancy).
+			Writes(ns.NamespaceDetail{}))
+	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/namespace/{name}/event").
 			To(apiHandler.handleGetNamespaceEventsWithMultiTenancy).
 			Writes(common.EventList{}))
-
+	apiV1Ws.Route(
+		apiV1Ws.GET("/partition/{partition}/tenants/{tenant}/namespace/{name}/event").
+			To(apiHandler.handleGetNamespaceEventsWithMultiTenancy).
+			Writes(common.EventList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/secret").
 			To(apiHandler.handleGetSecretList).
@@ -4302,11 +4309,11 @@ func (apiHandler *APIHandlerV2) handleDeleteRolesWithMultiTenancy(request *restf
 
 func (apiHandler *APIHandlerV2) handleAddResourceQuota(request *restful.Request, response *restful.Response) {
 	log.Printf("Adding Quota")
-  resourceQuotaSpec := new(resourcequota.ResourceQuotaSpec)
-  if err := request.ReadEntity(resourceQuotaSpec); err != nil {
-    errors.HandleInternalError(response, err)
-    return
-  }
+	resourceQuotaSpec := new(resourcequota.ResourceQuotaSpec)
+	if err := request.ReadEntity(resourceQuotaSpec); err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
 	//tenant := request.PathParameter("tenant")
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
@@ -4318,7 +4325,6 @@ func (apiHandler *APIHandlerV2) handleAddResourceQuota(request *restful.Request,
 		errors.HandleInternalError(response, err)
 		return
 	}
-
 
 	//tenant := request.PathParameter("tenant")
 	//namespace := request.PathParameter("namespace")
@@ -4735,10 +4741,11 @@ func (apiHandler *APIHandlerV2) handleGetNamespaceDetail(request *restful.Reques
 
 func (apiHandler *APIHandlerV2) handleGetNamespaceDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	partition := request.PathParameter("partition")
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-	client := ResourceAllocator("", tenant, apiHandler.tpManager)
+	client := ResourceAllocator(partition, tenant, apiHandler.tpManager)
 	c, err := request.Request.Cookie("tenant")
 	var CookieTenant string
 	if err != nil {
@@ -4749,7 +4756,7 @@ func (apiHandler *APIHandlerV2) handleGetNamespaceDetailWithMultiTenancy(request
 	}
 	log.Printf("cookie_tenant is: %s", CookieTenant)
 	var k8sClient kubernetes.Interface
-	if tenant != CookieTenant {
+	if tenant != CookieTenant || partition != "" {
 		k8sClient = client.InsecureClient()
 	} else {
 		k8sClient, err = client.Client(request)
@@ -4791,10 +4798,11 @@ func (apiHandler *APIHandlerV2) handleGetNamespaceEvents(request *restful.Reques
 
 func (apiHandler *APIHandlerV2) handleGetNamespaceEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	partition := request.PathParameter("partition")
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-	client := ResourceAllocator("", tenant, apiHandler.tpManager)
+	client := ResourceAllocator(partition, tenant, apiHandler.tpManager)
 	c, err := request.Request.Cookie("tenant")
 	var CookieTenant string
 	if err != nil {
@@ -4805,7 +4813,7 @@ func (apiHandler *APIHandlerV2) handleGetNamespaceEventsWithMultiTenancy(request
 	}
 	log.Printf("cookie_tenant is: %s", CookieTenant)
 	var k8sClient kubernetes.Interface
-	if tenant != CookieTenant {
+	if tenant != CookieTenant || partition != "" {
 		k8sClient = client.InsecureClient()
 	} else {
 		k8sClient, err = client.Client(request)
