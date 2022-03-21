@@ -71,7 +71,7 @@ type ResourceQuotaDetailList struct {
 
 func AddResourceQuotas(client k8sClient.Interface, namespace string, tenant string, spec *ResourceQuotaSpec) (*v1.ResourceQuota, error) {
 	if tenant == "" {
-		tenant = "default"
+		tenant = "system"
 	}
 	ns, err := client.CoreV1().NamespacesWithMultiTenancy(tenant).Get(namespace, metaV1.GetOptions{})
 	if err != nil {

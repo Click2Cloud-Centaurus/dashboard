@@ -4302,21 +4302,23 @@ func (apiHandler *APIHandlerV2) handleDeleteRolesWithMultiTenancy(request *restf
 
 func (apiHandler *APIHandlerV2) handleAddResourceQuota(request *restful.Request, response *restful.Response) {
 	log.Printf("Adding Quota")
-	tenant := request.PathParameter("tenant")
+  resourceQuotaSpec := new(resourcequota.ResourceQuotaSpec)
+  if err := request.ReadEntity(resourceQuotaSpec); err != nil {
+    errors.HandleInternalError(response, err)
+    return
+  }
+	//tenant := request.PathParameter("tenant")
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-	client := ResourceAllocator("", tenant, apiHandler.tpManager)
+
+	client := ResourceAllocator("", resourceQuotaSpec.Tenant, apiHandler.tpManager)
 	k8sClient, err := client.Client(request)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	resourceQuotaSpec := new(resourcequota.ResourceQuotaSpec)
-	if err := request.ReadEntity(resourceQuotaSpec); err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
+
 
 	//tenant := request.PathParameter("tenant")
 	//namespace := request.PathParameter("namespace")
