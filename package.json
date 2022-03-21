@@ -1,13 +1,13 @@
 {
-  "name": "kubernetes-dashboard",
-  "version": "2.0.0-beta4",
+  "name": "centaurus-dashboard",
+  "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/kubernetes/dashboard.git"
   },
   "license": "Apache-2.0",
   "scripts": {
-    "start": "concurrently \"npm run start:backend --kubernetes-dashboard:sidecar_host=$npm_package_config_sidecar_host\" \"npm run start:frontend --kubernetes-dashboard:bind_address=$npm_package_config_bind_address\"",
+    "start": "concurrently \"npm run start:backend --centaurus-dashboard:sidecar_host=$npm_package_config_sidecar_host\" \"npm run start:frontend --centaurus-dashboard:bind_address=$npm_package_config_bind_address\"",
     "start:https": "concurrently \"npm run start:backend:https\" \"npm run start:frontend:https\"",
     "start:frontend": "npm run postversion && ng serve --aot --progress=false --proxy-config aio/proxy.conf.json --host=$npm_package_config_bind_address",
     "start:frontend:https": "node aio/scripts/version.js && ng serve --progress=false --aot --proxy-config aio/https-proxy.conf.json --ssl --host=$npm_package_config_bind_address",

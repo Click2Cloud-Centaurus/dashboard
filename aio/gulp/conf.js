@@ -53,7 +53,7 @@ const version = {
   /**
    * Current release version of the project.
    */
-  release: 'v2.0.0-beta4',
+  release: 'v0.0.1',
   /**
    * Version name of the head release of the project.
    */
@@ -61,7 +61,7 @@ const version = {
   /**
    * Year of last source change of the project
    */
-  year: '2019',
+  year: '2022',
 };
 
 /**
