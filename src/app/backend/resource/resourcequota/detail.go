@@ -145,7 +145,7 @@ func AddResourceQuotas(client k8sClient.Interface, namespace string, tenant stri
 
 func DeleteResourceQuota(client k8sClient.Interface, namespace string, tenant string, name string) error {
 	if tenant == "" {
-		tenant = "default"
+		tenant = "system"
 	}
 	ns, err := client.CoreV1().NamespacesWithMultiTenancy(tenant).Get(namespace, metaV1.GetOptions{})
 	if err != nil {
@@ -182,7 +182,7 @@ func GetResourceQuotaList(client k8sClient.Interface, namespace *common.Namespac
 
 func GetResourceQuotaListsWithMultiTenancy(client k8sClient.Interface, namespace string, tenant string) (*ResourceQuotaDetailList, error) {
 	if tenant == "" {
-		tenant = "default"
+		tenant = "system"
 	}
 	ns, err := client.CoreV1().NamespacesWithMultiTenancy(tenant).Get(namespace, metaV1.GetOptions{})
 	if err != nil {
@@ -208,7 +208,7 @@ func GetResourceQuotaListsWithMultiTenancy(client k8sClient.Interface, namespace
 
 func GetResourceQuotaDetails(client k8sClient.Interface, namespace string, tenant string, name string) (*ResourceQuotaDetail, error) {
 	if tenant == "" {
-		tenant = "default"
+		tenant = "system"
 	}
 	ns, err := client.CoreV1().NamespacesWithMultiTenancy(tenant).Get(namespace, metaV1.GetOptions{})
 	if err != nil {
