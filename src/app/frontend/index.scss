@@ -486,6 +486,7 @@ router-outlet::after {
 .mat-drawer .kd-namespace-select-title {
   font-size: 11px !important;
   margin-bottom: 3px !important;
+  margin-top: -10px !important;
 }
 .mat-drawer .mat-form-field-infix {
   flex: initial !important;
@@ -655,11 +656,9 @@ router-outlet::after {
 .mat-card {
   margin: 12px 20px !important;
 }
-.mt_10 {
-  margin-top: 10px !important;
-}
 .create_btn_sec {
   margin-right: 20px !important;
+  margin-top: -10px !important;
 }
 .create_btn_sec .mat-raised-button {
   font-size: 11px !important;
