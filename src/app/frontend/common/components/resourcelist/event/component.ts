@@ -22,6 +22,7 @@ import {ResourceListWithStatuses} from '../../../resources/list';
 import {NotificationsService} from '../../../services/global/notifications';
 import {NamespacedResourceService} from '../../../services/resource/resource';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
+import {TenantService} from "../../../services/global/tenant";
 
 const EVENT_TYPE_WARNING = 'Warning';
 
@@ -29,9 +30,12 @@ const EVENT_TYPE_WARNING = 'Warning';
 export class EventListComponent extends ResourceListWithStatuses<EventList, Event>
   implements OnInit {
   @Input() endpoint: string;
+  private tenantName: string;
+  private partition: string;
 
   constructor(
     private readonly eventList: NamespacedResourceService<EventList>,
+    private readonly tenant_: TenantService,
     notifications: NotificationsService,
   ) {
     super('', notifications);
@@ -41,6 +45,10 @@ export class EventListComponent extends ResourceListWithStatuses<EventList, Even
     // Register status icon handler
     this.registerBinding(this.icon.warning, 'kd-warning', this.isWarning);
     this.registerBinding(this.icon.none, '', this.isNormal.bind(this));
+
+    this.tenantName = this.tenant_.current() === 'system' ?
+      sessionStorage.getItem('currentTenant') : this.tenant_.current()
+    this.partition = this.tenantName === 'system' ? this.tenant_.tenantPartition() : ''
   }
 
   ngOnInit(): void {
@@ -60,7 +68,7 @@ export class EventListComponent extends ResourceListWithStatuses<EventList, Even
   }
 
   getResourceObservable(params?: HttpParams): Observable<EventList> {
-    return this.eventList.get(this.endpoint, undefined, undefined, params);
+    return this.eventList.get(this.endpoint, undefined, undefined, params, this.tenantName, this.partition);
   }
 
   map(eventList: EventList): Event[] {

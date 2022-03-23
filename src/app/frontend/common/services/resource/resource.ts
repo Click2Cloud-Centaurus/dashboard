@@ -113,7 +113,8 @@ export class NamespacedResourceService<T> extends ResourceBase<T> {
     }
 
     if (partition) {
-      endpoint = endpoint.replace(':partition', sessionStorage.getItem(`${name}`));
+      tenant = name === null ? sessionStorage.getItem('currentTenant') : name
+      endpoint = endpoint.replace(':partition', sessionStorage.getItem(tenant));
     }
 
     if (tenant) {
