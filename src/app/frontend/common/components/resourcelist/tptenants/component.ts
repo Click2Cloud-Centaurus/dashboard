@@ -115,11 +115,13 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
 
   setPartition(partitionName:string, $event:any) {
     const resourceName = $event.target.innerHTML.replace(/^\s+|\s+$/gm,'');
-    if (sessionStorage.getItem(`${resourceName}`)) {
-      sessionStorage.removeItem(resourceName)
-      sessionStorage.removeItem('currentTpTenant')
+    if (sessionStorage.getItem('currentTenant')) {
+      sessionStorage.removeItem('currentTenant')
     }
-    sessionStorage.setItem('currentTpTenant', resourceName)
-    sessionStorage.setItem(`${resourceName}`,partitionName);;
+    if (sessionStorage.getItem(`${resourceName}`)) {
+      sessionStorage.removeItem(`${resourceName}`)
+    }
+    sessionStorage.setItem('currentTenant', resourceName);
+    sessionStorage.setItem(`${resourceName}`,partitionName);
   }
 }
