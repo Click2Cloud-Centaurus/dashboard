@@ -351,7 +351,15 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 			To(apiHandler.handleGetReplicaSetDetailWithMultiTenancy).
 			Writes(replicaset.ReplicaSetDetail{}))
 	apiV1Ws.Route(
+		apiV1Ws.GET("/partition/{partition}/tenants/{tenant}/replicaset/{namespace}/{replicaSet}").
+			To(apiHandler.handleGetReplicaSetDetailWithMultiTenancy).
+			Writes(replicaset.ReplicaSetDetail{}))
+	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicaset/{namespace}/{replicaSet}/pod").
+			To(apiHandler.handleGetReplicaSetPodsWithMutiTenancy).
+			Writes(pod.PodList{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/partition/{partition}/tenants/{tenant}/replicaset/{namespace}/{replicaSet}/pod").
 			To(apiHandler.handleGetReplicaSetPodsWithMutiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
@@ -359,7 +367,15 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 			To(apiHandler.handleGetReplicaSetServicesWithMultiTenancy).
 			Writes(pod.PodList{}))
 	apiV1Ws.Route(
+		apiV1Ws.GET("/partition/{partition}/tenants/{tenant}/replicaset/{namespace}/{replicaSet}/service").
+			To(apiHandler.handleGetReplicaSetServicesWithMultiTenancy).
+			Writes(pod.PodList{}))
+	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/replicaset/{namespace}/{replicaSet}/event").
+			To(apiHandler.handleGetReplicaSetEventsWithMultiTenancy).
+			Writes(common.EventList{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/partition/{partition}/tenants/{tenant}/replicaset/{namespace}/{replicaSet}/event").
 			To(apiHandler.handleGetReplicaSetEventsWithMultiTenancy).
 			Writes(common.EventList{}))
 
@@ -414,6 +430,10 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 			Writes(vm.VMList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/pod/{namespace}/{pod}").
+			To(apiHandler.handleGetPodDetailWithMultiTenancy).
+			Writes(pod.PodDetail{}))
+	apiV1Ws.Route(
+		apiV1Ws.GET("/partition/{partition}/tenants/{tenant}/pod/{namespace}/{pod}").
 			To(apiHandler.handleGetPodDetailWithMultiTenancy).
 			Writes(pod.PodDetail{}))
 	apiV1Ws.Route(
@@ -2683,10 +2703,11 @@ func (apiHandler *APIHandlerV2) handleGetReplicaSetDetail(request *restful.Reque
 
 func (apiHandler *APIHandlerV2) handleGetReplicaSetDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	partition := request.PathParameter("partition")
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-	client := ResourceAllocator("", tenant, apiHandler.tpManager)
+	client := ResourceAllocator(partition, tenant, apiHandler.tpManager)
 	c, err := request.Request.Cookie("tenant")
 	var CookieTenant string
 	if err != nil {
@@ -2697,7 +2718,7 @@ func (apiHandler *APIHandlerV2) handleGetReplicaSetDetailWithMultiTenancy(reques
 	}
 	log.Printf("cookie_tenant is: %s", CookieTenant)
 	var k8sClient kubernetes.Interface
-	if tenant != CookieTenant {
+	if tenant != CookieTenant || partition != "" {
 		k8sClient = client.InsecureClient()
 	} else {
 		k8sClient, err = client.Client(request)
@@ -2745,10 +2766,11 @@ func (apiHandler *APIHandlerV2) handleGetReplicaSetPods(request *restful.Request
 
 func (apiHandler *APIHandlerV2) handleGetReplicaSetPodsWithMutiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	partition := request.PathParameter("partition")
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-	client := ResourceAllocator("", tenant, apiHandler.tpManager)
+	client := ResourceAllocator(partition, tenant, apiHandler.tpManager)
 	c, err := request.Request.Cookie("tenant")
 	var CookieTenant string
 	if err != nil {
@@ -2759,7 +2781,7 @@ func (apiHandler *APIHandlerV2) handleGetReplicaSetPodsWithMutiTenancy(request *
 	}
 	log.Printf("cookie_tenant is: %s", CookieTenant)
 	var k8sClient kubernetes.Interface
-	if tenant != CookieTenant {
+	if tenant != CookieTenant || partition != "" {
 		k8sClient = client.InsecureClient()
 	} else {
 		k8sClient, err = client.Client(request)
@@ -2808,10 +2830,11 @@ func (apiHandler *APIHandlerV2) handleGetReplicaSetServices(request *restful.Req
 
 func (apiHandler *APIHandlerV2) handleGetReplicaSetServicesWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	partition := request.PathParameter("partition")
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-	client := ResourceAllocator("", tenant, apiHandler.tpManager)
+	client := ResourceAllocator(partition, tenant, apiHandler.tpManager)
 	c, err := request.Request.Cookie("tenant")
 	var CookieTenant string
 	if err != nil {
@@ -2822,7 +2845,7 @@ func (apiHandler *APIHandlerV2) handleGetReplicaSetServicesWithMultiTenancy(requ
 	}
 	log.Printf("cookie_tenant is: %s", CookieTenant)
 	var k8sClient kubernetes.Interface
-	if tenant != CookieTenant {
+	if tenant != CookieTenant || partition != "" {
 		k8sClient = client.InsecureClient()
 	} else {
 		k8sClient, err = client.Client(request)
@@ -2871,10 +2894,11 @@ func (apiHandler *APIHandlerV2) handleGetReplicaSetEvents(request *restful.Reque
 
 func (apiHandler *APIHandlerV2) handleGetReplicaSetEventsWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	partition := request.PathParameter("partition")
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-	client := ResourceAllocator("", tenant, apiHandler.tpManager)
+	client := ResourceAllocator(partition, tenant, apiHandler.tpManager)
 	c, err := request.Request.Cookie("tenant")
 	var CookieTenant string
 	if err != nil {
@@ -2885,7 +2909,7 @@ func (apiHandler *APIHandlerV2) handleGetReplicaSetEventsWithMultiTenancy(reques
 	}
 	log.Printf("cookie_tenant is: %s", CookieTenant)
 	var k8sClient kubernetes.Interface
-	if tenant != CookieTenant {
+	if tenant != CookieTenant || partition != "" {
 		k8sClient = client.InsecureClient()
 	} else {
 		k8sClient, err = client.Client(request)
@@ -3433,10 +3457,11 @@ func (apiHandler *APIHandlerV2) handleGetPodDetail(request *restful.Request, res
 
 func (apiHandler *APIHandlerV2) handleGetPodDetailWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	partition := request.PathParameter("partition")
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-	client := ResourceAllocator("", tenant, apiHandler.tpManager)
+	client := ResourceAllocator(partition, tenant, apiHandler.tpManager)
 	c, err := request.Request.Cookie("tenant")
 	var CookieTenant string
 	if err != nil {
@@ -3447,7 +3472,7 @@ func (apiHandler *APIHandlerV2) handleGetPodDetailWithMultiTenancy(request *rest
 	}
 	log.Printf("cookie_tenant is: %s", CookieTenant)
 	var k8sClient kubernetes.Interface
-	if tenant != CookieTenant {
+	if tenant != CookieTenant || partition != "" {
 		k8sClient = client.InsecureClient()
 	} else {
 		k8sClient, err = client.Client(request)
@@ -5000,7 +5025,7 @@ func (apiHandler *APIHandlerV2) handleGetConfigMapList(request *restful.Request,
 
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parseDataSelectPathParameter(request)
-	result, err := configmap.GetConfigMapListWithMultiTenancy(k8sClient, tenant,namespace, dataSelect)
+	result, err := configmap.GetConfigMapListWithMultiTenancy(k8sClient, tenant, namespace, dataSelect)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -5022,7 +5047,7 @@ func (apiHandler *APIHandlerV2) handleGetConfigMapDetail(request *restful.Reques
 
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("configmap")
-	result, err := configmap.GetConfigMapDetailWithMultiTenancy(k8sClient, namespace, name,tenant)
+	result, err := configmap.GetConfigMapDetailWithMultiTenancy(k8sClient, namespace, name, tenant)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
