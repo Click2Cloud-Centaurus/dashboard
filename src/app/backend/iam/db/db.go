@@ -256,7 +256,7 @@ db := CreateConnection()
 defer db.Close()
 
 // create the delete sql query
-sqlStatement := `DELETE * FROM userdetails`
+sqlStatement := `DELETE FROM userdetails`
 
 // execute the sql statement
 res, err := db.Exec(sqlStatement)
