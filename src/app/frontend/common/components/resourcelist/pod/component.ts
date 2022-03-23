@@ -63,12 +63,8 @@ export class PodListComponent extends ResourceListWithStatuses<PodList, Pod> {
   getResourceObservable(params?: HttpParams): Observable<PodList> {
     const partition = this.tenantName === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : ''
     let endpoint = ''
-    if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      if (this.endpoint.includes('replicaset')) {
-        endpoint = this.endpoint
-      } else {
-        endpoint = `api/v1/${partition}tenants/${this.tenantName}/pod`
-      }
+    if (sessionStorage.getItem('userType') === 'cluster-admin' && !this.endpoint.includes('/replicaset/')) {
+      endpoint = `api/v1/${partition}tenants/${this.tenantName}/pod`
     } else {
       endpoint = this.endpoint
     }

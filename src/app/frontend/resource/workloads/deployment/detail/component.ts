@@ -62,19 +62,21 @@ export class DeploymentDetailComponent implements OnInit, OnDestroy {
     } else {
       endpoint = this.endpoint_.detail()
     }
-
+    const partition = resourceTenant === 'system' ? this.tenant_.tenantPartition() : ''
     this.eventListEndpoint = this.endpoint_.child(resourceName, Resource.event, resourceNamespace, resourceTenant);
     this.oldReplicaSetsEndpoint = this.endpoint_.child(
       resourceName,
       Resource.oldReplicaSet,
       resourceNamespace,
       resourceTenant,
+      partition,
     );
     this.newReplicaSetEndpoint = this.endpoint_.child(
       resourceName,
       Resource.newReplicaSet,
       resourceNamespace,
       resourceTenant,
+      partition,
     );
 
     this.deployment_

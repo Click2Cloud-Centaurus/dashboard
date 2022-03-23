@@ -507,10 +507,17 @@ func CreateHTTPAPIHandler(iManager integration.IntegrationManager, tpManager cli
 			To(apiHandler.handleGetDeploymentOldReplicaSetsWithMultiTenancy).
 			Writes(replicaset.ReplicaSetList{}))
 	apiV1Ws.Route(
+		apiV1Ws.GET("/partition/{partition}/tenants/{tenant}/deployment/{namespace}/{deployment}/oldreplicaset").
+			To(apiHandler.handleGetDeploymentOldReplicaSetsWithMultiTenancy).
+			Writes(replicaset.ReplicaSetList{}))
+	apiV1Ws.Route(
 		apiV1Ws.GET("/tenants/{tenant}/deployment/{namespace}/{deployment}/newreplicaset").
 			To(apiHandler.handleGetDeploymentNewReplicaSetWithMultiTenancy).
 			Writes(replicaset.ReplicaSet{}))
-
+	apiV1Ws.Route(
+		apiV1Ws.GET("/partition/{partition}/tenants/{tenant}/deployment/{namespace}/{deployment}/newreplicaset").
+			To(apiHandler.handleGetDeploymentNewReplicaSetWithMultiTenancy).
+			Writes(replicaset.ReplicaSet{}))
 	apiV1Ws.Route(
 		apiV1Ws.PUT("/scale/{kind}/{namespace}/{name}/").
 			To(apiHandler.handleScaleResource).
@@ -3268,14 +3275,30 @@ func (apiHandler *APIHandlerV2) handleGetDeploymentOldReplicaSets(request *restf
 
 func (apiHandler *APIHandlerV2) handleGetDeploymentOldReplicaSetsWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	partition := request.PathParameter("partition")
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-	client := ResourceAllocator("", tenant, apiHandler.tpManager)
-	k8sClient, err := client.Client(request)
+	client := ResourceAllocator(partition, tenant, apiHandler.tpManager)
+
+	c, err := request.Request.Cookie("tenant")
+	var CookieTenant string
 	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
+		log.Printf("Cookie error: %v", err)
+		CookieTenant = tenant
+	} else {
+		CookieTenant = c.Value
+	}
+	log.Printf("cookie_tenant is: %s", CookieTenant)
+	var k8sClient kubernetes.Interface
+	if tenant != CookieTenant || partition != "" {
+		k8sClient = client.InsecureClient()
+	} else {
+		k8sClient, err = client.Client(request)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
 	}
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("deployment")
@@ -3315,10 +3338,12 @@ func (apiHandler *APIHandlerV2) handleGetDeploymentNewReplicaSet(request *restfu
 
 func (apiHandler *APIHandlerV2) handleGetDeploymentNewReplicaSetWithMultiTenancy(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
+	partition := request.PathParameter("partition")
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
-	client := ResourceAllocator("", tenant, apiHandler.tpManager)
+	client := ResourceAllocator(partition, tenant, apiHandler.tpManager)
+
 	c, err := request.Request.Cookie("tenant")
 	var CookieTenant string
 	if err != nil {
@@ -3329,7 +3354,7 @@ func (apiHandler *APIHandlerV2) handleGetDeploymentNewReplicaSetWithMultiTenancy
 	}
 	log.Printf("cookie_tenant is: %s", CookieTenant)
 	var k8sClient kubernetes.Interface
-	if tenant != CookieTenant {
+	if tenant != CookieTenant || partition != "" {
 		k8sClient = client.InsecureClient()
 	} else {
 		k8sClient, err = client.Client(request)
