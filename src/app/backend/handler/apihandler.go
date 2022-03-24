@@ -5134,9 +5134,6 @@ func (apiHandler *APIHandlerV2) handleGetConfigMapList(request *restful.Request,
 func (apiHandler *APIHandlerV2) handleGetConfigMapDetail(request *restful.Request, response *restful.Response) {
 	tenant := request.PathParameter("tenant")
 	partition := request.PathParameter("partition")
-	if partition == ":partition" {
-		partition = ""
-	}
 	if len(apiHandler.tpManager) == 0 {
 		apiHandler.tpManager = append(apiHandler.tpManager, apiHandler.defaultClientmanager)
 	}
