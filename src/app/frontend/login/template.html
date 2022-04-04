@@ -16,14 +16,10 @@ limitations under the License.
 
 <div class="kd-login-container kd-bg-background login_container" fxFlex>
 
-  <!-- <mat-card *ngFor="let error of errors" class="kd-error-container kd-bg-error kd-accent">
-    <img src="/assets/images/danger.svg">
-    <div class="kd-error-text">{{error.status}} ({{error.code}}): {{error.message}}</div>
-  </mat-card> -->
-
   <kd-card titleClasses="kd-card-top-radius kd-bg-primary kd-accent" class="kd-login-card" [expandable]="false">
     <div content>
-      <img class="image-logo" src="/assets/images/logo_centaurus.svg">
+      <img class="login_logo_icon" src="assets/images/centaurus-logo-icon.png" alt="">
+      <img class="login_logo_text" src="assets/images/centaurus-logo-text.svg" alt="">
       <form  fxLayout="column" (ngSubmit)="login()">
         <ng-container [ngSwitch]="selectedAuthenticationMode">
           <mat-form-field *ngSwitchCase="loginModes.Token" class="kd-login-input">
@@ -49,7 +45,7 @@ limitations under the License.
 
           <div class="alert_section_outer">
             <div class="alert_section" *ngFor="let error of errors">
-              <img src="/assets/images/danger.svg">
+              <img src="../assets/images/danger.svg">
               <span class="kd-error-text">{{error.status}} ({{error.code}}): {{error.message}}</span>
             </div>
           </div>
