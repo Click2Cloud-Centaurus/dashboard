@@ -63,8 +63,7 @@ export class CRDObjectDetailComponent implements OnInit, OnDestroy {
     private readonly renderer_: Renderer2,
     private readonly tenant_: TenantService,
   ) {
-    this.tenantName = this.tenant_.current() === 'system' && sessionStorage.getItem('crdPartition') !== null ?
-      this.tenant_.current() : this.tenant_.resourceTenant()
+    this.tenantName = this.tenant_.current();
     this.partitionName = this.tenantName === 'system' ? sessionStorage.getItem('crdPartition') : ''
     this.partition = this.tenantName === 'system' ? 'partition/' + sessionStorage.getItem('crdPartition') + '/' : ''
   }
