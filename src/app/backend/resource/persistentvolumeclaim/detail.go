@@ -40,6 +40,18 @@ func GetPersistentVolumeClaimDetail(client kubernetes.Interface, namespace strin
 	return getPersistentVolumeClaimDetail(*pvc), nil
 }
 
+// GetPersistentVolumeClaimDetailWithMultiTenancy returns detailed information about a persistent volume claim
+func GetPersistentVolumeClaimDetailWithMultiTenancy(client kubernetes.Interface, namespace string, tenant string, name string) (*PersistentVolumeClaimDetail, error) {
+	log.Printf("Getting details of %s persistent volume claim", name)
+
+	pvc, err := client.CoreV1().PersistentVolumeClaimsWithMultiTenancy(namespace, tenant).Get(name, metaV1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return getPersistentVolumeClaimDetail(*pvc), nil
+}
+
 func getPersistentVolumeClaimDetail(pvc v1.PersistentVolumeClaim) *PersistentVolumeClaimDetail {
 	return &PersistentVolumeClaimDetail{
 		PersistentVolumeClaim: toPersistentVolumeClaim(pvc),

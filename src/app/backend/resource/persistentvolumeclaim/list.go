@@ -23,6 +23,7 @@ import (
 	"github.com/CentaurusInfra/dashboard/src/app/backend/resource/dataselect"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
+	client "k8s.io/client-go/kubernetes"
 )
 
 // PersistentVolumeClaimListComponent contains a list of Persistent Volume Claims in the cluster.
@@ -56,6 +57,17 @@ func GetPersistentVolumeClaimList(client kubernetes.Interface, nsQuery *common.N
 		PersistentVolumeClaimList: common.GetPersistentVolumeClaimListChannel(client, nsQuery, 1),
 	}
 
+	return GetPersistentVolumeClaimListFromChannels(channels, nsQuery, dsQuery)
+}
+
+// GetPersistentVolumeClaimListWithMultiTenancy returns a list of all Persistent Volume Claims in the cluster.
+func GetPersistentVolumeClaimListWithMultiTenancy(client client.Interface, tenant string, nsQuery *common.NamespaceQuery,
+	dsQuery *dataselect.DataSelectQuery) (*PersistentVolumeClaimList, error) {
+
+	log.Print("Getting list persistent volumes claims")
+	channels := &common.ResourceChannels{
+		PersistentVolumeClaimList: common.GetPersistentVolumeClaimListChannelWithMultiTenancy(client, tenant, nsQuery, 1),
+	}
 	return GetPersistentVolumeClaimListFromChannels(channels, nsQuery, dsQuery)
 }
 

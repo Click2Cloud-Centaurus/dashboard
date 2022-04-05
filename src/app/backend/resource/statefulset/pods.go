@@ -28,6 +28,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	k8sClient "k8s.io/client-go/kubernetes"
 )
 
 // GetStatefulSetPods return list of pods targeting pet set.
@@ -42,6 +43,25 @@ func GetStatefulSetPods(client kubernetes.Interface, metricClient metricapi.Metr
 	}
 
 	events, err := event.GetPodsEvents(client, namespace, pods)
+	nonCriticalErrors, criticalError := errors.HandleError(err)
+	if criticalError != nil {
+		return nil, criticalError
+	}
+
+	podList := pod.ToPodList(pods, events, nonCriticalErrors, dsQuery, metricClient)
+	return &podList, nil
+}
+
+func GetStatefulSetPodsWithMultiTenancy(client k8sClient.Interface, metricClient metricapi.MetricClient, tenant string,
+	dsQuery *dataselect.DataSelectQuery, StatefulSetName, namespace string) (*pod.PodList, error) {
+	log.Printf("Getting replication controller %s pods in namespace %s for %s", StatefulSetName, namespace, tenant)
+
+	pods, err := getRawStatefulSetPodsWithMultiTenancy(client, tenant, StatefulSetName, namespace)
+	if err != nil {
+		return pod.EmptyPodList, err
+	}
+
+	events, err := event.GetPodsEventsWithMultiTenancy(client, tenant, namespace, pods)
 	nonCriticalErrors, criticalError := errors.HandleError(err)
 	if criticalError != nil {
 		return nil, criticalError
