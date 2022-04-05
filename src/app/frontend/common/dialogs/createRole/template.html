@@ -32,18 +32,22 @@ limitations under the License.
         <span class="red" *ngIf="role.hasError('maxlength')">Name should not be greater than 24 characters.</span>
       </div>
     </div>
+
     <div class="col-10 col-sm-10 col-md-10 col-lg-10">
-      <mat-form-field appearance="fill">
-        <mat-label>Enter Namespace</mat-label>
-        <input matInput type="text"   formControlName="namespace" required autocomplete="off"/>
-        <mat-hint align="end"></mat-hint>
-      </mat-form-field>
-      <div class="error_sec" *ngIf="namespace.errors && (namespace.dirty || namespace.touched)">
-        <span class="red" *ngIf="namespace.errors.required">Name is required.</span>
-        <span class="red" *ngIf="namespace.hasError('pattern')">Name must be alphanumeric and may contain dashes.</span>
-        <span class="red" *ngIf="namespace.hasError('maxlength')">Name should not be greater than 63 characters.</span>
-      </div>
-    </div>
+    <mat-form-field appearance="fill">
+      <mat-label>Namespace</mat-label>
+      <mat-select formControlName="namespace"
+                  (selectionChange)="selectNamespace($event.value)"
+                  placeholder="namespace"
+                  i18n-placeholder
+                  required>
+        <mat-option *ngFor="let namespace of namespaces"
+                    [value]="namespace">
+          {{namespace}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 
     <div class="col-10 col-sm-10 col-md-10 col-lg-10">
       <mat-form-field appearance="fill">

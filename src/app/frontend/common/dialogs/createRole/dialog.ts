@@ -17,35 +17,39 @@ import {Component, OnInit, Inject} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {AbstractControl, Validators,FormBuilder} from '@angular/forms';
+import {AbstractControl, Validators, FormBuilder} from '@angular/forms';
 import {FormGroup} from '@angular/forms';
-import {CONFIG} from "../../../index.config";
-import {CsrfTokenService} from "../../services/global/csrftoken";
-import {NamespacedResourceService} from "../../services/resource/resource";
-import {TenantDetail} from "@api/backendapi";
+import {CONFIG} from '../../../index.config';
+import {CsrfTokenService} from '../../services/global/csrftoken';
+import {NamespacedResourceService} from '../../services/resource/resource';
+import {Namespace, NamespaceList, TenantDetail} from '@api/backendapi';
 
 // @ts-ignore
-import Swal from "sweetalert2/dist/sweetalert2.js";
+import Swal from 'sweetalert2/dist/sweetalert2.js';
+import {ActivatedRoute} from '@angular/router';
+import {validateUniqueName} from '../../../create/from/form/validator/uniquename.validator';
+import {NamespaceService} from '../../services/global/namespace';
 
 export interface CreateRoleDialogMeta {
   name: string;
-  apiGroups: string []
-  resources: string[]
-  verbs: string[]
-  namespace: string[]
+  apiGroups: string[];
+  resources: string[];
+  verbs: string[];
+  namespace: string[];
 }
 @Component({
   selector: 'kd-create-role-dialog',
   templateUrl: 'template.html',
 })
-
 export class CreateRoleDialog implements OnInit {
   form1: FormGroup;
   private readonly config_ = CONFIG;
-  currentTenant: string
-  apiGroups1: string[]
-  resources1: string[]
-  verbs1: string[]
+  currentTenant: string;
+  apiGroups1: string[];
+  resources1: string[];
+  verbs1: string[];
+  namespaces: string[];
+  selectednamespace = '';
 
   //Validation
   roleMaxLength = 24;
@@ -55,14 +59,19 @@ export class CreateRoleDialog implements OnInit {
   namespacePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
 
   apiGroupsMaxLength = 63;
-  apiGroupsPattern: RegExp = new RegExp('^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{\'\\|<>\\[&\\+-]*$');
+  apiGroupsPattern: RegExp = new RegExp(
+    "^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{'\\|<>\\[&\\+-]*$",
+  );
 
   resourceMaxLength = 63;
-  resourcePattern: RegExp = new RegExp('^^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{\'\\|<>\\[&\\+-]*$');
+  resourcePattern: RegExp = new RegExp(
+    "^^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{'\\|<>\\[&\\+-]*$",
+  );
 
   verbsMaxLength = 63;
-  verbsPattern: RegExp = new RegExp('^^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{\'\\|<>\\[&\\+-]*$');
-
+  verbsPattern: RegExp = new RegExp(
+    "^^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{'\\|<>\\[&\\+-]*$",
+  );
 
   constructor(
     public dialogRef: MatDialogRef<CreateRoleDialog>,
@@ -72,15 +81,17 @@ export class CreateRoleDialog implements OnInit {
     private readonly csrfToken_: CsrfTokenService,
     private readonly matDialog_: MatDialog,
     private readonly fb_: FormBuilder,
+    private readonly route_: ActivatedRoute,
+    private readonly namespace_: NamespaceService,
   ) {}
 
   ngOnInit(): void {
-    this.currentTenant = this.tenant_['tenant_']['currentTenant_']
+    this.currentTenant = this.tenant_['tenant_']['currentTenant_'];
     this.form1 = this.fb_.group({
+      namespace: [this.route_.snapshot.params.namespace || '', Validators.required],
       role: [
         '',
         Validators.compose([
-
           Validators.maxLength(this.roleMaxLength),
           Validators.pattern(this.rolePattern),
         ]),
@@ -90,13 +101,6 @@ export class CreateRoleDialog implements OnInit {
         Validators.compose([
           Validators.maxLength(this.apiGroupsMaxLength),
           Validators.pattern(this.apiGroupsPattern),
-        ]),
-      ],
-      namespace: [
-        '',
-        Validators.compose([
-          Validators.maxLength(this.namespaceMaxLength),
-          Validators.pattern(this.namespacePattern),
         ]),
       ],
       resources: [
@@ -114,8 +118,34 @@ export class CreateRoleDialog implements OnInit {
         ]),
       ],
     });
+    this.namespace.valueChanges.subscribe((namespace: string) => {
+      if (this.name !== null) {
+        this.name.clearAsyncValidators();
+        this.name.setAsyncValidators(validateUniqueName(this.http_, namespace));
+        this.name.updateValueAndValidity();
+      }
+    });
+    this.http_
+      .get(`api/v1/tenants/${this.currentTenant}/namespace`)
+      .subscribe((result: NamespaceList) => {
+        this.namespaces = result.namespaces.map(
+          (namespace: Namespace) => namespace.objectMeta.name,
+        );
+        this.namespace.patchValue(
+          !this.namespace_.areMultipleNamespacesSelected()
+            ? this.route_.snapshot.params.namespace || this.namespaces
+            : this.namespaces,
+        );
+      });
   }
 
+  selectNamespace(event: any) {
+    this.selectednamespace = event;
+  }
+
+  get name(): AbstractControl {
+    return this.form1.get('name');
+  }
   get role(): AbstractControl {
     return this.form1.get('role');
   }
@@ -135,12 +165,19 @@ export class CreateRoleDialog implements OnInit {
   // To create role under specific namespace
   createRole(): void {
     if (!this.form1.valid) return;
-    this.apiGroups1 = this.apigroups.value.split(',')
-    this.resources1 = this.resources.value.split(',')
-    this.verbs1 = this.verbs.value.split(',')
+    this.apiGroups1 = this.apigroups.value.split(',');
+    this.resources1 = this.resources.value.split(',');
+    this.verbs1 = this.verbs.value.split(',');
 
-    const roleSpec = {name: this.role.value, tenant: this.currentTenant, namespace: this.namespace.value, apiGroups: this.apiGroups1,verbs: this.verbs1,resources: this.resources1};
-    const tokenPromise = this.csrfToken_.getTokenForAction(roleSpec.tenant,'roles');
+    const roleSpec = {
+      name: this.role.value,
+      tenant: this.currentTenant,
+      namespace: this.namespace.value,
+      apiGroups: this.apiGroups1,
+      verbs: this.verbs1,
+      resources: this.resources1,
+    };
+    const tokenPromise = this.csrfToken_.getTokenForAction(roleSpec.tenant, 'roles');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(
@@ -157,17 +194,17 @@ export class CreateRoleDialog implements OnInit {
               title: this.role.value,
               text: 'role successfully created!',
               imageUrl: '/assets/images/tick-circle.svg',
-            })
+            });
             this.dialogRef.close(this.role.value);
           },
-          (error:any) => {
+          (error: any) => {
             if (error) {
               Swal.fire({
-                type:'error',
+                type: 'error',
                 title: this.role.value,
                 text: 'role already exists!',
                 imageUrl: '/assets/images/close-circle.svg',
-              })
+              });
             }
           },
         );
@@ -180,5 +217,4 @@ export class CreateRoleDialog implements OnInit {
   cancel(): void {
     this.dialogRef.close();
   }
-
 }
