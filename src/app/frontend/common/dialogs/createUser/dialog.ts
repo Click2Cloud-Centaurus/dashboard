@@ -84,6 +84,9 @@ export class CreateUserDialog implements OnInit {
   usertypeMaxLength = 24;
   usertypePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
 
+  roleMaxLength = 24;
+  rolePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
+
   secret: SecretDetail;
   secretName =""
 
@@ -113,7 +116,10 @@ export class CreateUserDialog implements OnInit {
     this.passwordTimeout();
     this.currentTenant = this.tenants_['tenant_']['currentTenant_']
     this.form1 = this.fb_.group({
-        role: [this.route_.snapshot.params.role || '', Validators.required],
+        role: [this.route_.snapshot.params.role || '', Validators.compose([
+          Validators.maxLength(this.roleMaxLength),
+          Validators.pattern(this.rolePattern),
+        ]),],
         namespace: [this.route_.snapshot.params.namespace || '', Validators.required],
         usertype: [
           '',
@@ -172,25 +178,12 @@ export class CreateUserDialog implements OnInit {
       this.tenant.patchValue(
         this.tenant.value,
       );
-      // if (this.usertype === 'tenant-admin') {
-      //   this.tenant.patchValue(
-      //     !this.tenantService_.isCurrentSystem()
-      //       ? this.route_.snapshot.params.tenant || this.tenants : this.currentTenant,
-      //   );
-      // }
-      // else if (this.usertype === 'cluster-admin'){
-      //   this.tenant.patchValue(
-      //     !this.tenantService_.isCurrentSystem()
-      //       ? this.route_.snapshot.params.tenant || this.tenants : this.tenants,
-      //   );
-      // }
     });
 
     this.ngZone_.run(() => {
       const usertype = sessionStorage.getItem('userType');
       this.userType = usertype
     });
-
   }
 
   passwordTimeout() {
@@ -234,9 +227,6 @@ export class CreateUserDialog implements OnInit {
   get name(): AbstractControl {
     return this.form1.get('name');
   }
-  // get tenant(): any {
-  //   return this.tenantService_.current()
-  // }
   get role(): any {
     return this.form1.get('role');
   }
@@ -501,10 +491,6 @@ export class CreateUserDialog implements OnInit {
 
   decode(s: string): string {
     return atob(s);
-  }
-
-  isCreateDisabled(): boolean {
-    return !this.username.value || !this.password.value || !this.usertype.value;
   }
 
   isDisabled(): boolean {
