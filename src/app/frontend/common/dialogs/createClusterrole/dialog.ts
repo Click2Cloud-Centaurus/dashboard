@@ -12,51 +12,55 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Component,Inject,OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {AbstractControl, Validators,FormBuilder} from '@angular/forms';
-import { FormGroup } from '@angular/forms';
-import {CONFIG} from "../../../index.config";
-import {CsrfTokenService} from "../../services/global/csrftoken";
+import {AbstractControl, Validators, FormBuilder} from '@angular/forms';
+import {FormGroup} from '@angular/forms';
+import {CONFIG} from '../../../index.config';
+import {CsrfTokenService} from '../../services/global/csrftoken';
 
 // @ts-ignore
-import Swal from "sweetalert2/dist/sweetalert2.js";
-
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 export interface CreateClusterroleDialogMeta {
   name: string;
-  apiGroups: string []
-  resources: string[]
-  verbs: string[]
+  apiGroups: string[];
+  resources: string[];
+  verbs: string[];
 }
 
 @Component({
   selector: 'kd-create-clusterrole-dialog',
   templateUrl: 'template.html',
 })
-
 export class CreateClusterroleDialog implements OnInit {
   form1: FormGroup;
   private readonly config_ = CONFIG;
-  name: string
-  apigroup: string[]
-  resource: string[]
-  verb : string[]
+  name: string;
+  apigroup: string[];
+  resource: string[];
+  verb: string[];
 
   // validation
   clusterroleMaxLength = 24;
   clusterrolePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
 
   apigroupsMaxLength = 63;
-  apigroupsPattern:  RegExp = new RegExp('^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{\'\\|<>\\[&\\+-]*$');
+  apigroupsPattern: RegExp = new RegExp(
+    "^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{'\\|<>\\[&\\+-]*$",
+  );
 
   resourceMaxLength = 63;
-  resourcePattern: RegExp = new RegExp('^^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{\'\\|<>\\[&\\+-]*$');
+  resourcePattern: RegExp = new RegExp(
+    "^^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{'\\|<>\\[&\\+-]*$",
+  );
 
   verbsMaxLength = 63;
-  verbsPattern: RegExp = new RegExp('^^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{\'\\|<>\\[&\\+-]*$');
+  verbsPattern: RegExp = new RegExp(
+    "^^[a-z\\a-z\\d_@.#$=!%^)(\\]:\\*;\\?\\/\\,}{'\\|<>\\[&\\+-]*$",
+  );
 
   constructor(
     public dialogRef: MatDialogRef<CreateClusterroleDialog>,
@@ -116,12 +120,17 @@ export class CreateClusterroleDialog implements OnInit {
   // To create clusterole specific tenant
   createClusterrole(): void {
     if (!this.form1.valid) return;
-    this.apigroup = this.apigroups.value.split(',')
-    this.resource = this.resources.value.split(',')
-    this.verb = this.verbs.value.split(',')
+    this.apigroup = this.apigroups.value.split(',');
+    this.resource = this.resources.value.split(',');
+    this.verb = this.verbs.value.split(',');
 
-    const clusterroleSpec= {name: this.clusterrole.value,apiGroups: this.apigroup,verbs: this.verb,resources: this.resource};
-    const tokenPromise = this.csrfToken_.getTokenForAction('system','clusterrole');
+    const clusterroleSpec = {
+      name: this.clusterrole.value,
+      apiGroups: this.apigroup,
+      verbs: this.verb,
+      resources: this.resource,
+    };
+    const tokenPromise = this.csrfToken_.getTokenForAction('system', 'clusterrole');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(
@@ -138,18 +147,17 @@ export class CreateClusterroleDialog implements OnInit {
               title: this.clusterrole.value,
               text: 'clusterrole successfully created!',
               imageUrl: '/assets/images/tick-circle.svg',
-            })
+            });
             this.dialogRef.close(this.clusterrole.value);
-
           },
-          (error:any) => {
+          (error: any) => {
             if (error) {
               Swal.fire({
-                type:'error',
+                type: 'error',
                 title: this.clusterrole.value,
                 text: 'clusterrole already exists!',
                 imageUrl: '/assets/images/close-circle.svg',
-              })
+              });
             }
           },
         );
@@ -162,5 +170,4 @@ export class CreateClusterroleDialog implements OnInit {
   cancel(): void {
     this.dialogRef.close();
   }
-
 }

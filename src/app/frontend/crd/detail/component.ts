@@ -21,12 +21,12 @@ import {ActionbarService, ResourceMeta} from '../../common/services/global/actio
 import {NotificationsService} from '../../common/services/global/notifications';
 import {ResourceService} from '../../common/services/resource/resource';
 import {EndpointManager, Resource} from '../../common/services/resource/endpoint';
-import {TenantService} from "../../common/services/global/tenant";
+import {TenantService} from '../../common/services/global/tenant';
 
 @Component({selector: 'kd-crd-detail', templateUrl: './template.html'})
 export class CRDDetailComponent implements OnInit, OnDestroy {
   private crdSubscription_: Subscription;
-  private readonly endpoint_ = EndpointManager.resource(Resource.crd,false,true);
+  private readonly endpoint_ = EndpointManager.resource(Resource.crd, false, true);
   crd: CRDDetail;
   crdObjectEndpoint: string;
   isInitialized = false;
@@ -41,15 +41,20 @@ export class CRDDetailComponent implements OnInit, OnDestroy {
     private readonly tenant_: TenantService,
     private readonly notifications_: NotificationsService,
   ) {
-    this.tenantName = this.tenant_.current() === 'system' && sessionStorage.getItem('crdPartition') !== null ?
-      this.tenant_.current() : this.tenant_.resourceTenant()
-    this.partitionName = this.tenantName === 'system' ? sessionStorage.getItem('crdPartition') : ''
-    this.partition = this.tenantName === 'system' ? 'partition/' + sessionStorage.getItem('crdPartition') + '/' : ''
+    this.tenantName =
+      this.tenant_.current() === 'system' && sessionStorage.getItem('crdPartition') !== null
+        ? this.tenant_.current()
+        : this.tenant_.resourceTenant();
+    this.partitionName = this.tenantName === 'system' ? sessionStorage.getItem('crdPartition') : '';
+    this.partition =
+      this.tenantName === 'system'
+        ? 'partition/' + sessionStorage.getItem('crdPartition') + '/'
+        : '';
   }
 
   ngOnInit(): void {
     const {crdName} = this.activatedRoute_.snapshot.params;
-    this.crdObjectEndpoint = EndpointManager.resource(Resource.crd, false,true).child(
+    this.crdObjectEndpoint = EndpointManager.resource(Resource.crd, false, true).child(
       crdName,
       Resource.crdObject,
       undefined,
@@ -57,22 +62,20 @@ export class CRDDetailComponent implements OnInit, OnDestroy {
       this.partitionName,
     );
 
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/${this.partition}tenants/${this.tenantName}/crd/${crdName}`
+      endpoint = `api/v1/${this.partition}tenants/${this.tenantName}/crd/${crdName}`;
     } else {
-      endpoint = this.endpoint_.detail()
+      endpoint = this.endpoint_.detail();
     }
-    this.crdSubscription_ = this.crd_
-      .get(endpoint, crdName)
-      .subscribe((d: CRDDetail) => {
-        this.crd = d;
-        this.notifications_.pushErrors(d.errors);
-        this.actionbar_.onInit.emit(
-          new ResourceMeta('Custom Resource Definition', d.objectMeta, d.typeMeta),
-        );
-        this.isInitialized = true;
-      });
+    this.crdSubscription_ = this.crd_.get(endpoint, crdName).subscribe((d: CRDDetail) => {
+      this.crd = d;
+      this.notifications_.pushErrors(d.errors);
+      this.actionbar_.onInit.emit(
+        new ResourceMeta('Custom Resource Definition', d.objectMeta, d.typeMeta),
+      );
+      this.isInitialized = true;
+    });
   }
 
   ngOnDestroy(): void {

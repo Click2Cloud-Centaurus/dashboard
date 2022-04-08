@@ -17,23 +17,37 @@ limitations under the License.
 <div class="main_container">
   <div class="row">
     <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-      <div class="create_btn_sec" align="right">
-        <button mat-raised-button matTooltip="Add User" color="primary" (click)="onClick()">
-          <img class="add_icon" src="assets/images/plus_icon_white.svg" alt="">
+      <div class="create_btn_sec"
+           align="right">
+        <button mat-raised-button
+                matTooltip="Add User"
+                color="primary"
+                (click)="onClick()">
+          <img class="add_icon"
+               src="assets/images/plus_icon_white.svg"
+               alt="">
           Add User</button>
       </div>
     </div>
   </div>
   <div class="row">
     <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-      <kd-card role="table" [hidden]="isHidden()">
-        <div title fxLayout="row" i18n></div>
-        <div title fxLayout="row" i18n>Users</div>
-        <div description><span class="kd-muted-light" i18n>Items:&nbsp;</span>{{totalItems}}
+      <kd-card role="table"
+               [hidden]="isHidden()">
+        <div title
+             fxLayout="row"
+             i18n></div>
+        <div title
+             fxLayout="row"
+             i18n>Users</div>
+        <div description><span class="kd-muted-light"
+                i18n>Items:&nbsp;</span>{{totalItems}}
         </div>
 
-        <div content [hidden]="showZeroState()">
-          <div kdLoadingSpinner [isLoading]="isLoading"></div>
+        <div content
+             [hidden]="showZeroState()">
+          <div kdLoadingSpinner
+               [isLoading]="isLoading"></div>
 
           <mat-table [dataSource]="getData()"
                      matSort
@@ -95,7 +109,7 @@ limitations under the License.
                 <a routerLink="/role/{{user.objectMeta.namespace}}/{{user.objectMeta.role}}"
                    queryParamsHandling="preserve"
                    routerLinkActive="active"
-                   [state]="{tenant: user.objectMeta.tenant}" >
+                   [state]="{tenant: user.objectMeta.tenant}">
                   {{user.objectMeta.role}}
                 </a>
               </mat-cell>
@@ -141,12 +155,11 @@ limitations under the License.
              [hidden]="!showZeroState()">
           <kd-list-zero-state></kd-list-zero-state>
         </div>
-        <div content [hidden]="!showZeroState()">
+        <div content
+             [hidden]="!showZeroState()">
           <kd-list-zero-state></kd-list-zero-state>
         </div>
       </kd-card>
     </div>
   </div>
 </div>
-
-

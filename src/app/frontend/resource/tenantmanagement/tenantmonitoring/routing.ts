@@ -14,10 +14,10 @@
 
 import {NgModule} from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
-import {TenantMonitoringListComponent} from "./list/component";
-import {TENANTMANAGEMENT_ROUTE} from "../routing";
-import {TenantMonitoringDetailComponent} from "./detail/component";
-import {DEFAULT_ACTIONBAR} from "../../../common/components/actionbars/routing";
+import {TenantMonitoringListComponent} from './list/component';
+import {TENANTMANAGEMENT_ROUTE} from '../routing';
+import {TenantMonitoringDetailComponent} from './detail/component';
+import {DEFAULT_ACTIONBAR} from '../../../common/components/actionbars/routing';
 
 const TENANTMONITORING_LIST_ROUTE: Route = {
   path: '',
@@ -27,7 +27,6 @@ const TENANTMONITORING_LIST_ROUTE: Route = {
     parent: TENANTMANAGEMENT_ROUTE,
   },
 };
-
 
 const TENANTMONITORING_DETAIL_ROUTE: Route = {
   path: ':resourceName',
@@ -39,7 +38,13 @@ const TENANTMONITORING_DETAIL_ROUTE: Route = {
 };
 
 @NgModule({
-  imports: [RouterModule.forChild([TENANTMONITORING_LIST_ROUTE, TENANTMONITORING_DETAIL_ROUTE, DEFAULT_ACTIONBAR])],
+  imports: [
+    RouterModule.forChild([
+      TENANTMONITORING_LIST_ROUTE,
+      TENANTMONITORING_DETAIL_ROUTE,
+      DEFAULT_ACTIONBAR,
+    ]),
+  ],
   exports: [RouterModule],
 })
 export class TenantMonitoringRoutingModule {}

@@ -58,13 +58,13 @@ export class NetworkListComponent extends ResourceListWithStatuses<NetworkList, 
   }
 
   map(networkList: NetworkList): Network[] {
-    const networkLists:Network[] = [];
-    networkList.items.map((network)=>{
+    const networkLists: Network[] = [];
+    networkList.items.map(network => {
       if (network.names.kind === 'Network' || network.group === 'mizar.com') {
-        networkLists.push(network)
+        networkLists.push(network);
       }
-    })
-    this.totalItems = networkLists.length
+    });
+    this.totalItems = networkLists.length;
     return networkLists;
   }
 
@@ -83,5 +83,4 @@ export class NetworkListComponent extends ResourceListWithStatuses<NetworkList, 
   getDisplayColumns(): string[] {
     return ['statusicon', 'name', 'group', 'fullName', 'namespaced', 'age'];
   }
-
 }

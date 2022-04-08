@@ -15,39 +15,40 @@
 import {ObjectMeta, TypeMeta} from '@api/backendapi';
 
 export class RawResource {
-  static getUrl(tenant: string, typeMeta: TypeMeta, objectMeta: ObjectMeta, partition?: string): string {
-    let resourceUrl = 'api/v1' + (partition ? `/partition/${partition}` : '') + (tenant ? `/tenants/${tenant}` : '') + `/_raw/${typeMeta.kind}`;
+  static getUrl(
+    tenant: string,
+    typeMeta: TypeMeta,
+    objectMeta: ObjectMeta,
+    partition?: string,
+  ): string {
+    let resourceUrl =
+      'api/v1' +
+      (partition ? `/partition/${partition}` : '') +
+      (tenant ? `/tenants/${tenant}` : '') +
+      `/_raw/${typeMeta.kind}`;
 
     if (objectMeta.namespace !== undefined && !resourceUrl.includes('/User')) {
       resourceUrl += `/namespace/${objectMeta.namespace}`;
     }
 
-    if(!resourceUrl.includes('/User')) {
+    if (!resourceUrl.includes('/User')) {
       resourceUrl += `/name/${objectMeta.name}`;
     }
 
     if (resourceUrl.includes('/tenant/name')) {
-      resourceUrl = 'api/v1/tenants' + `/${objectMeta.name}`
-    }
-
-    else if (resourceUrl.includes('/role')) {
+      resourceUrl = 'api/v1/tenants' + `/${objectMeta.name}`;
+    } else if (resourceUrl.includes('/role')) {
       resourceUrl = `api/v1/tenants/${tenant}/namespaces/${objectMeta.namespace}/${typeMeta.kind}/${objectMeta.name}`;
-    }
-
-    else if (resourceUrl.includes('/User')) {
+    } else if (resourceUrl.includes('/User')) {
       if (`${objectMeta.name}` !== sessionStorage.getItem('username')) {
-        resourceUrl = `api/v1/tenants/${tenant}/users/${objectMeta.name}/${objectMeta.id}`
-      }
-      else {
+        resourceUrl = `api/v1/tenants/${tenant}/users/${objectMeta.name}/${objectMeta.id}`;
+      } else {
         return null;
       }
-    }
-
-    else if (resourceUrl.includes('/virtualmachine')) {
-      resourceUrl = `api/v1/tenants/${tenant}/_raw/pod/namespace/${objectMeta.namespace}/name/${objectMeta.name}`
+    } else if (resourceUrl.includes('/virtualmachine')) {
+      resourceUrl = `api/v1/tenants/${tenant}/_raw/pod/namespace/${objectMeta.namespace}/name/${objectMeta.name}`;
     }
 
     return resourceUrl;
   }
 }
-

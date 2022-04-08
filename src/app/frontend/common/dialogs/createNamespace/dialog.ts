@@ -18,11 +18,11 @@ import {AbstractControl, FormBuilder, FormGroup, Validators} from '@angular/form
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material';
 import {CsrfTokenService} from '../../../common/services/global/csrftoken';
 import {CONFIG} from '../../../index.config';
-import {NamespacedResourceService} from "../../services/resource/resource";
-import {TenantDetail} from "@api/backendapi";
+import {NamespacedResourceService} from '../../services/resource/resource';
+import {TenantDetail} from '@api/backendapi';
 
 // @ts-ignore
-import Swal from "sweetalert2/dist/sweetalert2.js";
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 export interface CreateNamespaceDialogMeta {
   namespaces: string[];
@@ -35,7 +35,7 @@ export interface CreateNamespaceDialogMeta {
 export class CreateNamespaceDialog implements OnInit {
   form1: FormGroup;
   private readonly config_ = CONFIG;
-  private currentTenant:string
+  private currentTenant: string;
 
   namespaceMaxLength = 63;
   namespacePattern: RegExp = new RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
@@ -51,7 +51,7 @@ export class CreateNamespaceDialog implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentTenant = this.tenant_['tenant_']['currentTenant_']
+    this.currentTenant = this.tenant_['tenant_']['currentTenant_'];
 
     this.form1 = this.fb_.group({
       namespace: [
@@ -72,7 +72,7 @@ export class CreateNamespaceDialog implements OnInit {
   createNamespace(): void {
     if (!this.form1.valid) return;
     const namespaceSpec = {name: this.namespace.value, tenant: this.currentTenant};
-    const tokenPromise = this.csrfToken_.getTokenForAction(this.currentTenant,'namespace');
+    const tokenPromise = this.csrfToken_.getTokenForAction(this.currentTenant, 'namespace');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(
@@ -89,17 +89,17 @@ export class CreateNamespaceDialog implements OnInit {
               title: this.namespace.value,
               text: 'namespace successfully created!',
               imageUrl: '/assets/images/tick-circle.svg',
-            })
+            });
             this.dialogRef.close(this.namespace.value);
           },
-          (error:any) => {
+          (error: any) => {
             if (error) {
               Swal.fire({
-                type:'error',
+                type: 'error',
                 title: this.namespace.value,
                 text: 'namespace already exists!',
                 imageUrl: '/assets/images/close-circle.svg',
-              })
+              });
             }
           },
         );
@@ -113,5 +113,4 @@ export class CreateNamespaceDialog implements OnInit {
   cancel(): void {
     this.dialogRef.close();
   }
-
 }

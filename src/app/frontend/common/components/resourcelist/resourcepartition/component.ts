@@ -23,14 +23,17 @@ import {ResourceService} from '../../../services/resource/resource';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
 import {VerberService} from '../../../services/global/verber';
-import {Router} from "@angular/router";
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'kd-resource-partition-list',
   templateUrl: './template.html',
 })
 // @ts-ignore
-export class ResourcePartitionListComponent extends ResourceListWithStatuses<ResourcePartitionList, ResourcePartition> {
+export class ResourcePartitionListComponent extends ResourceListWithStatuses<
+  ResourcePartitionList,
+  ResourcePartition
+> {
   @Input() endpointTp = EndpointManager.resource(Resource.resourcePartition).list();
 
   constructor(
@@ -50,8 +53,8 @@ export class ResourcePartitionListComponent extends ResourceListWithStatuses<Res
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
   }
 
-  setClusterName($event:any) {
-    const clusterName = $event.target.innerHTML.replace(/^\s+|\s+$/gm,'');
+  setClusterName($event: any) {
+    const clusterName = $event.target.innerHTML.replace(/^\s+|\s+$/gm, '');
     this.router_.navigateByUrl('/node', {state: {clusterName}});
   }
 
@@ -60,7 +63,7 @@ export class ResourcePartitionListComponent extends ResourceListWithStatuses<Res
   }
 
   map(resourcePartitionList: ResourcePartitionList): ResourcePartition[] {
-    return resourcePartitionList.resourcePartitions
+    return resourcePartitionList.resourcePartitions;
   }
 
   isInSuccessState(): boolean {
@@ -68,6 +71,6 @@ export class ResourcePartitionListComponent extends ResourceListWithStatuses<Res
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'nodecount','cpu','memory','health','etcd'];
+    return ['statusicon', 'name', 'nodecount', 'cpu', 'memory', 'health', 'etcd'];
   }
 }

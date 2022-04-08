@@ -137,7 +137,9 @@ export abstract class ResourceListBase<T extends ResourceList, R extends Resourc
   }
 
   getDetailsHref(resourceName: string, namespace?: string, tenant?: string): string {
-    return this.stateName_ ? this.kdState_.href(this.stateName_, resourceName, namespace, tenant) : '';
+    return this.stateName_
+      ? this.kdState_.href(this.stateName_, resourceName, namespace, tenant)
+      : '';
   }
 
   getData(): DataSource<R> {
@@ -187,7 +189,11 @@ export abstract class ResourceListBase<T extends ResourceList, R extends Resourc
     } as ActionColumnDef<ActionColumn>);
   }
 
-  protected registerDynamicColumn(col: string, afterCol: string, whenCallback: ColumnWhenCallback): void {
+  protected registerDynamicColumn(
+    col: string,
+    afterCol: string,
+    whenCallback: ColumnWhenCallback,
+  ): void {
     this.dynamicColumns_.push({
       col,
       afterCol,
@@ -240,7 +246,9 @@ export abstract class ResourceListBase<T extends ResourceList, R extends Resourc
       result = params;
     }
 
-    return result.set('itemsPerPage', `${this.itemsPerPage}`).set('page', `${this.matPaginator_.pageIndex + 1}`);
+    return result
+      .set('itemsPerPage', `${this.itemsPerPage}`)
+      .set('page', `${this.matPaginator_.pageIndex + 1}`);
   }
 
   private filter_(params?: HttpParams): HttpParams {
@@ -249,7 +257,10 @@ export abstract class ResourceListBase<T extends ResourceList, R extends Resourc
       result = params;
     }
 
-    const filterByQuery = this.cardFilter_ !== undefined && this.cardFilter_.query ? `name,${this.cardFilter_.query}` : '';
+    const filterByQuery =
+      this.cardFilter_ !== undefined && this.cardFilter_.query
+        ? `name,${this.cardFilter_.query}`
+        : '';
     if (filterByQuery) {
       return result.set('filterBy', filterByQuery);
     }
@@ -335,7 +346,7 @@ export abstract class ResourceListBase<T extends ResourceList, R extends Resourc
 export abstract class ResourceListWithStatuses<
   T extends ResourceList,
   R extends Resource
-  > extends ResourceListBase<T, R> {
+> extends ResourceListBase<T, R> {
   private readonly bindings_: {[hash: number]: StateBinding<R>} = {};
   @ViewChildren('matrow', {read: ViewContainerRef})
   private readonly containers_: QueryList<ViewContainerRef>;
@@ -431,7 +442,11 @@ export abstract class ResourceListWithStatuses<
     return false;
   }
 
-  protected registerBinding(iconName: IconName, iconClass: string, callbackFunction: StatusCheckCallback<R>): void {
+  protected registerBinding(
+    iconName: IconName,
+    iconClass: string,
+    callbackFunction: StatusCheckCallback<R>,
+  ): void {
     const icon = new Icon(String(iconName), iconClass);
     this.bindings_[icon.hash()] = {icon, callbackFunction};
   }

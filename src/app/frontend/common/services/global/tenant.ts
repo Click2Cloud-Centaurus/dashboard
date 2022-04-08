@@ -34,40 +34,44 @@ export class TenantService {
     if (this.isSystemTenant_) {
       this.currentTenant_ = tenant;
     }
-
   }
-
 
   current(): string {
     const username = sessionStorage.getItem('parentTenant');
     const userType = sessionStorage.getItem('userType');
-    if (userType === 'cluster-admin'){
-      this.currentTenant_ = 'system'
+    if (userType === 'cluster-admin') {
+      this.currentTenant_ = 'system';
     } else {
-      this.currentTenant_ = username
+      this.currentTenant_ = username;
     }
     return this.currentTenant_;
   }
 
   resourceTenant(): string {
     if (sessionStorage.getItem('currentTenant') && sessionStorage.getItem('reqFromTenant')) {
-      this.resourceTenant_ = sessionStorage.getItem('currentTenant')
-    } else if (sessionStorage.getItem('currentTpTenant') && sessionStorage.getItem('reqFromTpTenant')) {
-      this.resourceTenant_ = sessionStorage.getItem('currentTpTenant')
+      this.resourceTenant_ = sessionStorage.getItem('currentTenant');
+    } else if (
+      sessionStorage.getItem('currentTpTenant') &&
+      sessionStorage.getItem('reqFromTpTenant')
+    ) {
+      this.resourceTenant_ = sessionStorage.getItem('currentTpTenant');
     }
-    return this.resourceTenant_
+    return this.resourceTenant_;
   }
 
   tenantPartition(): string {
-    let partition = ''
+    let partition = '';
     if (sessionStorage.getItem('currentTenant') && sessionStorage.getItem('reqFromTenant')) {
       partition = sessionStorage.getItem(sessionStorage.getItem('currentTenant'));
-    } else if (sessionStorage.getItem('currentTpTenant') && sessionStorage.getItem('reqFromTpTenant')) {
+    } else if (
+      sessionStorage.getItem('currentTpTenant') &&
+      sessionStorage.getItem('reqFromTpTenant')
+    ) {
       partition = sessionStorage.getItem(sessionStorage.getItem('currentTpTenant'));
     } else {
       partition = sessionStorage.getItem(this.resourceTenant());
     }
-    return partition
+    return partition;
   }
 
   setAuthTenant(tenant: string) {

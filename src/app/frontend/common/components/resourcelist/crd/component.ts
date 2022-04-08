@@ -50,7 +50,7 @@ export class CRDListComponent extends ResourceListWithStatuses<CRDList, CRD> {
     this.registerBinding(this.icon.error, 'kd-error', this.isInErrorState);
 
     const userType = sessionStorage.getItem('userType');
-    this.isClusterAdmin = userType ==='cluster-admin' ? true : false;
+    this.isClusterAdmin = userType === 'cluster-admin' ? true : false;
   }
 
   isNamespaced(crd: CRD): string {
@@ -78,11 +78,11 @@ export class CRDListComponent extends ResourceListWithStatuses<CRDList, CRD> {
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon','clusterName', 'name', 'group', 'fullName', 'namespaced',  'age'];
+    return ['statusicon', 'clusterName', 'name', 'group', 'fullName', 'namespaced', 'age'];
   }
 
   setPartitionName($event: any, partitionName: string) {
-    const crdName = $event.target.innerHTML.replace(/^\s+|\s+$/gm,'');
-    sessionStorage.setItem('crdPartition', partitionName)
+    const crdName = $event.target.innerHTML.replace(/^\s+|\s+$/gm, '');
+    sessionStorage.setItem('crdPartition', partitionName);
   }
 }

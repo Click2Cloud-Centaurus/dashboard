@@ -15,7 +15,7 @@
 import {NgModule} from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
 import {WorkloadOverviewComponent} from './component';
-import {WORKLOADS_ROUTE} from "../routing";
+import {WORKLOADS_ROUTE} from '../routing';
 
 export const OVERVIEW_ROUTE: Route = {
   path: '',
@@ -30,5 +30,4 @@ export const OVERVIEW_ROUTE: Route = {
   imports: [RouterModule.forChild([OVERVIEW_ROUTE])],
   exports: [RouterModule],
 })
-
 export class WorkloadOverviewRoutingModule {}

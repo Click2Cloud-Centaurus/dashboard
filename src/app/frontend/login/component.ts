@@ -15,7 +15,12 @@
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Component, NgZone, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {AuthenticationMode, EnabledAuthenticationModes, LoginSkippableResponse, LoginSpec} from '@api/backendapi';
+import {
+  AuthenticationMode,
+  EnabledAuthenticationModes,
+  LoginSkippableResponse,
+  LoginSpec,
+} from '@api/backendapi';
 import {KdError, KdFile, StateError} from '@api/frontendapi';
 import {map} from 'rxjs/operators';
 import {AsKdError, K8SError} from '../common/errors/errors';
@@ -33,7 +38,6 @@ enum LoginModes {
   templateUrl: './template.html',
   styleUrls: ['./style.scss'],
 })
-
 export class LoginComponent implements OnInit {
   username = '';
   password = '';
@@ -58,7 +62,6 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-
     this.http_
       .get<EnabledAuthenticationModes>('api/v1/login/modes')
       .subscribe((enabledModes: EnabledAuthenticationModes) => {
@@ -100,11 +103,11 @@ export class LoginComponent implements OnInit {
 
         this.ngZone_.run(() => {
           const usertype = sessionStorage.getItem('userType');
-          if(usertype =='cluster-admin') {
+          if (usertype === 'cluster-admin') {
             this.state_.navigate(['partition']);
-          }else if(usertype =='tenant-admin'){
+          } else if (usertype === 'tenant-admin') {
             this.state_.navigate(['overview']);
-          }else{
+          } else {
             this.state_.navigate(['workloadoverview']);
           }
         });
@@ -136,39 +139,36 @@ export class LoginComponent implements OnInit {
         if ((event.target as HTMLInputElement).id === 'username') {
           this.username_ = (event.target as HTMLInputElement).value;
           this.setUsername(this.username_);
-        }
-        else {
+        } else {
           this.password_ = (event.target as HTMLInputElement).value;
         }
         break;
       default:
     }
   }
-  public GetCurrentUserInformation(encodedata:any): Promise<any>{
-    return this.http_.get('/api/v1/users/'+encodedata, {responseType: 'json'}).toPromise()
+  GetCurrentUserInformation(encodedata: any): Promise<any> {
+    return this.http_.get('/api/v1/users/' + encodedata, {responseType: 'json'}).toPromise();
   }
 
   private onFileLoad_(file: KdFile): void {
     this.kubeconfig_ = file.content;
   }
 
-  private async getLoginSpec_():Promise<LoginSpec>  {
-
+  private async getLoginSpec_(): Promise<LoginSpec> {
     switch (this.selectedAuthenticationMode) {
       case LoginModes.Kubeconfig:
         return {kubeConfig: this.kubeconfig_} as LoginSpec;
       case LoginModes.Token:
         return {token: this.token_} as LoginSpec;
       case LoginModes.Basic:
-        var data=btoa(this.username_ + "+" +this.password_);
-        this.responseData = await this.GetCurrentUserInformation(data)
-        if (this.responseData.objectMeta.password == this.password_){
+        const data = btoa(this.username_ + '+' + this.password_);
+        this.responseData = await this.GetCurrentUserInformation(data);
+        if (this.responseData.objectMeta.password === this.password_) {
           this.setUserType(this.responseData.objectMeta.type);
           this.setParentTenant(this.responseData.objectMeta.tenant);
           this.setDefaultNamespace(this.responseData.objectMeta.namespace);
           return this.responseData.objectMeta as LoginSpec;
-        }
-        else{
+        } else {
           return {} as LoginSpec;
         }
       default:
@@ -176,19 +176,19 @@ export class LoginComponent implements OnInit {
     }
   }
 
-  private setUsername (username_:string) {
+  private setUsername(username_: string) {
     sessionStorage.setItem('username', username_);
   }
 
-  private setUserType(userType : string){
+  private setUserType(userType: string) {
     sessionStorage.setItem('userType', userType);
   }
 
-  private setParentTenant (parentTenant:string) {
+  private setParentTenant(parentTenant: string) {
     sessionStorage.setItem('parentTenant', parentTenant);
   }
-  private setDefaultNamespace (namespace:string) {
-    CONFIG.defaultNamespace = namespace ;
+  private setDefaultNamespace(namespace: string) {
+    CONFIG.defaultNamespace = namespace;
     sessionStorage.setItem('namespace', namespace);
   }
 }

@@ -83,8 +83,8 @@ limitations under the License.
 <kd-network-object-list [endpoint]="networkObjectEndpoint"></kd-network-object-list>
 
 <kd-network-versions-list *ngIf="network?.versions"
-                      [versions]="network?.versions"
-                      [initialized]="isInitialized"></kd-network-versions-list>
+                          [versions]="network?.versions"
+                          [initialized]="isInitialized"></kd-network-versions-list>
 
 <kd-condition-list [conditions]="network?.conditions"
                    [showLastProbeTime]="false"

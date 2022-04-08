@@ -40,6 +40,4 @@ const TENANTQUOTA_DETAIL_ROUTE: Route = {
   imports: [RouterModule.forChild([TENANTQUOTA_LIST_ROUTE, TENANTQUOTA_DETAIL_ROUTE])],
   exports: [RouterModule],
 })
-export class ResourceQuotaRoutingModule {
-
-}
+export class ResourceQuotaRoutingModule {}

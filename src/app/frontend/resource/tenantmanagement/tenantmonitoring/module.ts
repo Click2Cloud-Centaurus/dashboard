@@ -7,6 +7,6 @@ import {TenantMonitoringRoutingModule} from './routing';
 
 @NgModule({
   imports: [SharedModule, ComponentsModule, TenantMonitoringRoutingModule],
-  declarations: [TenantMonitoringListComponent,TenantMonitoringDetailComponent],
+  declarations: [TenantMonitoringListComponent, TenantMonitoringDetailComponent],
 })
 export class TenantMonitoringModule {}

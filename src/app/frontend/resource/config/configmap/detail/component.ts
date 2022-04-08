@@ -22,7 +22,7 @@ import {ActionbarService, ResourceMeta} from '../../../../common/services/global
 import {NotificationsService} from '../../../../common/services/global/notifications';
 import {EndpointManager, Resource} from '../../../../common/services/resource/endpoint';
 import {NamespacedResourceService} from '../../../../common/services/resource/resource';
-import {TenantService} from "../../../../common/services/global/tenant";
+import {TenantService} from '../../../../common/services/global/tenant';
 
 @Component({
   selector: 'kd-config-map-detail',
@@ -44,27 +44,32 @@ export class ConfigMapDetailComponent implements OnInit, OnDestroy {
     private readonly tenant_: TenantService,
     private readonly notifications_: NotificationsService,
   ) {
-    this.tenantName = this.tenant_.current() === 'system' ?
-      sessionStorage.getItem('currentTenant') : this.tenant_.current()
-    this.partition = this.tenantName === 'system' ? 'partition/' + sessionStorage.getItem(sessionStorage.getItem('currentTenant')) + '/' : ''
+    this.tenantName =
+      this.tenant_.current() === 'system'
+        ? sessionStorage.getItem('currentTenant')
+        : this.tenant_.current();
+    this.partition =
+      this.tenantName === 'system'
+        ? 'partition/' + sessionStorage.getItem(sessionStorage.getItem('currentTenant')) + '/'
+        : '';
   }
 
   ngOnInit(): void {
     const resourceName = this.activatedRoute_.snapshot.params.resourceName;
     const resourceNamespace = this.activatedRoute_.snapshot.params.resourceNamespace;
 
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/${this.partition}tenants/${this.tenantName}/configmap/${resourceNamespace}/${resourceName}`
+      endpoint = `api/v1/${this.partition}tenants/${this.tenantName}/configmap/${resourceNamespace}/${resourceName}`;
     } else {
-      endpoint = this.endpoint_.detail()
+      endpoint = this.endpoint_.detail();
     }
 
     this.configMapSubscription_ = this.configMap_
       .get(endpoint, resourceName, resourceNamespace)
       .subscribe((d: ConfigMapDetail) => {
         this.configMap = d;
-        console.log("data => ", this.configMap.data);
+        console.log('data => ', this.configMap.data);
         this.notifications_.pushErrors(d.errors);
         this.actionbar_.onInit.emit(new ResourceMeta('Config Map', d.objectMeta, d.typeMeta));
         this.isInitialized = true;

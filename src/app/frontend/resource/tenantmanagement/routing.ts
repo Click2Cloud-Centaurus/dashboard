@@ -18,7 +18,7 @@ import {TenantManagementComponent} from './component';
 
 export const TENANTMANAGEMENT_ROUTE: Route = {
   path: '',
-  component:TenantManagementComponent,
+  component: TenantManagementComponent,
   data: {
     breadcrumb: 'Tenant Management',
     link: ['', 'tenantmanagement'],

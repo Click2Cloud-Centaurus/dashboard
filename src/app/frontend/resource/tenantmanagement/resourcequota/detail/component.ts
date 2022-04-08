@@ -21,15 +21,15 @@ import {ActionbarService, ResourceMeta} from '../../../../common/services/global
 import {NotificationsService} from '../../../../common/services/global/notifications';
 import {EndpointManager, Resource} from '../../../../common/services/resource/endpoint';
 import {NamespacedResourceService} from '../../../../common/services/resource/resource';
-import {MatTableDataSource} from "@angular/material";
-import {TenantService} from "../../../../common/services/global/tenant";
+import {MatTableDataSource} from '@angular/material';
+import {TenantService} from '../../../../common/services/global/tenant';
 
 @Component({
   selector: 'kd-resourcequota-detail',
   templateUrl: './template.html',
 })
 export class ResourceQuotaDetailComponent implements OnInit, OnDestroy {
-  private readonly endpoint_ = EndpointManager.resource(Resource.resourcequota, true,true);
+  private readonly endpoint_ = EndpointManager.resource(Resource.resourcequota, true, true);
   private readonly unsubscribe_ = new Subject<void>();
 
   resourceQuota: ResourceQuotaDetail;
@@ -45,22 +45,26 @@ export class ResourceQuotaDetailComponent implements OnInit, OnDestroy {
     private readonly notifications_: NotificationsService,
   ) {}
 
-
   ngOnInit(): void {
     const resourceName = this.route_.snapshot.params.resourceName;
-    const resourceNamespace = this.route_.snapshot.params.resourceNamespace === undefined ?
-      window.history.state.namespace : this.route_.snapshot.params.resourceNamespace;
-    const resourceTenant = this.tenant_.current() === 'system' ?
-      sessionStorage.getItem('resourceQuotaTenant') : this.tenant_.current()
+    const resourceNamespace =
+      this.route_.snapshot.params.resourceNamespace === undefined
+        ? window.history.state.namespace
+        : this.route_.snapshot.params.resourceNamespace;
+    const resourceTenant =
+      this.tenant_.current() === 'system'
+        ? sessionStorage.getItem('resourceQuotaTenant')
+        : this.tenant_.current();
 
-    const partition = resourceTenant === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : ''
+    const partition =
+      resourceTenant === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : '';
 
     this.allocationData = [];
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/${partition}tenants/${resourceTenant}/resourcequota/${resourceNamespace}/${resourceName}`
+      endpoint = `api/v1/${partition}tenants/${resourceTenant}/resourcequota/${resourceNamespace}/${resourceName}`;
     } else {
-      endpoint = this.endpoint_.detail()
+      endpoint = this.endpoint_.detail();
     }
 
     this.resourceQuota_
@@ -68,13 +72,17 @@ export class ResourceQuotaDetailComponent implements OnInit, OnDestroy {
       .pipe(first())
       .subscribe((d: ResourceQuotaDetail) => {
         this.resourceQuota = d;
-        this.statusList = d.statusList
+        this.statusList = d.statusList;
         this.notifications_.pushErrors(d.errors);
         this.actionbar_.onInit.emit(new ResourceMeta('ResourceQuota', d.objectMeta, d.typeMeta));
         this.isInitialized = true;
-        for(const key in this.statusList){
-          if(this.statusList[key]){
-            this.allocationData.push({name: key, used: this.statusList[key].used, hard: this.statusList[key].hard})
+        for (const key in this.statusList) {
+          if (this.statusList[key]) {
+            this.allocationData.push({
+              name: key,
+              used: this.statusList[key].used,
+              hard: this.statusList[key].hard,
+            });
           }
         }
       });

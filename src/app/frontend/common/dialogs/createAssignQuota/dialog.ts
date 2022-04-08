@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Component,Inject,OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {AbstractControl, Validators,FormBuilder} from '@angular/forms';
-import { FormGroup } from '@angular/forms';
-import {CONFIG} from "../../../index.config";
-import {CsrfTokenService} from "../../services/global/csrftoken";
+import {AbstractControl, Validators, FormBuilder} from '@angular/forms';
+import {FormGroup} from '@angular/forms';
+import {CONFIG} from '../../../index.config';
+import {CsrfTokenService} from '../../services/global/csrftoken';
 
 // @ts-ignore
-import Swal from "sweetalert2/dist/sweetalert2.js";
+import Swal from 'sweetalert2/dist/sweetalert2.js';
 
 export interface CreateAssignQuotaDialogMeta {
   quotaname: string[];
@@ -42,7 +42,6 @@ export interface CreateAssignQuotaDialogMeta {
   selector: 'kd-assign-quota-dialog',
   templateUrl: 'template.html',
 })
-
 export class CreateAssignQuotaDialog implements OnInit {
   form1: FormGroup;
 
@@ -137,8 +136,8 @@ export class CreateAssignQuotaDialog implements OnInit {
   // To create quota under specific tenant and namespace
   createQuota(): void {
     if (!this.form1.valid) return;
-    const quotaSpec= {
-      name: this.quotaname.value ,
+    const quotaSpec = {
+      name: this.quotaname.value,
       tenant: this.tenants.value,
       namespace: this.namespaces.value,
       cpu: this.cpus.value,
@@ -151,7 +150,7 @@ export class CreateAssignQuotaDialog implements OnInit {
       ephemeral_storage: this.ephemeral_storage.value,
     };
 
-    const tokenPromise = this.csrfToken_.getTokenForAction(this.tenants.value,'resourcequota');
+    const tokenPromise = this.csrfToken_.getTokenForAction(this.tenants.value, 'resourcequota');
     tokenPromise.subscribe(csrfToken => {
       return this.http_
         .post<{valid: boolean}>(
@@ -168,17 +167,17 @@ export class CreateAssignQuotaDialog implements OnInit {
               title: this.quotaname.value,
               text: 'quota successfully created!',
               imageUrl: '/assets/images/tick-circle.svg',
-            })
+            });
             this.dialogRef.close(this.quotaname.value);
           },
-          (error:any) => {
+          (error: any) => {
             if (error) {
               Swal.fire({
-                type:'error',
+                type: 'error',
                 title: this.quotaname.value,
                 text: 'quota already exists!',
                 imageUrl: '/assets/images/close-circle.svg',
-              })
+              });
             }
           },
         );

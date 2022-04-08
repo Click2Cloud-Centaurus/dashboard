@@ -17,7 +17,7 @@ import {Route, RouterModule} from '@angular/router';
 import {DEFAULT_ACTIONBAR} from '../../../common/components/actionbars/routing';
 import {NodeDetailComponent} from './detail/component';
 import {NodeListComponent} from './list/component';
-import {PARTITION_LIST_ROUTE} from "../partition/routing";
+import {PARTITION_LIST_ROUTE} from '../partition/routing';
 
 const NODE_LIST_ROUTE: Route = {
   path: '',

@@ -16,9 +16,15 @@ limitations under the License.
 
 <div class="col-12 col-sm-12 col-md-12 col-lg-12">
 
-  <div class="create_btn_sec mt_10" align="right">
-    <button mat-raised-button matTooltip="Add Role" color="primary" (click)="onClick()">
-      <img class="add_icon" src="assets/images/plus_icon_white.svg" alt="">
+  <div class="create_btn_sec mt_10"
+       align="right">
+    <button mat-raised-button
+            matTooltip="Add Role"
+            color="primary"
+            (click)="onClick()">
+      <img class="add_icon"
+           src="assets/images/plus_icon_white.svg"
+           alt="">
       Add Role</button>
   </div>
 </div>
@@ -29,7 +35,7 @@ limitations under the License.
        fxLayout="row"
        i18n>Roles</div>
   <div description><span class="kd-muted-light"
-                         i18n>Items:&nbsp;</span>{{totalItems}}</div>
+          i18n>Items:&nbsp;</span>{{totalItems}}</div>
   <div actions>
     <kd-card-list-filter></kd-card-list-filter>
   </div>

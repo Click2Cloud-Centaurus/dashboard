@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {RoleDetail} from '@api/backendapi';
@@ -22,15 +21,14 @@ import {ActionbarService, ResourceMeta} from '../../../../common/services/global
 import {NotificationsService} from '../../../../common/services/global/notifications';
 import {EndpointManager, Resource} from '../../../../common/services/resource/endpoint';
 import {NamespacedResourceService} from '../../../../common/services/resource/resource';
-import {TenantService} from "../../../../common/services/global/tenant";
+import {TenantService} from '../../../../common/services/global/tenant';
 
 @Component({
   selector: 'kd-role-detail',
   templateUrl: './template.html',
 })
-
 export class RoleDetailComponent implements OnInit, OnDestroy {
-  private readonly endpoint_ = EndpointManager.resource(Resource.role, true,true);
+  private readonly endpoint_ = EndpointManager.resource(Resource.role, true, true);
   private readonly unsubscribe_ = new Subject<void>();
 
   role: RoleDetail;
@@ -46,16 +44,18 @@ export class RoleDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const resourceName = this.route_.snapshot.params.resourceName;
-    const resourceNamespace = this.route_.snapshot.params.resourceNamespace === undefined ?
-      window.history.state.namespace : this.route_.snapshot.params.resourceNamespace;
-    const resourceTenant = this.tenant_.current() === 'system' ?
-      window.history.state.tenant : this.tenant_.current()
+    const resourceNamespace =
+      this.route_.snapshot.params.resourceNamespace === undefined
+        ? window.history.state.namespace
+        : this.route_.snapshot.params.resourceNamespace;
+    const resourceTenant =
+      this.tenant_.current() === 'system' ? window.history.state.tenant : this.tenant_.current();
 
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/tenants/${resourceTenant}/role/${resourceNamespace}/${resourceName}`
+      endpoint = `api/v1/tenants/${resourceTenant}/role/${resourceNamespace}/${resourceName}`;
     } else {
-      endpoint = this.endpoint_.detail()
+      endpoint = this.endpoint_.detail();
     }
 
     this.role_

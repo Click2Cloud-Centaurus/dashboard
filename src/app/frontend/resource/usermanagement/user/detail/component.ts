@@ -5,14 +5,13 @@ import {ActionbarService, ResourceMeta} from '../../../../common/services/global
 import {NotificationsService} from '../../../../common/services/global/notifications';
 import {ResourceService} from 'common/services/resource/resource';
 import {EndpointManager, Resource} from 'common/services/resource/endpoint';
-import {Subject} from "rxjs";
-import {takeUntil} from "rxjs/operators";
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'kd-user-detail',
   templateUrl: './template.html',
 })
-
 export class UsersDetailComponent implements OnInit, OnDestroy {
   private readonly endpoint_ = EndpointManager.resource(Resource.users);
   private readonly unsubscribe_ = new Subject<void>();
@@ -24,7 +23,7 @@ export class UsersDetailComponent implements OnInit, OnDestroy {
     private readonly user_: ResourceService<UserDetail>,
     private readonly actionbar_: ActionbarService,
     private readonly route_: ActivatedRoute,
-    private readonly notifications_: NotificationsService
+    private readonly notifications_: NotificationsService,
   ) {}
 
   ngOnInit(): void {

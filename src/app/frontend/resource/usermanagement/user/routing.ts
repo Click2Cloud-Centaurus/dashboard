@@ -3,7 +3,7 @@ import {Route, RouterModule} from '@angular/router';
 import {USERMANAGEMENT_ROUTE} from '../../usermanagement/routing';
 import {UsersListComponent} from './list/component';
 import {UsersDetailComponent} from './detail/component';
-import {DEFAULT_ACTIONBAR} from "../../../common/components/actionbars/routing";
+import {DEFAULT_ACTIONBAR} from '../../../common/components/actionbars/routing';
 
 const USERS_LIST_ROUTE: Route = {
   path: '',

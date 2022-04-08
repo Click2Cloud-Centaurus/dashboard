@@ -18,7 +18,7 @@ import {UserManagementComponent} from './component';
 
 export const USERMANAGEMENT_ROUTE: Route = {
   path: '',
-  component:UserManagementComponent,
+  component: UserManagementComponent,
   data: {
     breadcrumb: 'User Management',
     link: ['', 'usermanagement'],

@@ -14,15 +14,16 @@
 
 import {HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
-import {ComponentFactoryResolver} from '@angular/core'
-import {Component, OnDestroy, OnInit,Input} from '@angular/core';
+import {ComponentFactoryResolver} from '@angular/core';
+import {Component, OnDestroy, OnInit, Input} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {
   Deployment,
   DeploymentList,
   Event,
   Namespace,
-  NamespaceList, ObjectMeta,
+  NamespaceList,
+  ObjectMeta,
   Pod,
   PodList,
   ReplicaSet,
@@ -36,21 +37,26 @@ import {ActionbarService, ResourceMeta} from '../../../../common/services/global
 import {NotificationsService} from '../../../../common/services/global/notifications';
 import {EndpointManager, Resource} from 'common/services/resource/endpoint';
 import {Subscription} from 'rxjs/Subscription';
-import {NamespacedResourceService, ResourceService} from "../../../../common/services/resource/resource";
-import {ResourceListWithStatuses} from "../../../../common/resources/list";
-import {VerberService} from "../../../../common/services/global/verber";
-import {ListGroupIdentifier,ListIdentifier} from "../../../../common/components/resourcelist/groupids";
-import {MenuComponent} from "../../../../common/components/list/column/menu/component";
-import {TenantService} from "../../../../common/services/global/tenant";
+import {
+  NamespacedResourceService,
+  ResourceService,
+} from '../../../../common/services/resource/resource';
+import {ResourceListWithStatuses} from '../../../../common/resources/list';
+import {VerberService} from '../../../../common/services/global/verber';
+import {
+  ListGroupIdentifier,
+  ListIdentifier,
+} from '../../../../common/components/resourcelist/groupids';
+import {MenuComponent} from '../../../../common/components/list/column/menu/component';
+import {TenantService} from '../../../../common/services/global/tenant';
 
 @Component({
   selector: 'kd-tptenant-detail',
   templateUrl: './template.html',
 })
-
 export class TpTenantDetailComponent implements OnInit, OnDestroy {
   private tenantSubscription_: Subscription;
-  private readonly endpoint_ = EndpointManager.resource(Resource.tenant,false,false, true);
+  private readonly endpoint_ = EndpointManager.resource(Resource.tenant, false, false, true);
   tenant: TenantDetail;
   isInitialized = false;
 
@@ -65,11 +71,18 @@ export class TpTenantDetailComponent implements OnInit, OnDestroy {
     const resourceName = this.activatedRoute_.snapshot.params.resourceName;
     const resourcePartition = sessionStorage.getItem(`${resourceName}`);
     if (sessionStorage.getItem('currentTenant')) {
-      sessionStorage.removeItem('currentTenant')
+      sessionStorage.removeItem('currentTenant');
     }
     sessionStorage.setItem('currentTenant', resourceName);
     this.tenantSubscription_ = this.tenant_
-      .get(this.endpoint_.detail(), resourceName, undefined, undefined,undefined, resourcePartition)
+      .get(
+        this.endpoint_.detail(),
+        resourceName,
+        undefined,
+        undefined,
+        undefined,
+        resourcePartition,
+      )
       .subscribe((d: TenantDetail) => {
         this.tenant = d;
         this.notifications_.pushErrors(d.errors);
@@ -110,18 +123,19 @@ export class NamespaceListComponent extends ResourceListWithStatuses<NamespaceLi
     // Register action columns.
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
 
-    this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
-      this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
-    sessionStorage.setItem('tenantName',this.tenantName);
-
+    this.tenantName =
+      this.activatedRoute_.snapshot.params.resourceName === undefined
+        ? this.tenant_.current()
+        : this.activatedRoute_.snapshot.params.resourceName;
+    sessionStorage.setItem('tenantName', this.tenantName);
   }
 
   getResourceObservable(params?: HttpParams): Observable<NamespaceList> {
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/tenants/${this.tenantName}/namespace`
+      endpoint = `api/v1/tenants/${this.tenantName}/namespace`;
     } else {
-      endpoint = this.endpoint
+      endpoint = this.endpoint;
     }
     return this.namespace_.get(endpoint, undefined, params, this.tenantName);
   }
@@ -174,18 +188,19 @@ export class DeploymentListComponent extends ResourceListWithStatuses<Deployment
     // Register dynamic columns.
     this.registerDynamicColumn('namespace', 'name', this.shouldShowNamespaceColumn_.bind(this));
 
-    this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
-      this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
-    sessionStorage.setItem('tenantName',this.tenantName);
-
+    this.tenantName =
+      this.activatedRoute_.snapshot.params.resourceName === undefined
+        ? this.tenant_.current()
+        : this.activatedRoute_.snapshot.params.resourceName;
+    sessionStorage.setItem('tenantName', this.tenantName);
   }
 
   getResourceObservable(params?: HttpParams): Observable<DeploymentList> {
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/tenants/${this.tenantName}/deployment`
+      endpoint = `api/v1/tenants/${this.tenantName}/deployment`;
     } else {
-      endpoint = this.endpoint
+      endpoint = this.endpoint;
     }
 
     return this.deployment_.get(endpoint, undefined, undefined, params, this.tenantName);
@@ -251,19 +266,21 @@ export class PodListComponent extends ResourceListWithStatuses<PodList, Pod> {
     // Register dynamic columns.
     this.registerDynamicColumn('namespace', 'name', this.shouldShowNamespaceColumn_.bind(this));
 
-    this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
-      this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
-    sessionStorage.setItem('tenantName',this.tenantName);
+    this.tenantName =
+      this.activatedRoute_.snapshot.params.resourceName === undefined
+        ? this.tenant_.current()
+        : this.activatedRoute_.snapshot.params.resourceName;
+    sessionStorage.setItem('tenantName', this.tenantName);
   }
 
   getResourceObservable(params?: HttpParams): Observable<PodList> {
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/tenants/${this.tenantName}/pod`
+      endpoint = `api/v1/tenants/${this.tenantName}/pod`;
     } else {
-      endpoint = this.endpoint
+      endpoint = this.endpoint;
     }
-    return this.podList.get(endpoint, undefined, undefined, params,this.tenantName);
+    return this.podList.get(endpoint, undefined, undefined, params, this.tenantName);
   }
 
   map(podList: PodList): Pod[] {
@@ -367,17 +384,19 @@ export class ReplicaSetListComponent extends ResourceListWithStatuses<ReplicaSet
 
     // Register dynamic columns.
     this.registerDynamicColumn('namespace', 'name', this.shouldShowNamespaceColumn_.bind(this));
-    this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
-      this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
-    sessionStorage.setItem('tenantName',this.tenantName);
+    this.tenantName =
+      this.activatedRoute_.snapshot.params.resourceName === undefined
+        ? this.tenant_.current()
+        : this.activatedRoute_.snapshot.params.resourceName;
+    sessionStorage.setItem('tenantName', this.tenantName);
   }
 
   getResourceObservable(params?: HttpParams): Observable<ReplicaSetList> {
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/tenants/${this.tenantName}/replicaset`
+      endpoint = `api/v1/tenants/${this.tenantName}/replicaset`;
     } else {
-      endpoint = this.endpoint
+      endpoint = this.endpoint;
     }
 
     return this.replicaSet_.get(endpoint, undefined, undefined, params, this.tenantName);
@@ -416,19 +435,21 @@ export class ReplicaSetListComponent extends ResourceListWithStatuses<ReplicaSet
   }
 }
 
-export class ResourceQuotasListComponent extends ResourceListWithStatuses<ResourceQuotaList, ResourceQuota> {
+export class ResourceQuotasListComponent extends ResourceListWithStatuses<
+  ResourceQuotaList,
+  ResourceQuota
+> {
   @Input() endpoint = EndpointManager.resource(Resource.resourcequota, true, true).list();
 
   tenantName: string;
 
   constructor(
-    public readonly verber_: VerberService,
+    readonly verber_: VerberService,
     private readonly resourcequota_: NamespacedResourceService<ResourceQuotaList>,
     notifications: NotificationsService,
     private readonly tenant_: TenantService,
     private readonly activatedRoute_: ActivatedRoute,
   ) {
-
     super('resourcequota', notifications);
     this.id = ListIdentifier.resourcequota;
     this.groupId = ListGroupIdentifier.cluster;
@@ -437,9 +458,11 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
 
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
-    this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
-      this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
-    sessionStorage.setItem('tenantName',this.tenantName);
+    this.tenantName =
+      this.activatedRoute_.snapshot.params.resourceName === undefined
+        ? this.tenant_.current()
+        : this.activatedRoute_.snapshot.params.resourceName;
+    sessionStorage.setItem('tenantName', this.tenantName);
   }
 
   isInSuccessState(): boolean {
@@ -447,11 +470,11 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   }
 
   getResourceObservable(params?: HttpParams): Observable<ResourceQuotaList> {
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/tenants/${this.tenantName}/resourcequota`
+      endpoint = `api/v1/tenants/${this.tenantName}/resourcequota`;
     } else {
-      endpoint = this.endpoint
+      endpoint = this.endpoint;
     }
 
     return this.resourcequota_.get(endpoint, undefined, undefined, params, this.tenantName);
@@ -464,5 +487,4 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   getDisplayColumns(): string[] {
     return ['statusicon', 'name', 'namespace', 'age'];
   }
-
 }

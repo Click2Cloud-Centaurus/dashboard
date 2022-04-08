@@ -18,5 +18,4 @@ import {Component} from '@angular/core';
   selector: 'kd-partition-list-state',
   template: '<kd-partition-list></kd-partition-list>',
 })
-
-export class PartitionListComponent{}
+export class PartitionListComponent {}

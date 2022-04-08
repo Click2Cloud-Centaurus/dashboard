@@ -23,14 +23,17 @@ import {ResourceService} from '../../../services/resource/resource';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
 import {VerberService} from '../../../services/global/verber';
-import {Router} from "@angular/router";
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'kd-tenant-partition-list',
   templateUrl: './template.html',
 })
 // @ts-ignore
-export class TenantPartitionListComponent extends ResourceListWithStatuses<TenantPartitionList, TenantPartition> {
+export class TenantPartitionListComponent extends ResourceListWithStatuses<
+  TenantPartitionList,
+  TenantPartition
+> {
   @Input() endpointTp = EndpointManager.resource(Resource.tenantPartition).list();
 
   constructor(
@@ -50,8 +53,8 @@ export class TenantPartitionListComponent extends ResourceListWithStatuses<Tenan
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
   }
 
-  setClusterName($event:any) {
-    const clusterName = $event.target.innerHTML.replace(/^\s+|\s+$/gm,'');
+  setClusterName($event: any) {
+    const clusterName = $event.target.innerHTML.replace(/^\s+|\s+$/gm, '');
     this.router_.navigateByUrl('/tptenant', {state: {clusterName}});
   }
 
@@ -60,7 +63,7 @@ export class TenantPartitionListComponent extends ResourceListWithStatuses<Tenan
   }
 
   map(tenantPartitionList: TenantPartitionList): TenantPartition[] {
-    return tenantPartitionList.tenantPartitions
+    return tenantPartitionList.tenantPartitions;
   }
 
   isInSuccessState(): boolean {
@@ -68,6 +71,6 @@ export class TenantPartitionListComponent extends ResourceListWithStatuses<Tenan
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'tenantcount','pods','cpu','memory','health','etcd'];
+    return ['statusicon', 'name', 'tenantcount', 'pods', 'cpu', 'memory', 'health', 'etcd'];
   }
 }

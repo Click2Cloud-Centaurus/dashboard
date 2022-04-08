@@ -18,7 +18,8 @@ limitations under the License.
      i18n>Tenant</div>
 
 <mat-form-field class="kd-namespace-select-input-container">
-  <mat-select [(ngModel)]="systemTenantName" disabled>
+  <mat-select [(ngModel)]="systemTenantName"
+              disabled>
     <mat-optgroup>
       <mat-option [value]="systemTenantName">{{systemTenantName}}</mat-option>
       <mat-option *ngFor="let tenant of tenants | filterBy: selectTenantInput"

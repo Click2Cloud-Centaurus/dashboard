@@ -54,12 +54,10 @@ const routes: Routes = [
       {
         path: 'node',
         loadChildren: 'resource/cluster/node/module#NodeModule',
-
       },
       {
         path: 'partition',
         loadChildren: 'resource/cluster/partition/module#PartitionModule',
-
       },
       {
         path: 'tptenant',
@@ -77,7 +75,6 @@ const routes: Routes = [
       {
         path: 'user',
         loadChildren: 'resource/usermanagement/user/module#UsersModule',
-
       },
 
       // Workloads group
@@ -192,7 +189,6 @@ const routes: Routes = [
       {
         path: 'tenantmonitoring',
         loadChildren: 'resource/tenantmanagement/tenantmonitoring/module#TenantMonitoringModule',
-
       },
 
       //here

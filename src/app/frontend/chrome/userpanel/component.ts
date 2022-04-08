@@ -25,7 +25,6 @@ import {Router} from '@angular/router';
     '[class.kd-hidden]': 'this.isAuthEnabled() === false',
   },
 })
-
 export class UserPanelComponent implements OnInit {
   loginStatus: LoginStatus;
   isLoginStatusInitialized = false;

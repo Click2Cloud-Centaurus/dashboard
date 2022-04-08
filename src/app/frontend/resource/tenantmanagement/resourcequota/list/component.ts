@@ -18,6 +18,4 @@ import {Component} from '@angular/core';
   selector: 'kd-resourcequota-list-state',
   template: '<kd-resourcequota-list></kd-resourcequota-list>',
 })
-export class ResourceQuotasListComponent {
-
-}
+export class ResourceQuotasListComponent {}

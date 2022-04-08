@@ -13,14 +13,13 @@
 // limitations under the License.
 
 import {Component} from '@angular/core';
-import {GroupedResourceList} from "../../../../common/resources/groupedlist";
-import {ListGroupIdentifier} from "../../../../common/components/resourcelist/groupids";
+import {GroupedResourceList} from '../../../../common/resources/groupedlist';
+import {ListGroupIdentifier} from '../../../../common/components/resourcelist/groupids';
 
 @Component({
   selector: 'kd-tenantmonitoring-list-state',
   templateUrl: './template.html',
 })
-
 export class TenantMonitoringListComponent extends GroupedResourceList {
   hasWorkloads(): boolean {
     return this.isGroupVisible(ListGroupIdentifier.workloads);

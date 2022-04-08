@@ -23,34 +23,31 @@ import {ResourceService} from '../../../services/resource/resource';
 import {NotificationsService} from '../../../services/global/notifications';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
-import {UserApi} from "../../../../../frontend/common/services/global/userapi"
-import {VerberService} from "../../../../../frontend/common/services/global/verber"
-import {NamespacedResourceService} from "../../../services/resource/resource";
-import {TenantDetail} from "@api/backendapi";
+import {UserApi} from '../../../../../frontend/common/services/global/userapi';
+import {VerberService} from '../../../../../frontend/common/services/global/verber';
+import {NamespacedResourceService} from '../../../services/resource/resource';
+import {TenantDetail} from '@api/backendapi';
 
 @Component({
   selector: 'kd-user-list',
   templateUrl: './template.html',
-
 })
-
 export class UserListComponent extends ResourceListWithStatuses<UserList, User> {
-  @Input() endpoint = EndpointManager.resource(Resource.user,false,true).list();
+  @Input() endpoint = EndpointManager.resource(Resource.user, false, true).list();
   @ViewChild(MatDrawer, {static: true}) private readonly nav_: MatDrawer;
 
-  displayName:string;
-  typeMeta:TypeMeta;
-  objectMeta:ObjectMeta;
+  displayName: string;
+  typeMeta: TypeMeta;
+  objectMeta: ObjectMeta;
 
   private currentTenant: string;
 
   constructor(
-    public readonly verber_: VerberService,
+    readonly verber_: VerberService,
     private readonly user_: ResourceService<UserList>,
-    private userAPI_:UserApi,
+    private userAPI_: UserApi,
     private readonly tenant_: NamespacedResourceService<TenantDetail>,
     notifications: NotificationsService,
-
   ) {
     super('user', notifications);
     this.id = ListIdentifier.user;
@@ -62,8 +59,7 @@ export class UserListComponent extends ResourceListWithStatuses<UserList, User> 
 
     // Register action columns.
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
-    this.currentTenant = this.tenant_['tenant_']['currentTenant_']
-
+    this.currentTenant = this.tenant_['tenant_']['currentTenant_'];
   }
 
   getResourceObservable(params?: HttpParams): Observable<UserList> {
@@ -71,7 +67,7 @@ export class UserListComponent extends ResourceListWithStatuses<UserList, User> 
   }
 
   map(userList: UserList): User[] {
-    return userList.users
+    return userList.users;
   }
 
   isInErrorState(resource: User): boolean {

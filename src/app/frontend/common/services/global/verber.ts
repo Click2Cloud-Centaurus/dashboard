@@ -22,12 +22,12 @@ import {EditResourceDialog} from '../../dialogs/editresource/dialog';
 import {ScaleResourceDialog} from '../../dialogs/scaleresource/dialog';
 import {TriggerResourceDialog} from '../../dialogs/triggerresource/dialog';
 import {RawResource} from '../../resources/rawresource';
-import {CreateTenantDialog } from '../../dialogs/createTenant/dialog';
+import {CreateTenantDialog} from '../../dialogs/createTenant/dialog';
 import {CreateUserDialog} from '../../dialogs/createUser/dialog';
 import {CreateNamespaceDialog} from '../../dialogs/createNamespace/dialog';
 import {CreateRoleDialog} from '../../dialogs/createRole/dialog';
 import {CreateClusterroleDialog} from '../../dialogs/createClusterrole/dialog';
-import {CreateAssignQuotaDialog } from '../../dialogs/createAssignQuota/dialog';
+import {CreateAssignQuotaDialog} from '../../dialogs/createAssignQuota/dialog';
 import {ResourceMeta} from './actionbar';
 import {TenantService} from './tenant';
 
@@ -44,7 +44,6 @@ export class VerberService {
     private readonly dialog_: MatDialog,
     private readonly http_: HttpClient,
     private tenant_: TenantService,
-
   ) {}
 
   // create Tenant dialog
@@ -81,11 +80,14 @@ export class VerberService {
         if (result) {
         }
       });
-
   }
 
   //Create Quota dialog
-  showResourceQuotaCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+  showResourceQuotaCreateDialog(
+    displayName: string,
+    typeMeta: TypeMeta,
+    objectMeta: ObjectMeta,
+  ): void {
     const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
     this.dialog_
       .open(CreateAssignQuotaDialog, dialogConfig)
@@ -109,7 +111,11 @@ export class VerberService {
   }
 
   // create Clusterrole dialog
-  showClusterroleCreateDialog(displayName: string, typeMeta: TypeMeta, objectMeta: ObjectMeta): void {
+  showClusterroleCreateDialog(
+    displayName: string,
+    typeMeta: TypeMeta,
+    objectMeta: ObjectMeta,
+  ): void {
     const dialogConfig = this.getDialogConfig_(displayName, typeMeta, objectMeta);
     this.dialog_
       .open(CreateClusterroleDialog, dialogConfig)

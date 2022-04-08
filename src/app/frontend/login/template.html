@@ -14,37 +14,74 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<div class="kd-login-container kd-bg-background login_container" fxFlex>
+<div class="kd-login-container kd-bg-background login_container"
+     fxFlex>
 
-  <kd-card titleClasses="kd-card-top-radius kd-bg-primary kd-accent" class="kd-login-card" [expandable]="false">
+  <kd-card titleClasses="kd-card-top-radius kd-bg-primary kd-accent"
+           class="kd-login-card"
+           [expandable]="false">
     <div content>
-      <img class="login_logo_icon" src="assets/images/centaurus-logo-icon.png" alt="">
-      <img class="login_logo_text" src="assets/images/centaurus-logo-text.svg" alt="">
-      <form  fxLayout="column" (ngSubmit)="login()">
+      <img class="login_logo_icon"
+           src="assets/images/centaurus-logo-icon.png"
+           alt="">
+      <img class="login_logo_text"
+           src="assets/images/centaurus-logo-text.svg"
+           alt="">
+      <form fxLayout="column"
+            (ngSubmit)="login()">
         <ng-container [ngSwitch]="selectedAuthenticationMode">
-          <mat-form-field *ngSwitchCase="loginModes.Token" class="kd-login-input">
-            <input matInput id="token" name="token" i18n-placeholder placeholder="Enter token" type="password" required
+          <mat-form-field *ngSwitchCase="loginModes.Token"
+                          class="kd-login-input">
+            <input matInput
+                   id="token"
+                   name="token"
+                   i18n-placeholder
+                   placeholder="Enter token"
+                   type="password"
+                   required
                    (change)="onChange($event)">
           </mat-form-field>
 
-          <div *ngSwitchCase="loginModes.Basic" fxLayout="column">
-            <mat-form-field fxFlex class="kd-login-input">
-              <input id="username" name="username" matInput i18n-placeholder placeholder="Username" [(ngModel)]="username" required autocomplete="off"
+          <div *ngSwitchCase="loginModes.Basic"
+               fxLayout="column">
+            <mat-form-field fxFlex
+                            class="kd-login-input">
+              <input id="username"
+                     name="username"
+                     matInput
+                     i18n-placeholder
+                     placeholder="Username"
+                     [(ngModel)]="username"
+                     required
+                     autocomplete="off"
                      (change)="onChange($event)">
             </mat-form-field>
 
-            <mat-form-field fxFlex class="kd-login-input">
-              <input id="password" name="password" matInput i18n-placeholder placeholder="Password" [(ngModel)]="password" type="password" autocomplete="off"
-                     required (change)="onChange($event)">
+            <mat-form-field fxFlex
+                            class="kd-login-input">
+              <input id="password"
+                     name="password"
+                     matInput
+                     i18n-placeholder
+                     placeholder="Password"
+                     [(ngModel)]="password"
+                     type="password"
+                     autocomplete="off"
+                     required
+                     (change)="onChange($event)">
             </mat-form-field>
           </div>
 
-          <div *ngSwitchCase="loginModes.Kubeconfig" class="kd-login-input">
-            <kd-upload-file label="Choose kubeconfig file" i18n-label (onLoad)="onChange($event)"></kd-upload-file>
+          <div *ngSwitchCase="loginModes.Kubeconfig"
+               class="kd-login-input">
+            <kd-upload-file label="Choose kubeconfig file"
+                            i18n-label
+                            (onLoad)="onChange($event)"></kd-upload-file>
           </div>
 
           <div class="alert_section_outer">
-            <div class="alert_section" *ngFor="let error of errors">
+            <div class="alert_section"
+                 *ngFor="let error of errors">
               <img src="../assets/images/danger.svg">
               <span class="kd-error-text">{{error.status}} ({{error.code}}): {{error.message}}</span>
             </div>
@@ -52,7 +89,12 @@ limitations under the License.
 
         </ng-container>
         <div align="right">
-          <button mat-raised-button color="primary" type="submit" class="kd-login-button" [disabled]="username === '' || password == ''" i18n>
+          <button mat-raised-button
+                  color="primary"
+                  type="submit"
+                  class="kd-login-button"
+                  [disabled]="username === '' || password == ''"
+                  i18n>
             Sign in
           </button>
         </div>

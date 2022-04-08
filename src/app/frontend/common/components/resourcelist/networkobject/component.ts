@@ -50,12 +50,11 @@ export class NetworkObjectListComponent extends ResourceListBase<NetworkObjectLi
   }
 
   map(networkObjectList: NetworkObjectList): NetworkObject[] {
-    this.networkObjectKind = networkObjectList.typeMeta.kind.split("List")[0]+"s"
+    this.networkObjectKind = networkObjectList.typeMeta.kind.split('List')[0] + 's';
     return networkObjectList.items;
   }
 
   getDisplayColumns(): string[] {
     return ['name', 'namespace', 'age'];
   }
-
 }

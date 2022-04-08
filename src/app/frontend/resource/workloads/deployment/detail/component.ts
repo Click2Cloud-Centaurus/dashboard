@@ -24,7 +24,7 @@ import {NotificationsService} from '../../../../common/services/global/notificat
 import {KdStateService} from '../../../../common/services/global/state';
 import {EndpointManager, Resource} from '../../../../common/services/resource/endpoint';
 import {NamespacedResourceService} from '../../../../common/services/resource/resource';
-import {TenantService} from "../../../../common/services/global/tenant";
+import {TenantService} from '../../../../common/services/global/tenant';
 
 @Component({
   selector: 'kd-deployment-detail',
@@ -52,19 +52,30 @@ export class DeploymentDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const resourceName = this.activatedRoute_.snapshot.params.resourceName;
-    const resourceNamespace = this.activatedRoute_.snapshot.params.resourceNamespace === undefined ?
-      window.history.state.namespace : this.activatedRoute_.snapshot.params.resourceNamespace;
-    const resourceTenant = this.tenant_.current() === 'system' ?
-      sessionStorage.getItem('deploymentTenant') : this.tenant_.current()
-    const partition = resourceTenant === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : ''
-    let endpoint = ''
+    const resourceNamespace =
+      this.activatedRoute_.snapshot.params.resourceNamespace === undefined
+        ? window.history.state.namespace
+        : this.activatedRoute_.snapshot.params.resourceNamespace;
+    const resourceTenant =
+      this.tenant_.current() === 'system'
+        ? sessionStorage.getItem('deploymentTenant')
+        : this.tenant_.current();
+    const partition =
+      resourceTenant === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : '';
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/${partition}tenants/${resourceTenant}/deployment/${resourceNamespace}/${resourceName}`
+      endpoint = `api/v1/${partition}tenants/${resourceTenant}/deployment/${resourceNamespace}/${resourceName}`;
     } else {
-      endpoint = this.endpoint_.detail()
+      endpoint = this.endpoint_.detail();
     }
-    const resourcePartition = resourceTenant === 'system' ? this.tenant_.tenantPartition() : ''
-    this.eventListEndpoint = this.endpoint_.child(resourceName, Resource.event, resourceNamespace, resourceTenant, resourcePartition);
+    const resourcePartition = resourceTenant === 'system' ? this.tenant_.tenantPartition() : '';
+    this.eventListEndpoint = this.endpoint_.child(
+      resourceName,
+      Resource.event,
+      resourceNamespace,
+      resourceTenant,
+      resourcePartition,
+    );
     this.oldReplicaSetsEndpoint = this.endpoint_.child(
       resourceName,
       Resource.oldReplicaSet,

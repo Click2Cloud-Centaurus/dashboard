@@ -23,14 +23,17 @@ import {NotificationsService} from '../../../services/global/notifications';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
 import {VerberService} from '../../../services/global/verber';
-import {ActivatedRoute} from "@angular/router";
-import {TenantService} from "../../../services/global/tenant";
+import {ActivatedRoute} from '@angular/router';
+import {TenantService} from '../../../services/global/tenant';
 
 @Component({
   selector: 'kd-resourcequota-list',
   templateUrl: './template.html',
 })
-export class ResourceQuotasListComponent extends ResourceListWithStatuses<ResourceQuotaList, ResourceQuota> {
+export class ResourceQuotasListComponent extends ResourceListWithStatuses<
+  ResourceQuotaList,
+  ResourceQuota
+> {
   @Input() endpoint = EndpointManager.resource(Resource.resourcequota, true, true).list();
 
   displayName: string;
@@ -39,13 +42,12 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   tenantName: string;
 
   constructor(
-    public readonly verber_: VerberService,
+    readonly verber_: VerberService,
     private readonly resourcequota_: NamespacedResourceService<ResourceQuotaList>,
     notifications: NotificationsService,
     private readonly tenant_: TenantService,
     private readonly activatedRoute_: ActivatedRoute,
   ) {
-
     super('resourcequota', notifications);
     this.id = ListIdentifier.resourcequota;
     this.groupId = ListGroupIdentifier.cluster;
@@ -54,8 +56,10 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
 
     this.registerBinding(this.icon.checkCircle, 'kd-success', this.isInSuccessState);
-    this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
-      this.tenant_.current() : this.tenant_.resourceTenant()
+    this.tenantName =
+      this.activatedRoute_.snapshot.params.resourceName === undefined
+        ? this.tenant_.current()
+        : this.tenant_.resourceTenant();
     sessionStorage.setItem('resourceQuotaTenant', this.tenantName);
   }
 
@@ -64,12 +68,13 @@ export class ResourceQuotasListComponent extends ResourceListWithStatuses<Resour
   }
 
   getResourceObservable(params?: HttpParams): Observable<ResourceQuotaList> {
-    const partition = this.tenantName === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : ''
-    let endpoint = ''
+    const partition =
+      this.tenantName === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : '';
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/${partition}tenants/${this.tenantName}/resourcequota`
+      endpoint = `api/v1/${partition}tenants/${this.tenantName}/resourcequota`;
     } else {
-      endpoint = this.endpoint
+      endpoint = this.endpoint;
     }
 
     return this.resourcequota_.get(endpoint, undefined, undefined, params, this.tenantName);

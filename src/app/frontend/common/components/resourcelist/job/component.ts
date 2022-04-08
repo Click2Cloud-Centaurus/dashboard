@@ -28,7 +28,6 @@ import {ListGroupIdentifier, ListIdentifier} from '../groupids';
   selector: 'kd-job-list',
   templateUrl: './template.html',
 })
-
 export class JobListComponent extends ResourceListWithStatuses<JobList, Job> {
   @Input() title: string;
   @Input() endpoint = EndpointManager.resource(Resource.job, true, true).list();

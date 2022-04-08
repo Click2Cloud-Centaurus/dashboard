@@ -48,7 +48,7 @@ export enum Resource {
   role = 'role',
   user = 'users',
   users = 'user',
-  serviceaccount= 'serviceaccount',
+  serviceaccount = 'serviceaccount',
   resourcePartition = 'resourcepartition',
   tenantPartition = 'tenantpartition',
   network = 'crd',
@@ -66,41 +66,45 @@ class ResourceEndpoint {
     private readonly namespaced_ = false,
     private readonly tenanted_ = false,
     private readonly partitioned_ = false,
-  ) {
-  }
+  ) {}
 
   list(): string {
-    return `${baseHref}${this.partitioned_ ? '/partition/:partition' : ''}${this.tenanted_ ? '/tenants/:tenant' : ''}/${this.resource_}${
-      this.namespaced_ ? '/:namespace' : ''
-    }`;
+    return `${baseHref}${this.partitioned_ ? '/partition/:partition' : ''}${
+      this.tenanted_ ? '/tenants/:tenant' : ''
+    }/${this.resource_}${this.namespaced_ ? '/:namespace' : ''}`;
   }
 
   detail(): string {
-    return `${baseHref}${this.partitioned_ ? '/partition/:partition' : ''}${this.tenanted_ ? '/tenants/:tenant' : ''}/${this.resource_}${
-      this.namespaced_ ? '/:namespace' : ''
-    }/:name`;
+    return `${baseHref}${this.partitioned_ ? '/partition/:partition' : ''}${
+      this.tenanted_ ? '/tenants/:tenant' : ''
+    }/${this.resource_}${this.namespaced_ ? '/:namespace' : ''}/:name`;
   }
 
-  child(resourceName: string, relatedResource: Resource, resourceNamespace?: string, tenant?: string, partition?: string): string {
+  child(
+    resourceName: string,
+    relatedResource: Resource,
+    resourceNamespace?: string,
+    tenant?: string,
+    partition?: string,
+  ): string {
     if (!resourceNamespace) {
       resourceNamespace = ':namespace';
     }
-    let url = ''
+    let url = '';
     if (tenant) {
       if (partition) {
-        url = `${baseHref}/partition/${partition}${this.tenanted_ ? `/tenants/${tenant}` : ''}/${this.resource_}${
-          this.namespaced_ ? `/${resourceNamespace}` : ''
-        }/${resourceName}/${relatedResource}`
+        url = `${baseHref}/partition/${partition}${this.tenanted_ ? `/tenants/${tenant}` : ''}/${
+          this.resource_
+        }${this.namespaced_ ? `/${resourceNamespace}` : ''}/${resourceName}/${relatedResource}`;
       } else {
         url = `${baseHref}${this.tenanted_ ? `/tenants/${tenant}` : ''}/${this.resource_}${
           this.namespaced_ ? `/${resourceNamespace}` : ''
-        }/${resourceName}/${relatedResource}`
+        }/${resourceName}/${relatedResource}`;
       }
-
     } else {
       url = `${baseHref}${this.tenanted_ ? '/tenants/:tenant' : ''}/${this.resource_}${
         this.namespaced_ ? `/${resourceNamespace}` : ''
-      }/${resourceName}/${relatedResource}`
+      }/${resourceName}/${relatedResource}`;
     }
     return url;
   }
@@ -119,7 +123,12 @@ class UtilityEndpoint {
 }
 
 export class EndpointManager {
-  static resource(resource: Resource, namespaced?: boolean, tenanted?: boolean, partitioned?: boolean): ResourceEndpoint {
+  static resource(
+    resource: Resource,
+    namespaced?: boolean,
+    tenanted?: boolean,
+    partitioned?: boolean,
+  ): ResourceEndpoint {
     return new ResourceEndpoint(resource, namespaced, tenanted, partitioned);
   }
 

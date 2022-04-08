@@ -18,7 +18,7 @@ import {
   ResourcePartition,
   ResourcePartitionList,
   TenantPartition,
-  TenantPartitionList
+  TenantPartitionList,
 } from '@api/backendapi';
 import {Observable} from 'rxjs/Observable';
 import {ResourceListWithStatuses} from '../../../resources/list';
@@ -27,21 +27,22 @@ import {EndpointManager, Resource} from '../../../services/resource/endpoint';
 import {ResourceService} from '../../../services/resource/resource';
 import {MenuComponent} from '../../list/column/menu/component';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
-import {VerberService} from "../../../services/global/verber";
+import {VerberService} from '../../../services/global/verber';
 
 @Component({
   selector: 'kd-partition-list',
   templateUrl: './template.html',
 })
-export class PartitionListComponent implements  OnInit {
-  constructor(
-    readonly verber_: VerberService,
-  ) {}
+export class PartitionListComponent implements OnInit {
+  constructor(readonly verber_: VerberService) {}
 
   ngOnInit(): void {}
 }
 
-export class ResourcePartitionListComponent extends ResourceListWithStatuses<ResourcePartitionList, ResourcePartition> {
+export class ResourcePartitionListComponent extends ResourceListWithStatuses<
+  ResourcePartitionList,
+  ResourcePartition
+> {
   @Input() endpointRp = EndpointManager.resource(Resource.resourcePartition).list();
 
   constructor(
@@ -65,7 +66,7 @@ export class ResourcePartitionListComponent extends ResourceListWithStatuses<Res
   }
 
   map(resourcePartitionList: ResourcePartitionList): ResourcePartition[] {
-    return resourcePartitionList.resourcePartitions
+    return resourcePartitionList.resourcePartitions;
   }
 
   isInSuccessState(): boolean {
@@ -73,12 +74,14 @@ export class ResourcePartitionListComponent extends ResourceListWithStatuses<Res
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'nodecount','cpu','memory','health','etcd'];
+    return ['statusicon', 'name', 'nodecount', 'cpu', 'memory', 'health', 'etcd'];
   }
-
 }
 
-export class TenantPartitionListComponent extends ResourceListWithStatuses<TenantPartitionList, TenantPartition> {
+export class TenantPartitionListComponent extends ResourceListWithStatuses<
+  TenantPartitionList,
+  TenantPartition
+> {
   @Input() endpointTp = EndpointManager.resource(Resource.tenantPartition).list();
 
   constructor(
@@ -102,7 +105,7 @@ export class TenantPartitionListComponent extends ResourceListWithStatuses<Tenan
   }
 
   map(tenantPartitionList: TenantPartitionList): TenantPartition[] {
-    return tenantPartitionList.tenantPartitions
+    return tenantPartitionList.tenantPartitions;
   }
 
   isInSuccessState(): boolean {
@@ -110,7 +113,6 @@ export class TenantPartitionListComponent extends ResourceListWithStatuses<Tenan
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'tenantcount','pods','cpu','memory','health','etcd'];
+    return ['statusicon', 'name', 'tenantcount', 'pods', 'cpu', 'memory', 'health', 'etcd'];
   }
-
 }

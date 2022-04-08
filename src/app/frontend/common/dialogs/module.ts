@@ -21,12 +21,12 @@ import {LogsDownloadDialog} from './download/dialog';
 import {EditResourceDialog} from './editresource/dialog';
 import {ScaleResourceDialog} from './scaleresource/dialog';
 import {TriggerResourceDialog} from './triggerresource/dialog';
-import {CreateTenantDialog} from "./createTenant/dialog";
-import {CreateNamespaceDialog} from "./createNamespace/dialog";
-import {CreateClusterroleDialog} from "./createClusterrole/dialog";
-import {CreateRoleDialog} from "./createRole/dialog";
-import {CreateAssignQuotaDialog} from "./createAssignQuota/dialog";
-import {CreateUserDialog} from "./createUser/dialog";
+import {CreateTenantDialog} from './createTenant/dialog';
+import {CreateNamespaceDialog} from './createNamespace/dialog';
+import {CreateClusterroleDialog} from './createClusterrole/dialog';
+import {CreateRoleDialog} from './createRole/dialog';
+import {CreateAssignQuotaDialog} from './createAssignQuota/dialog';
+import {CreateUserDialog} from './createUser/dialog';
 
 @NgModule({
   imports: [SharedModule, ComponentsModule],

@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core'
+import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 
 export interface DashboardUser {
-  id:number;
+  id: number;
   username: string;
   password: string;
   token: string;
@@ -10,16 +10,12 @@ export interface DashboardUser {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-
 export class UserApi {
-  constructor(
-    private http:HttpClient,
-  ){}
+  constructor(private http: HttpClient) {}
 
-  allUsers()
-  {
-    return this.http.get<DashboardUser[]>("/api/v1/users")
+  allUsers() {
+    return this.http.get<DashboardUser[]>('/api/v1/users');
   }
 }

@@ -39,7 +39,7 @@ export class NetworkDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const {networkName} = this.activatedRoute_.snapshot.params;
-    this.networkObjectEndpoint = EndpointManager.resource(Resource.network, false,true).child(
+    this.networkObjectEndpoint = EndpointManager.resource(Resource.network, false, true).child(
       networkName,
       Resource.networkObject,
     );
@@ -49,9 +49,7 @@ export class NetworkDetailComponent implements OnInit, OnDestroy {
       .subscribe((d: NetworkDetail) => {
         this.network = d;
         this.notifications_.pushErrors(d.errors);
-        this.actionbar_.onInit.emit(
-          new ResourceMeta('Network', d.objectMeta, d.typeMeta),
-        );
+        this.actionbar_.onInit.emit(new ResourceMeta('Network', d.objectMeta, d.typeMeta));
         this.isInitialized = true;
       });
   }

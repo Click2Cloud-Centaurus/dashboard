@@ -9,5 +9,4 @@ import {UsersDetailComponent} from './detail/component';
   imports: [SharedModule, ComponentsModule, UsersRoutingModule],
   declarations: [UsersListComponent, UsersDetailComponent],
 })
-
 export class UsersModule {}

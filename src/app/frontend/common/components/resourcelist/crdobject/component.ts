@@ -50,12 +50,11 @@ export class CRDObjectListComponent extends ResourceListBase<CRDObjectList, CRDO
   }
 
   map(crdObjectList: CRDObjectList): CRDObject[] {
-    this.crdObjectKind = crdObjectList.typeMeta.kind.split("List")[0]+"s"
+    this.crdObjectKind = crdObjectList.typeMeta.kind.split('List')[0] + 's';
     return crdObjectList.items;
   }
 
   getDisplayColumns(): string[] {
     return ['name', 'namespace', 'age'];
   }
-
 }

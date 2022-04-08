@@ -37,7 +37,6 @@ enum Modes {
   selector: 'kd-crd-object-detail',
   templateUrl: './template.html',
 })
-
 export class CRDObjectDetailComponent implements OnInit, OnDestroy {
   @ViewChild('group', {static: true}) buttonToggleGroup: MatButtonToggleGroup;
   @ViewChild('code', {static: true}) codeRef: ElementRef;
@@ -64,12 +63,14 @@ export class CRDObjectDetailComponent implements OnInit, OnDestroy {
     private readonly tenant_: TenantService,
   ) {
     this.tenantName = this.tenant_.current();
-    this.partitionName = this.tenantName === 'system' ? sessionStorage.getItem('crdPartition') : ''
-    this.partition = this.tenantName === 'system' ? 'partition/' + sessionStorage.getItem('crdPartition') + '/' : ''
+    this.partitionName = this.tenantName === 'system' ? sessionStorage.getItem('crdPartition') : '';
+    this.partition =
+      this.tenantName === 'system'
+        ? 'partition/' + sessionStorage.getItem('crdPartition') + '/'
+        : '';
   }
 
   ngOnInit(): void {
-
     const {crdNamespace, crdName, objectName} = this.activatedRoute_.snapshot.params;
     this.eventListEndpoint = this.endpoint_.child(
       `${crdName}/${objectName}`,
@@ -77,44 +78,45 @@ export class CRDObjectDetailComponent implements OnInit, OnDestroy {
       crdNamespace,
     );
 
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin' && crdNamespace === undefined) {
-      endpoint = `api/v1/cluster/${this.partitionName}/tenants/${this.tenantName}/crd/${crdName}/${objectName}`
-    } else if (sessionStorage.getItem('userType') === 'cluster-admin' && crdNamespace !== undefined) {
-      endpoint = `api/v1/${this.partition}tenants/${this.tenantName}/crd/${crdNamespace}/${crdName}/${objectName}`
+      endpoint = `api/v1/cluster/${this.partitionName}/tenants/${this.tenantName}/crd/${crdName}/${objectName}`;
+    } else if (
+      sessionStorage.getItem('userType') === 'cluster-admin' &&
+      crdNamespace !== undefined
+    ) {
+      endpoint = `api/v1/${this.partition}tenants/${this.tenantName}/crd/${crdNamespace}/${crdName}/${objectName}`;
     } else {
-      endpoint = this.endpoint_.child(crdName, objectName, crdNamespace, this.tenantName)
+      endpoint = this.endpoint_.child(crdName, objectName, crdNamespace, this.tenantName);
     }
 
-    this.objectSubscription_ = this.object_
-      .get(endpoint)
-      .subscribe((d: CRDObjectDetail) => {
-        this.object = d;
-        this.notifications_.pushErrors(d.errors);
-        this.actionbar_.onInit.emit(new ResourceMeta(d.typeMeta.kind, d.objectMeta, d.typeMeta));
-        this.isInitialized = true;
+    this.objectSubscription_ = this.object_.get(endpoint).subscribe((d: CRDObjectDetail) => {
+      this.object = d;
+      this.notifications_.pushErrors(d.errors);
+      this.actionbar_.onInit.emit(new ResourceMeta(d.typeMeta.kind, d.objectMeta, d.typeMeta));
+      this.isInitialized = true;
 
-        // Get raw resource
-        let url = RawResource.getUrl(
-          this.tenantName,
-          this.object.typeMeta,
-          this.object.objectMeta,
-          this.partitionName,
-        );
-        if (crdNamespace === undefined) {
-          url = url.replace('/partition/', '/cluster/')
-        }
-        this.http_
-          .get(url)
-          .toPromise()
-          .then(response => {
-            this.objectRaw = {
-              json: highlightAuto(`${this.toRawJSON(response)}`, ['json']).value,
-              yaml: highlightAuto(`${toYaml(response)}`, ['yaml']).value,
-            };
-            this.updateText();
-          });
-      });
+      // Get raw resource
+      let url = RawResource.getUrl(
+        this.tenantName,
+        this.object.typeMeta,
+        this.object.objectMeta,
+        this.partitionName,
+      );
+      if (crdNamespace === undefined) {
+        url = url.replace('/partition/', '/cluster/');
+      }
+      this.http_
+        .get(url)
+        .toPromise()
+        .then(response => {
+          this.objectRaw = {
+            json: highlightAuto(`${this.toRawJSON(response)}`, ['json']).value,
+            yaml: highlightAuto(`${toYaml(response)}`, ['yaml']).value,
+          };
+          this.updateText();
+        });
+    });
 
     this.buttonToggleGroup.valueChange.subscribe((selectedMode: Modes) => {
       this.selectedMode = selectedMode;

@@ -28,15 +28,17 @@ import {ListGroupIdentifier, ListIdentifier} from '../groupids';
   templateUrl: './template.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ServiceAccountListComponent extends ResourceListBase<ServiceAccountList, ServiceAccount> {
+export class ServiceAccountListComponent extends ResourceListBase<
+  ServiceAccountList,
+  ServiceAccount
+> {
   @Input() endpoint = EndpointManager.resource(Resource.serviceaccount, false).list();
 
   constructor(
     private readonly serviceAccount_: NamespacedResourceService<ServiceAccountList>,
     notifications: NotificationsService,
-
   ) {
-    super('serviceaccount', notifications,);
+    super('serviceaccount', notifications);
     this.id = ListIdentifier.serviceaccount;
     this.groupId = ListGroupIdentifier.config;
 

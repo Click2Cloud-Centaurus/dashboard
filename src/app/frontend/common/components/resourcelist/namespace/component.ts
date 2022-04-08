@@ -24,9 +24,8 @@ import {ResourceService} from '../../../services/resource/resource';
 import {MenuComponent} from '../../list/column/menu/component';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {VerberService} from '../../../services/global/verber';
-import {ActivatedRoute} from "@angular/router";
-import {TenantService} from "../../../services/global/tenant";
-
+import {ActivatedRoute} from '@angular/router';
+import {TenantService} from '../../../services/global/tenant';
 
 @Component({
   selector: 'kd-namespace-list',
@@ -58,18 +57,21 @@ export class NamespaceListComponent extends ResourceListWithStatuses<NamespaceLi
     // Register action columns.
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
 
-    this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
-      this.tenant_.current() : this.tenant_.resourceTenant()
+    this.tenantName =
+      this.activatedRoute_.snapshot.params.resourceName === undefined
+        ? this.tenant_.current()
+        : this.tenant_.resourceTenant();
     sessionStorage.setItem('namespaceTenant', this.tenantName);
   }
 
   getResourceObservable(params?: HttpParams): Observable<NamespaceList> {
-    const partition = this.tenantName === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : ''
-    let endpoint = ''
+    const partition =
+      this.tenantName === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : '';
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/${partition}tenants/${this.tenantName}/namespace`
+      endpoint = `api/v1/${partition}tenants/${this.tenantName}/namespace`;
     } else {
-      endpoint = this.endpoint
+      endpoint = this.endpoint;
     }
     return this.namespace_.get(endpoint, undefined, params, this.tenantName);
   }

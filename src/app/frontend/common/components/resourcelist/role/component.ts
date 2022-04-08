@@ -29,10 +29,10 @@ import {VerberService} from '../../../services/global/verber';
   templateUrl: './template.html',
 })
 export class RoleListComponent extends ResourceListBase<RoleList, Role> {
-  @Input() endpoint = EndpointManager.resource(Resource.role, true,true).list();
+  @Input() endpoint = EndpointManager.resource(Resource.role, true, true).list();
 
-  typeMeta:TypeMeta;
-  objectMeta:ObjectMeta;
+  typeMeta: TypeMeta;
+  objectMeta: ObjectMeta;
 
   constructor(
     private readonly role_: NamespacedResourceService<RoleList>,
@@ -67,6 +67,6 @@ export class RoleListComponent extends ResourceListBase<RoleList, Role> {
   }
 
   onClick(): void {
-    this.verber_.showRoleCreateDialog('Role name',this.typeMeta,this.objectMeta);
+    this.verber_.showRoleCreateDialog('Role name', this.typeMeta, this.objectMeta);
   }
 }

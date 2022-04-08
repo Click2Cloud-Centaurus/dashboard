@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Component} from '@angular/core';
-import {ListGroupIdentifier,} from '../common/components/resourcelist/groupids';
+import {ListGroupIdentifier} from '../common/components/resourcelist/groupids';
 import {GroupedResourceList} from '../common/resources/groupedlist';
 
 @Component({
@@ -21,7 +21,6 @@ import {GroupedResourceList} from '../common/resources/groupedlist';
   templateUrl: './template.html',
   styleUrls: ['./style.scss'],
 })
-
 export class OverviewComponent extends GroupedResourceList {
   hasWorkloads(): boolean {
     return this.isGroupVisible(ListGroupIdentifier.workloads);

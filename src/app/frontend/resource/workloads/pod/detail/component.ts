@@ -23,7 +23,7 @@ import {NotificationsService} from '../../../../common/services/global/notificat
 import {KdStateService} from '../../../../common/services/global/state';
 import {EndpointManager, Resource} from '../../../../common/services/resource/endpoint';
 import {NamespacedResourceService} from '../../../../common/services/resource/resource';
-import {TenantService} from "../../../../common/services/global/tenant";
+import {TenantService} from '../../../../common/services/global/tenant';
 
 @Component({
   selector: 'kd-pod-detail',
@@ -47,19 +47,29 @@ export class PodDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const resourceName = this.activatedRoute_.snapshot.params.resourceName;
-    const resourceNamespace = this.activatedRoute_.snapshot.params.resourceNamespace === undefined ?
-      window.history.state.namespace : this.activatedRoute_.snapshot.params.resourceNamespace;
-    const resourceTenant = this.tenant_.current() === 'system' ?
-      sessionStorage.getItem('podTenant') : this.tenant_.current()
-    const partition = resourceTenant === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : ''
+    const resourceNamespace =
+      this.activatedRoute_.snapshot.params.resourceNamespace === undefined
+        ? window.history.state.namespace
+        : this.activatedRoute_.snapshot.params.resourceNamespace;
+    const resourceTenant =
+      this.tenant_.current() === 'system'
+        ? sessionStorage.getItem('podTenant')
+        : this.tenant_.current();
+    const partition =
+      resourceTenant === 'system' ? 'partition/' + this.tenant_.tenantPartition() + '/' : '';
 
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/${partition}tenants/${resourceTenant}/pod/${resourceNamespace}/${resourceName}`
+      endpoint = `api/v1/${partition}tenants/${resourceTenant}/pod/${resourceNamespace}/${resourceName}`;
     } else {
-      endpoint = this.endpoint_.detail()
+      endpoint = this.endpoint_.detail();
     }
-    this.eventListEndpoint = this.endpoint_.child(resourceName, Resource.event, resourceNamespace, resourceTenant);
+    this.eventListEndpoint = this.endpoint_.child(
+      resourceName,
+      Resource.event,
+      resourceNamespace,
+      resourceTenant,
+    );
 
     this.podSubscription_ = this.pod_
       .get(endpoint, resourceName, resourceNamespace, undefined, resourceTenant)

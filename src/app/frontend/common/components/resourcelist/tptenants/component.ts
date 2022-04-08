@@ -24,8 +24,8 @@ import {NotificationsService} from '../../../services/global/notifications';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
 import {MenuComponent} from '../../list/column/menu/component';
 import {VerberService} from '../../../services/global/verber';
-import {ActivatedRoute, Router} from "@angular/router";
-import {CookieService} from "ngx-cookie-service";
+import {ActivatedRoute, Router} from '@angular/router';
+import {CookieService} from 'ngx-cookie-service';
 
 @Component({
   selector: 'kd-tptenant-list',
@@ -33,7 +33,7 @@ import {CookieService} from "ngx-cookie-service";
 })
 //@ts-ignore
 export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, Tenant> {
-  @Input() endpoint = EndpointManager.resource(Resource.tenant,false,true).list();
+  @Input() endpoint = EndpointManager.resource(Resource.tenant, false, true).list();
 
   displayName: string;
   typeMeta: TypeMeta;
@@ -56,14 +56,14 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
     this.id = ListIdentifier.tenant;
     this.groupId = ListGroupIdentifier.cluster;
 
-    this.nodeName = this.activatedRoute_.snapshot.params.resourceName
+    this.nodeName = this.activatedRoute_.snapshot.params.resourceName;
 
     const routeInfo = this.router_.getCurrentNavigation();
-    if ( routeInfo === null || routeInfo.extras.state === undefined ) {
-      this.clusterName = sessionStorage.getItem('tpClusterName')
+    if (routeInfo === null || routeInfo.extras.state === undefined) {
+      this.clusterName = sessionStorage.getItem('tpClusterName');
     } else {
-      this.clusterName = (routeInfo.extras.state['clusterName']).toString();
-      sessionStorage.setItem('tpClusterName', this.clusterName)
+      this.clusterName = routeInfo.extras.state['clusterName'].toString();
+      sessionStorage.setItem('tpClusterName', this.clusterName);
     }
 
     // Register status icon handlers
@@ -75,24 +75,23 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
   }
 
   getResourceObservable(params?: HttpParams): Observable<TenantList> {
-    this.pageNo =  Number(params.get("page"))
+    this.pageNo = Number(params.get('page'));
     return this.tenant_.get(this.endpoint, undefined);
   }
 
   map(tenantList: TenantList): Tenant[] {
-    this.tenantList = []
-    this.tenantCount = 0
+    this.tenantList = [];
+    this.tenantCount = 0;
     if (tenantList.tenants.length > 0 && tenantList.tenants !== null) {
       const tenantsList: any = [];
-      tenantList.tenants.map((tenant)=>{
+      tenantList.tenants.map(tenant => {
         // @ts-ignore
-        if(tenant['clusterName'].includes(this.clusterName))
-        {
+        if (tenant['clusterName'].includes(this.clusterName)) {
           tenantsList.push(tenant);
         }
-      })
-      this.tenantList = tenantsList.slice((this.pageNo - 1) * 10, this.pageNo * 10)
-      this.totalItems = tenantsList.length
+      });
+      this.tenantList = tenantsList.slice((this.pageNo - 1) * 10, this.pageNo * 10);
+      this.totalItems = tenantsList.length;
     }
     return this.tenantList;
   }
@@ -113,17 +112,17 @@ export class TpTenantListComponent extends ResourceListWithStatuses<TenantList, 
     this.verber_.showTenantCreateDialog(this.displayName, this.typeMeta, this.objectMeta);
   }
 
-  setPartition(partitionName:string, $event:any) {
-    const resourceName = $event.target.innerHTML.replace(/^\s+|\s+$/gm,'');
+  setPartition(partitionName: string, $event: any) {
+    const resourceName = $event.target.innerHTML.replace(/^\s+|\s+$/gm, '');
     // @ts-ignore
-    const reqFromTpTenant = this.activatedRoute_.snapshot['_routerState'].url
+    const reqFromTpTenant = this.activatedRoute_.snapshot['_routerState'].url;
     if (sessionStorage.getItem(`${resourceName}`)) {
-      sessionStorage.removeItem(resourceName)
-      sessionStorage.removeItem('currentTpTenant')
-      sessionStorage.removeItem('reqFromTpTenant')
+      sessionStorage.removeItem(resourceName);
+      sessionStorage.removeItem('currentTpTenant');
+      sessionStorage.removeItem('reqFromTpTenant');
     }
-    sessionStorage.setItem('currentTpTenant', resourceName)
-    sessionStorage.setItem('reqFromTpTenant', reqFromTpTenant)
-    sessionStorage.setItem(`${resourceName}`,partitionName);;
+    sessionStorage.setItem('currentTpTenant', resourceName);
+    sessionStorage.setItem('reqFromTpTenant', reqFromTpTenant);
+    sessionStorage.setItem(`${resourceName}`, partitionName);
   }
 }

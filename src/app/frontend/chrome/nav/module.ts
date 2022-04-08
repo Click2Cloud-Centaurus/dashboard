@@ -25,6 +25,6 @@ import {MatExpansionModule} from '@angular/material/expansion';
 @NgModule({
   declarations: [NavComponent, NavItemComponent, HamburgerComponent, PinnerNavComponent],
   exports: [NavComponent, NavItemComponent, HamburgerComponent],
-  imports: [SharedModule, ComponentsModule, NavServiceModule,MatExpansionModule],
+  imports: [SharedModule, ComponentsModule, NavServiceModule, MatExpansionModule],
 })
 export class NavModule {}

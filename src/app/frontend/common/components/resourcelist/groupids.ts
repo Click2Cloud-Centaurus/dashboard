@@ -45,7 +45,7 @@ export enum ListIdentifier {
   serviceaccount = 'serviceaccount',
   network = 'crdList',
   networkObject = 'crdObjectList',
-  tpTenant = 'tptenant'
+  tpTenant = 'tptenant',
 }
 
 export enum ListGroupIdentifier {

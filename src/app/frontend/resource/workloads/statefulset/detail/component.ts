@@ -26,7 +26,6 @@ import {NamespacedResourceService} from '../../../../common/services/resource/re
   selector: 'kd-stateful-set-detail',
   templateUrl: './template.html',
 })
-
 export class StatefulSetDetailComponent implements OnInit, OnDestroy {
   private statefulSetSubscription_: Subscription;
   private readonly endpoint_ = EndpointManager.resource(Resource.statefulSet, true, true);

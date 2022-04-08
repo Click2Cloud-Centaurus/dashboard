@@ -1,4 +1,3 @@
-
 import {Component} from '@angular/core';
 import {ListGroupIdentifier} from '../../../common/components/resourcelist/groupids';
 import {GroupedResourceList} from '../../../common/resources/groupedlist';

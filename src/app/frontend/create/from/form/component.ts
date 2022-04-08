@@ -17,7 +17,7 @@ import {Component, OnInit} from '@angular/core';
 import {AbstractControl, FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MatDialog} from '@angular/material';
 import {ActivatedRoute} from '@angular/router';
-import {TenantDetail} from "@api/backendapi";
+import {TenantDetail} from '@api/backendapi';
 import {NamespacedResourceService} from '../../../../frontend/common/services/resource/resource';
 import {
   AppDeploymentSpec,
@@ -55,8 +55,8 @@ export class CreateFromFormComponent implements OnInit {
   protocols: string[];
   secrets: string[];
   userType = '';
-  Tenant = '';
-  nameSpace= '';
+  tenant = '';
+  nameSpace = '';
   isExternal = false;
   labelArr: DeployLabel[] = [];
 
@@ -76,12 +76,12 @@ export class CreateFromFormComponent implements OnInit {
 
   ngOnInit(): void {
     const nameSpace = sessionStorage.getItem('namespace');
-    this.nameSpace = nameSpace
-    const Tenant = sessionStorage.getItem('parentTenant');
-    this.Tenant = Tenant
+    this.nameSpace = nameSpace;
+    const parentTenant = sessionStorage.getItem('parentTenant');
+    this.tenant = parentTenant;
     const usertype = sessionStorage.getItem('userType');
-    this.userType = usertype
-    this.currentTenant = this.tenants_['tenant_']['currentTenant_']
+    this.userType = usertype;
+    this.currentTenant = this.tenants_['tenant_']['currentTenant_'];
     this.form = this.fb_.group({
       name: ['', Validators.compose([Validators.required, FormValidators.namePattern])],
       containerImage: ['', Validators.required],
@@ -109,14 +109,18 @@ export class CreateFromFormComponent implements OnInit {
       this.name.setAsyncValidators(validateUniqueName(this.http_, namespace));
       this.name.updateValueAndValidity();
     });
-    this.http_.get(`api/v1/tenants/${this.currentTenant}/namespace`).subscribe((result: NamespaceList) => {
-      this.namespaces = result.namespaces.map((namespace: Namespace) => namespace.objectMeta.name);
-      this.namespace.patchValue(
-        !this.namespace_.areMultipleNamespacesSelected()
-          ? this.route_.snapshot.params.namespace || this.namespaces[0]
-          : this.namespaces[0],
-      );
-    });
+    this.http_
+      .get(`api/v1/tenants/${this.currentTenant}/namespace`)
+      .subscribe((result: NamespaceList) => {
+        this.namespaces = result.namespaces.map(
+          (namespace: Namespace) => namespace.objectMeta.name,
+        );
+        this.namespace.patchValue(
+          !this.namespace_.areMultipleNamespacesSelected()
+            ? this.route_.snapshot.params.namespace || this.namespaces[0]
+            : this.namespaces[0],
+        );
+      });
     this.http_
       .get('api/v1/appdeployment/protocols')
       .subscribe((protocols: Protocols) => (this.protocols = protocols.protocols));
@@ -137,7 +141,7 @@ export class CreateFromFormComponent implements OnInit {
   get description(): AbstractControl {
     return this.form.get('description');
   }
-  get namespace():any {
+  get namespace(): any {
     return this.form.get('namespace');
   }
 
@@ -184,7 +188,6 @@ export class CreateFromFormComponent implements OnInit {
   resetImagePullSecret(): void {
     this.imagePullSecret.patchValue('');
   }
-
 
   getSecrets(): void {
     this.http_.get(`api/v1/secret/${this.namespace.value}`).subscribe((result: SecretList) => {
@@ -286,12 +289,11 @@ export class CreateFromFormComponent implements OnInit {
     const portMappings = this.portMappings.value.portMappings || [];
     const variables = this.variables.value.variables || [];
     const labels = this.labels.value.labels || [];
-    if(this.userType == "tenant-user"){
-      this.namespace.value = this.nameSpace
-      this.currentTenant = this.Tenant
+    if (this.userType === 'tenant-user') {
+      this.namespace.value = this.nameSpace;
+      this.currentTenant = this.tenant;
     }
     const spec: AppDeploymentSpec = {
-
       containerImage: this.containerImage.value,
       imagePullSecret: this.imagePullSecret.value ? this.imagePullSecret.value : null,
       containerCommand: this.containerCommand.value ? this.containerCommand.value : null,

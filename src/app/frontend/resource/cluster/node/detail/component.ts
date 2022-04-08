@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute,Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {NodeAddress, NodeDetail, NodeTaint} from '@api/backendapi';
 import {Subscription} from 'rxjs/Subscription';
 import {ActionbarService, ResourceMeta} from '../../../../common/services/global/actionbar';

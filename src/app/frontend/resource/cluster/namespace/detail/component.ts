@@ -22,7 +22,7 @@ import {ActionbarService, ResourceMeta} from '../../../../common/services/global
 import {NotificationsService} from '../../../../common/services/global/notifications';
 import {EndpointManager, Resource} from '../../../../common/services/resource/endpoint';
 import {ResourceService} from '../../../../common/services/resource/resource';
-import {TenantService} from "../../../../common/services/global/tenant";
+import {TenantService} from '../../../../common/services/global/tenant';
 
 @Component({
   selector: 'kd-namespace-detail',
@@ -46,11 +46,19 @@ export class NamespaceDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const resourceName = this.activatedRoute_.snapshot.params.resourceName;
 
-    const resourceTenant = this.tenant_.current() === 'system' ?
-      sessionStorage.getItem('namespaceTenant') : this.tenant_.current()
-    const partition = resourceTenant === 'system' ? this.tenant_.tenantPartition() : ''
+    const resourceTenant =
+      this.tenant_.current() === 'system'
+        ? sessionStorage.getItem('namespaceTenant')
+        : this.tenant_.current();
+    const partition = resourceTenant === 'system' ? this.tenant_.tenantPartition() : '';
 
-    this.eventListEndpoint = this.endpoint_.child(resourceName, Resource.event, undefined, resourceTenant, partition);
+    this.eventListEndpoint = this.endpoint_.child(
+      resourceName,
+      Resource.event,
+      undefined,
+      resourceTenant,
+      partition,
+    );
 
     this.namespaceSubscription_ = this.namespace_
       .get(this.endpoint_.detail(), resourceName)

@@ -18,6 +18,4 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
   selector: 'kd-TenantMonitoring-detail',
   templateUrl: './template.html',
 })
-export class TenantMonitoringDetailComponent {
-
-}
+export class TenantMonitoringDetailComponent {}

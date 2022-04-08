@@ -23,15 +23,17 @@ import {EndpointManager, Resource} from '../../../services/resource/endpoint';
 import {NamespacedResourceService} from '../../../services/resource/resource';
 import {MenuComponent} from '../../list/column/menu/component';
 import {ListGroupIdentifier, ListIdentifier} from '../groupids';
-import {ActivatedRoute} from "@angular/router";
-import {TenantService} from "../../../services/global/tenant";
+import {ActivatedRoute} from '@angular/router';
+import {TenantService} from '../../../services/global/tenant';
 
 @Component({
   selector: 'kd-virtual-machine-list',
-  templateUrl: './template.html'
+  templateUrl: './template.html',
 })
-
-export class VirtualMachineListComponent extends ResourceListWithStatuses<VirtualMachineList, VirtualMachine> {
+export class VirtualMachineListComponent extends ResourceListWithStatuses<
+  VirtualMachineList,
+  VirtualMachine
+> {
   @Input() endpoint = EndpointManager.resource(Resource.virtualMachine, true, true).list();
 
   tenantName: string;
@@ -55,19 +57,21 @@ export class VirtualMachineListComponent extends ResourceListWithStatuses<Virtua
     // Register action columns.
     this.registerActionColumn<MenuComponent>('menu', MenuComponent);
 
-    this.tenantName = this.activatedRoute_.snapshot.params.resourceName === undefined ?
-      this.tenant_.current() : this.activatedRoute_.snapshot.params.resourceName
-    sessionStorage.setItem('tenantName',this.tenantName);
+    this.tenantName =
+      this.activatedRoute_.snapshot.params.resourceName === undefined
+        ? this.tenant_.current()
+        : this.activatedRoute_.snapshot.params.resourceName;
+    sessionStorage.setItem('tenantName', this.tenantName);
   }
 
   getResourceObservable(params?: HttpParams): Observable<VirtualMachineList> {
-    let endpoint = ''
+    let endpoint = '';
     if (sessionStorage.getItem('userType') === 'cluster-admin') {
-      endpoint = `api/v1/tenants/${this.tenantName}/virtualmachine`
+      endpoint = `api/v1/tenants/${this.tenantName}/virtualmachine`;
     } else {
-      endpoint = this.endpoint
+      endpoint = this.endpoint;
     }
-    return this.virtualMachineList.get(endpoint, undefined, undefined, params,this.tenantName);
+    return this.virtualMachineList.get(endpoint, undefined, undefined, params, this.tenantName);
   }
 
   map(virtualMachineList: VirtualMachineList): VirtualMachine[] {
@@ -87,7 +91,7 @@ export class VirtualMachineListComponent extends ResourceListWithStatuses<Virtua
   }
 
   getDisplayColumns(): string[] {
-    return ['statusicon', 'name', 'image', 'keypair', 'status', 'phase', 'restart','age'];
+    return ['statusicon', 'name', 'image', 'keypair', 'status', 'phase', 'restart', 'age'];
   }
 
   hasErrors(virtualMachine: VirtualMachine): boolean {
@@ -99,14 +103,9 @@ export class VirtualMachineListComponent extends ResourceListWithStatuses<Virtua
   }
 
   getDisplayStatus(virtualMachine: VirtualMachine): string {
-    // See kubectl printers.go for logic in kubectl:
-    // https://github.com/kubernetes/kubernetes/blob/39857f486511bd8db81868185674e8b674b1aeb9/pkg/printers/internalversion/printers.go
-    let msgState = 'running';
-    let reason = undefined;
-
-    // Init container statuses are currently not taken into account.
-    // However, init containers with errors will still show as failed because of warnings.
-
+    let msgState: string, reason: string;
+    msgState = 'running';
+    reason = undefined;
 
     if (msgState === 'waiting') {
       return `Waiting: ${reason}`;

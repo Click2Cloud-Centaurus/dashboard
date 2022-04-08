@@ -38,7 +38,13 @@ export const VIRTUAL_MACHINE_DETAIL_ROUTE: Route = {
 };
 
 @NgModule({
-  imports: [RouterModule.forChild([VIRTUAL_MACHINE_LIST_ROUTE, VIRTUAL_MACHINE_DETAIL_ROUTE, LOGS_EXEC_DEFAULT_ACTIONBAR])],
+  imports: [
+    RouterModule.forChild([
+      VIRTUAL_MACHINE_LIST_ROUTE,
+      VIRTUAL_MACHINE_DETAIL_ROUTE,
+      LOGS_EXEC_DEFAULT_ACTIONBAR,
+    ]),
+  ],
   exports: [RouterModule],
 })
 export class VirtualMachineRoutingModule {}

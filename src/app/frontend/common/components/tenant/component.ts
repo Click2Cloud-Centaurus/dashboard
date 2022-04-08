@@ -32,7 +32,7 @@ import {NotificationsService, NotificationSeverity} from 'common/services/global
 export class TenantSelectorComponent implements OnInit {
   private tenantUpdate_ = new Subject();
   private unsubscribe_ = new Subject();
-  private readonly endpoint_ = EndpointManager.resource(Resource.tenant,false,true);
+  private readonly endpoint_ = EndpointManager.resource(Resource.tenant, false, true);
 
   tenants: string[] = [];
   selectedTenant: string;
@@ -54,9 +54,9 @@ export class TenantSelectorComponent implements OnInit {
 
   ngOnInit(): void {
     this._activeRoute.queryParams.pipe(takeUntil(this.unsubscribe_)).subscribe(params => {
-      const tenant_ = params
+      const tenant_ = params;
       const tenant = this.tenant;
-      this.tenant = this.getTenant_()
+      this.tenant = this.getTenant_();
       if (!tenant) {
         this.setDefaultQueryParams_();
         return;
@@ -87,14 +87,14 @@ export class TenantSelectorComponent implements OnInit {
       .pipe(switchMap(() => this.tenant_.get(this.endpoint_.list())))
       .subscribe(
         tenantList => {
-          if (tenantList.tenants == null ) {
-            this.tenants = []
-          }else {
+          if (tenantList.tenants == null) {
+            this.tenants = [];
+          } else {
             this.tenants = tenantList.tenants
               .map(t => t.objectMeta.name)
               .filter(t => t !== this.systemTenantName);
           }
-          if (tenantList.errors !== null){
+          if (tenantList.errors !== null) {
             if (tenantList.errors.length > 0) {
               for (const err of tenantList.errors) {
                 this.notifications_.push(err.ErrStatus.message, NotificationSeverity.error);
@@ -171,11 +171,10 @@ export class TenantSelectorComponent implements OnInit {
   getTenant_(): string {
     const username = sessionStorage.getItem('parentTenant');
     const userType = sessionStorage.getItem('userType');
-    if (userType === 'cluster-admin'){
-      return 'system'
-    }
-    else{
-      return username
+    if (userType === 'cluster-admin') {
+      return 'system';
+    } else {
+      return username;
     }
   }
 }

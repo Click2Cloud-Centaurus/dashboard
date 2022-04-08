@@ -18,6 +18,4 @@ import {Component} from '@angular/core';
   selector: 'kd-cluster-health-list-state',
   template: '<kd-namespace-list></kd-namespace-list>',
 })
-
-export class NamespaceListComponent{
-}
+export class NamespaceListComponent {}

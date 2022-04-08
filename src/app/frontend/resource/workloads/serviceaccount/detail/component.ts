@@ -37,13 +37,12 @@ export class ServiceAccountDetailComponent implements OnInit, OnDestroy {
     private readonly serviceAccount_: NamespacedResourceService<ServiceAccountDetail>,
     private readonly actionbar_: ActionbarService,
     private readonly activatedRoute_: ActivatedRoute,
-    private readonly notifications_: NotificationsService
+    private readonly notifications_: NotificationsService,
   ) {}
 
   ngOnInit(): void {
     const resourceName = this.activatedRoute_.snapshot.params.resourceName;
     const resourceNamespace = this.activatedRoute_.snapshot.params.resourceNamespace;
-
 
     this.serviceAccount_
       .get(this.endpoint_.detail(), resourceName, resourceNamespace)

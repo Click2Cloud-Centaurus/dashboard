@@ -17,7 +17,7 @@ import {Route, RouterModule} from '@angular/router';
 import {DEFAULT_ACTIONBAR} from '../../../common/components/actionbars/routing';
 import {RoleDetailComponent} from './detail/component';
 import {RoleListComponent} from './list/component';
-import {TENANTMANAGEMENT_ROUTE} from "../routing";
+import {TENANTMANAGEMENT_ROUTE} from '../routing';
 
 const ROLE_LIST_ROUTE: Route = {
   path: '',

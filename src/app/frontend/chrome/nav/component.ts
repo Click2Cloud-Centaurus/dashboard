@@ -25,42 +25,37 @@ import {TenantService} from 'common/services/global/tenant';
 })
 export class NavComponent implements OnInit {
   @ViewChild(MatDrawer, {static: true}) private readonly nav_: MatDrawer;
-  showCluster:boolean;
-  showTenant:boolean;
-  showUser:boolean;
-  showMenu:boolean;
+  showCluster: boolean;
+  showTenant: boolean;
+  showUser: boolean;
+  showMenu: boolean;
 
   constructor(
     private readonly navService_: NavService,
     private readonly tenantService_: TenantService,
   ) {
-
     this.showCluster = true;
     this.showTenant = true;
     this.showUser = true;
     this.showMenu = true;
 
-    const usertype = sessionStorage.getItem('userType');//added
+    const usertype = sessionStorage.getItem('userType'); //added
 
-    if(usertype==='cluster-admin'){
-      this.showCluster=this.showCluster;
-      this.showTenant=!this.showTenant;
-      this.showUser=this.showUser;
-      this.showMenu=!this.showMenu;
-    }
-
-    else if(usertype==='tenant-admin'){
-      this.showCluster=!this.showCluster;
-      this.showTenant=this.showTenant;
-      this.showUser=this.showUser;
-      this.showMenu=this.showMenu;
-    }
-
-    else{
-      this.showCluster=!this.showCluster;
-      this.showTenant=!this.showTenant;
-      this.showUser=!this.showUser;
-      this.showMenu=this.showMenu;
+    if (usertype === 'cluster-admin') {
+      this.showCluster = this.showCluster;
+      this.showTenant = !this.showTenant;
+      this.showUser = this.showUser;
+      this.showMenu = !this.showMenu;
+    } else if (usertype === 'tenant-admin') {
+      this.showCluster = !this.showCluster;
+      this.showTenant = this.showTenant;
+      this.showUser = this.showUser;
+      this.showMenu = this.showMenu;
+    } else {
+      this.showCluster = !this.showCluster;
+      this.showTenant = !this.showTenant;
+      this.showUser = !this.showUser;
+      this.showMenu = this.showMenu;
     }
   }
 

@@ -38,7 +38,13 @@ const SERVICEACCOUNT_DETAIL_ROUTE: Route = {
 };
 
 @NgModule({
-  imports: [RouterModule.forChild([SERVICEACCOUNT_LIST_ROUTE, SERVICEACCOUNT_DETAIL_ROUTE, DEFAULT_ACTIONBAR])],
+  imports: [
+    RouterModule.forChild([
+      SERVICEACCOUNT_LIST_ROUTE,
+      SERVICEACCOUNT_DETAIL_ROUTE,
+      DEFAULT_ACTIONBAR,
+    ]),
+  ],
   exports: [RouterModule],
 })
 export class ServiceAccountRoutingModule {}

@@ -17,9 +17,15 @@ limitations under the License.
 <div class="main_container">
   <div class="row">
     <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-      <div class="create_btn_sec detail_sec" align="right">
-        <button mat-raised-button matTooltip="Assign Quota" color="primary" (click)="onClick()">
-          <img class="add_icon" src="assets/images/plus_icon_white.svg" alt="">
+      <div class="create_btn_sec detail_sec"
+           align="right">
+        <button mat-raised-button
+                matTooltip="Assign Quota"
+                color="primary"
+                (click)="onClick()">
+          <img class="add_icon"
+               src="assets/images/plus_icon_white.svg"
+               alt="">
           Assign Quota</button>
       </div>
     </div>
@@ -27,14 +33,22 @@ limitations under the License.
 
   <div class="row">
     <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-      <kd-card role="table" [hidden]="isHidden()">
-        <div title fxLayout="row" i18n></div>
-        <div title fxLayout="row" i18n>Quotas</div>
-        <div description><span class="kd-muted-light" i18n>Items:&nbsp;</span>{{totalItems}}
+      <kd-card role="table"
+               [hidden]="isHidden()">
+        <div title
+             fxLayout="row"
+             i18n></div>
+        <div title
+             fxLayout="row"
+             i18n>Quotas</div>
+        <div description><span class="kd-muted-light"
+                i18n>Items:&nbsp;</span>{{totalItems}}
         </div>
 
-        <div content [hidden]="showZeroState()">
-          <div kdLoadingSpinner [isLoading]="isLoading"></div>
+        <div content
+             [hidden]="showZeroState()">
+          <div kdLoadingSpinner
+               [isLoading]="isLoading"></div>
           <mat-table [dataSource]="getData()"
                      matSort
                      [matSortActive]="getColumns()[5]"
@@ -57,7 +71,7 @@ limitations under the License.
               <mat-cell *matCellDef="let resourcequota">
                 <a [routerLink]="getDetailsHref(resourcequota.objectMeta.name)"
                    [state]="{namespace: resourcequota.objectMeta.namespace}"
-                   queryParamsHandling="preserve" >{{resourcequota.objectMeta.name}}</a>
+                   queryParamsHandling="preserve">{{resourcequota.objectMeta.name}}</a>
 
               </mat-cell>
             </ng-container>

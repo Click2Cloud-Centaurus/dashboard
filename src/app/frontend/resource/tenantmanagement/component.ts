@@ -13,15 +13,14 @@
 // limitations under the License.
 
 import {Component} from '@angular/core';
-import {GroupedResourceList} from "../../common/resources/groupedlist";
-import {TenantService} from "../../common/services/global/tenant";
-import {CONFIG} from "../../index.config";
+import {GroupedResourceList} from '../../common/resources/groupedlist';
+import {TenantService} from '../../common/services/global/tenant';
+import {CONFIG} from '../../index.config';
 
 @Component({
   selector: 'kd-tenantmanagement',
-  templateUrl: './template.html'
+  templateUrl: './template.html',
 })
-
 export class TenantManagementComponent extends GroupedResourceList {
   constructor(private readonly tenantService_: TenantService) {
     super();
